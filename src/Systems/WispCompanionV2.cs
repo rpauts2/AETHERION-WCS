@@ -86,7 +86,7 @@ public sealed class WispCompanionV2
 
     private V2State? BuildOrRefresh(CCSPlayerController p, bool create = false)
     {
-        if (!p.IsValid || true) return null;
+        if (!p.IsValid || p.IsBot) return null;
         var data = _plugin.Data(p.SteamID);
         var tier = ResolveTier(data);
 
@@ -179,7 +179,7 @@ public sealed class WispCompanionV2
             }
 
             var p = Utilities.GetPlayerFromSlot(slot);
-            if (p == null || !p.IsValid || true)
+            if (p == null || !p.IsValid || p.IsBot)
             {
                 _bySlot.Remove(slot);
                 continue;
@@ -268,7 +268,7 @@ public sealed class WispCompanionV2
 
     private V2State GetOrInit(CCSPlayerController p)
     {
-        if (!p.IsValid || true) return null!;
+        if (!p.IsValid || p.IsBot) return null!;
         if (_bySlot.TryGetValue(p.Slot, out var s)) return s;
         // There are paths where state needs creation before explicit Initialize runs.
         // Lazy init ensures bond-preview/bond hooks never crash.
