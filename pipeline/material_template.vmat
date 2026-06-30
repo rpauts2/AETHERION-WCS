@@ -1,0 +1,15 @@
+// AETHERION race material — auto-generated template
+Layer0
+{
+    shader "csgo_character.vfx"
+
+    TextureColor       "materials/races/{RACE}/{RACE}_color.tga"
+    TextureNormal      "materials/races/{RACE}/{RACE}_normal.tga"
+    TextureRoughness   "materials/races/{RACE}/{RACE}_rough.tga"
+
+    // Эфирное свечение (цвет ауры по дивизиону)
+    F_SELF_ILLUM 1
+    TextureSelfIllumMask "materials/races/{RACE}/{RACE}_emit.tga"
+    g_flSelfIllumScale "{GLOW}"           // интенсивность
+    g_vSelfIllumTint  "{AURA_RGB}"        // цвет дивизиона
+}

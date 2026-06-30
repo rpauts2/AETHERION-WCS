@@ -1,0 +1,815 @@
+{
+  "1000": {"sound":"weapons.awp.fire","customSound":""},
+  "1001": {"sound":"weapons.deagle.fire","customSound":""},
+  "1002": {"sound":"weapons.m4a1.fire","customSound":""},
+  "1003": {"sound":"weapons.ak47.fire","customSound":""},
+  "1004": {"sound":"weapons.p90.fire","customSound":""},
+  "1005": {"sound":"weapons.mp7.fire","customSound":""},
+  "1006": {"sound":"weapons.revolver.fire","customSound":""},
+  "1007": {"sound":"player.jump","customSound":""},
+  "1008": {"sound":"player.footsteps.left","customSound":""},
+  "1009": {"sound":"player.footsteps.right","customSound":""},
+  "1010": {"sound":"grenade.frag.explode","customSound":""},
+  "1011": {"sound":"grenade.flashbang.explode","customSound":""},
+  "1012": {"sound":"grenade.smoke.explode","customSound":""},
+  "1013": {"sound":"gamerules.firstblood","customSound":""},
+  "1014": {"sound":"ui.rankup","customSound":""},
+  "1015": {"sound":"ui.deny","customSound":""},
+  "1016": {"sound":"ui.youretired","customSound":""},
+  "1017": {"sound":"ui.tech_alarm","customSound":""},
+  "1018": {"sound":"ui.beacon","customSound":""},
+  "1019": {"sound":"ui.countdown","customSound":""},
+  "1020": {"sound":"campaigns.any.theme","customSound":""},
+  "1021": {"sound":"player.spawn","customSound":""},
+  "1022": {"sound":"player.damage","customSound":""},
+  "1023": {"sound":"player.died","customSound":""},
+  "1024": {"sound":"player.kill","customSound":""},
+  "1025": {"sound":"player.headshot","customSound":""},
+  "1026": {"sound":"player.revive","customSound":""},
+  "1027": {"sound":"player.heal","customSound":""},
+  "1028": {"sound":"player.step","customSound":""},
+  "1029": {"sound":"player.land","customSound":""},
+  "1030": {"sound":"weapons.knife.slash","customSound":""},
+  "1031": {"sound":"weapons.knife.hit","customSound":""},
+  "1032": {"sound":"weapons.knife.hitwall","customSound":""},
+  "1033": {"sound":"weapons.elite.fire","customSound":""},
+  "1034": {"sound":"weapons.famas.fire","customSound":""},
+  "1035": {"sound":"weapons.galilar.fire","customSound":""},
+  "1036": {"sound":"weapons.g36.fire","customSound":""},
+  "1037": {"sound":"weapons.m249.fire","customSound":""},
+  "1038": {"sound":"weapons.negev.fire","customSound":""},
+  "1039": {"sound":"weapons.mag7.fire","customSound":""},
+  "1040": {"sound":"weapons.nova.fire","customSound":""},
+  "1041": {"sound":"weapons.sawedoff.fire","customSound":""},
+  "1042": {"sound":"weapons.xm1014.fire","customSound":""},
+  "1043": {"sound":"weapons.bizon.fire","customSound":""},
+  "1044": {"sound":"weapons.tec9.fire","customSound":""},
+  "1045": {"sound":"weapons.cz75a.fire","customSound":""},
+  "1046": {"sound":"weapons.usp.fire","customSound":""},
+  "1047": {"sound":"weapons.p250.fire","customSound":""},
+  "1048": {"sound":"weapons.glock.fire","customSound":""},
+  "1049": {"sound":"weapons.elite.unsil-1","customSound":""},
+  "1050": {"sound":"weapons.deagle.reload","customSound":""},
+  "1051": {"sound":"weapons.ak47.reload","customSound":""},
+  "1052": {"sound":"weapons.m4a1.reload","customSound":""},
+  "1053": {"sound":"weapons.awp.reload","customSound":""},
+  "1054": {"sound":"weapons.scout.reload","customSound":""},
+  "1055": {"sound":"weapons.ssg08.reload","customSound":""},
+  "1056": {"sound":"weapons.sg556.reload","customSound":""},
+  "1057": {"sound":"weapons.aug.reload","customSound":""},
+  "1058": {"sound":"weapons.ump45.reload","customSound":""},
+  "1059": {"sound":"weapons.mp9.reload","customSound":""},
+  "1060": {"sound":"weapons.p90.reload","customSound":""},
+  "1061": {"sound":"weapons.mac10.reload","customSound":""},
+  "1062": {"sound":"weapons.mag7.reload","customSound":""},
+  "1063": {"sound":"weapons.nova.reload","customSound":""},
+  "1064": {"sound":"weapons.sawedoff.reload","customSound":""},
+  "1065": {"sound":"weapons.xm1014.reload","customSound":""},
+  "1066": {"sound":"weapons.bizon.reload","customSound":""},
+  "1067": {"sound":"weapons.tec9.reload","customSound":""},
+  "1068": {"sound":"weapons.deagle.reload","customSound":""},
+  "1069": {"sound":"weapons.p250.reload","customSound":""},
+  "1070": {"sound":"weapons.glock.reload","customSound":""},
+  "1071": {"sound":"weapons.elite.reload","customSound":""},
+  "1072": {"sound":"weapons.usp.reload","customSound":""},
+  "1073": {"sound":"weapons.famas.reload","customSound":""},
+  "1074": {"sound":"ui.menu_open","customSound":""},
+  "1075": {"sound":"ui.menu_close","customSound":""},
+  "1076": {"sound":"ui.menu_select","customSound":""},
+  "1077": {"sound":"ui.menu_hover","customSound":""},
+  "1078": {"sound":"ui.button_click","customSound":"sound/ui/click.wav"},
+  "1079": {"sound":"ui.button_hover","customSound":"sound/ui/hover.wav"},
+  "1080": {"sound":"ui.success","customSound":"sound/ui/success.wav"},
+  "1081": {"sound":"ui.error","customSound":"sound/ui/error.wav"},
+  "1082": {"sound":"ui.notify","customSound":"sound/ui/notify.wav"},
+  "1083": {"sound":"player.spawn_ambient","customSound":"sound/ambient/spawn_ambient.wav"},
+  "1084": {"sound":"music.round_start","customSound":"sound/music/round_start.wav"},
+  "1085": {"sound":"music.round_end_win","customSound":"sound/music/round_win.wav"},
+  "1086": {"sound":"music.round_end_lose","customSound":"sound/music/round_lose.wav"},
+  "1087": {"sound":"music.storm_active","customSound":"sound/music/storm_loop.wav"},
+  "1088": {"sound":"music.ambient_menu","customSound":"sound/music/menu_loop.wav"},
+  "1089": {"sound":"music.ambient_lobby","customSound":"sound/music/lobby_loop.wav"},
+
+
+  "2000": {
+    "race": "Пудж",
+    "sound": "weapons.knife.hit",
+    "customSound": "sound/race/pudge_pull.wav",
+    "levelUp": "ui.rankup",
+    "castActive": "weapons.knife.slash",
+    "castUltimate": "aetherion.ult.pudge_tornado",
+    "deathEnemy": "player.kill",
+    "ability_hook": "aetherion.abi.pudge_hook",
+    "ability_dump": "aetherion.abi.pudge_rot",
+    "spawn": "player.spawn"
+  },
+  "2001": {
+    "race": "Флеш-рейдер",
+    "sound": "weapons.elite.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "grenade.flashbang.explode",
+    "castUltimate": "aetherion.ult.flash_shadow_ring",
+    "deathEnemy": "player.kill",
+    "ability_blind": "aetherion.abi.flash_blind",
+    "ability_backstab": "aetherion.abi.flash_backstab",
+    "spawn": "player.spawn"
+  },
+  "2002": {
+    "race": "Кибер-снайпер",
+    "sound": "weapons.awp.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "weapons.scout.zoomin",
+    "castUltimate": "aetherion.ult.sniper_pierce",
+    "deathEnemy": "player.kill",
+    "ability_scan": "aetherion.abi.cyber_scan",
+    "ability_blink": "aetherion.abi.cyber_blink",
+    "spawn": "player.spawn"
+  },
+  "2003": {
+    "race": "Дух-апостол",
+    "sound": "player.heal",
+    "customSound": "sound/race/apostol_heal.wav",
+    "levelUp": "ui.rankup",
+    "castActive": "player.revive",
+    "castUltimate": "aetherion.ult.apostol_barrier",
+    "deathEnemy": "player.died",
+    "ability_summon": "aetherion.abi.apostol_summon",
+    "ability_cleanse": "aetherion.abi.apostol_cleanse",
+    "spawn": "player.spawn"
+  },
+  "2004": {
+    "race": "Арктик-охотник",
+    "sound": "weapons.deagle.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "player.footsteps.left",
+    "castUltimate": "aetherion.ult.arctic_iceberg",
+    "deathEnemy": "player.kill",
+    "ability_freeze": "aetherion.abi.arctic_freeze",
+    "ability_icebolt": "aetherion.abi.arctic_icebolt",
+    "spawn": "player.spawn"
+  },
+  "2005": {
+    "race": "Плазменный синдикат",
+    "sound": "weapons.m4a1.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "ui.menu_select",
+    "castUltimate": "aetherion.ult.plasma_overload",
+    "deathEnemy": "player.kill",
+    "ability_laser": "aetherion.abi.plasma_laser",
+    "ability_hack": "aetherion.abi.plasma_hack",
+    "spawn": "player.spawn"
+  },
+  "2006": {
+    "race": "Вулкан-рейнджер",
+    "sound": "weapons.p90.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "player.heal",
+    "castUltimate": "player.revive",
+    "deathEnemy": "player.died",
+    "ability_fireball": "aetherion.abi.volcano_fireball",
+    "ability_ash": "aetherion.abi.volcano_ash",
+    "spawn": "player.spawn"
+  },
+  "2007": {
+    "race": "Грави-страж",
+    "sound": "weapons.mp7.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "ui.menu_open",
+    "castUltimate": "UIPanorama.round_report_match_won",
+    "deathEnemy": "player.kill",
+    "ability_pull": "aetherion.abi.grav_pull",
+    "ability_quake": "aetherion.abi.grav_quake",
+    "spawn": "player.spawn"
+  },
+  "2008": {
+    "race": "Акустик-призрак",
+    "sound": "weapons.revolver.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "weapons.knife.hit",
+    "castUltimate": "player.headshot",
+    "deathEnemy": "player.kill",
+    "ability_thunder": "aetherion.abi.acoustic_thunder",
+    "ability_disintegrate": "aetherion.abi.acoustic_disin",
+    "spawn": "player.spawn"
+  },
+  "2009": {
+    "race": "Сердечник",
+    "sound": "weapons.elite.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "weapons.gsg.fire",
+    "castUltimate": "grenade.frag.explode",
+    "deathEnemy": "player.kill",
+    "ability_heal": "player.heal",
+    "ability_armor": "aetherion.abi.heart_armor",
+    "spawn": "player.spawn"
+  },
+  "2010": {
+    "race": "Сайлон-рейнджер",
+    "sound": "weapons.tec9.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "ui.menu_open",
+    "castUltimate": "UIPanorama.round_report_match_won",
+    "deathEnemy": "player.kill",
+    "ability_suppress": "aetherion.abi.cylon_suppress",
+    "ability_chase": "aetherion.abi.cylon_chase",
+    "spawn": "player.spawn"
+  },
+  "2011": {
+    "race": "Капкан-охотник",
+    "sound": "weapons.xm1014.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "weapons.knife.hit",
+    "castUltimate": "ui.tech_alarm",
+    "deathEnemy": "player.kill",
+    "ability_trap": "aetherion.abi.trap_place",
+    "ability_remote": "aetherion.abi.trap_detonate",
+    "spawn": "player.spawn"
+  },
+  "2012": {
+    "race": "Бесплотный лучник",
+    "sound": "weapons.nova.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "grenade.frag.explode",
+    "castUltimate": "UIPanorama.round_report_match_won",
+    "deathEnemy": "player.kill",
+    "ability_phantom_arrow": "aetherion.abi.phantom_arrow",
+    "ability_invisibility": "aetherion.abi.phantom_invis",
+    "spawn": "player.spawn"
+  },
+  "2013": {
+    "race": "Кровяной паладин",
+    "sound": "weapons.m249.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "grenade.frag.explode",
+    "castUltimate": "UIPanorama.round_report_match_won",
+    "deathEnemy": "player.kill",
+    "ability_mark": "aetherion.abi.blood_mark",
+    "ability_shield": "aetherion.abi.blood_shield",
+    "spawn": "player.spawn"
+  },
+  "2014": {
+    "race": "Крио-ассасин",
+    "sound": "weapons.sg556.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "weapons.deagle.reload",
+    "castUltimate": "aetherion.ult.cryo_freeze",
+    "deathEnemy": "player.kill",
+    "ability_chill_step": "aetherion.abi.cryo_step",
+    "ability_frost_blade": "aetherion.abi.cryo_blade",
+    "spawn": "player.spawn"
+  },
+  "2015": {
+    "race": "Хроно-перебежчик",
+    "sound": "weapons.aug.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "ui.menu_select",
+    "castUltimate": "ui.beacon",
+    "deathEnemy": "player.kill",
+    "ability_rewind": "aetherion.abi.chrono_rewind",
+    "ability_accel": "aetherion.abi.chrono_accel",
+    "spawn": "player.spawn"
+  },
+  "2016": {
+    "race": "Повелитель теней",
+    "sound": "weapons.mag7.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "ui.menu_open",
+    "castUltimate": "UIPanorama.round_report_match_won",
+    "deathEnemy": "player.kill",
+    "ability_shadow_step": "aetherion.abi.shadow_step",
+    "ability_darken": "aetherion.abi.shadow_darken",
+    "spawn": "player.spawn"
+  },
+  "2017": {
+    "race": "Ткач-дуэлянт",
+    "sound": "weapons.bizon.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "weapons.knife.hitwall",
+    "castUltimate": "ui.tech_alarm",
+    "deathEnemy": "player.kill",
+    "ability_parry": "aetherion.abi.weave_parry",
+    "ability_riposte": "aetherion.abi.weave_riposte",
+    "spawn": "player.spawn"
+  },
+  "2018": {
+    "race": "Бастион",
+    "sound": "weapons.ump45.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "weapons.knife.slash",
+    "castUltimate": "grenade.frag.explode",
+    "deathEnemy": "player.kill",
+    "ability_fortify": "aetherion.abi.bastion_fortify",
+    "ability_turret": "aetherion.abi.bastion_turret",
+    "spawn": "player.spawn"
+  },
+  "2019": {
+    "race": "Визуальный шаман",
+    "sound": "weapons.mp9.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "weapons.knife.hit",
+    "castUltimate": "player.headshot",
+    "deathEnemy": "player.kill",
+    "ability_hallucination": "aetherion.abi.shaman_halluc",
+    "ability_mental_spike": "aetherion.abi.shaman_spike",
+    "spawn": "player.spawn"
+  },
+  "2020": {
+    "race": "Тайфун-рейнджер",
+    "sound": "weapons.famas.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "weapons.elite.fire",
+    "castUltimate": "UIPanorama.round_report_match_won",
+    "deathEnemy": "player.kill",
+    "ability_impulse": "aetherion.abi.typhoon_impulse",
+    "ability_vortex": "aetherion.abi.typhoon_vortex",
+    "spawn": "player.spawn"
+  },
+  "2021": {
+    "race": "Коде-рейнджер",
+    "sound": "weapons.galilar.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "ui.menu_open",
+    "castUltimate": "ui.youretired",
+    "deathEnemy": "player.kill",
+    "ability_hack": "aetherion.abi.code_hack",
+    "ability_scan": "aetherion.abi.code_scan",
+    "spawn": "player.spawn"
+  },
+  "2022": {
+    "race": "Сферо-страж",
+    "sound": "weapons.negev.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "weapons.knife.hitwall",
+    "castUltimate": "grenade.frag.explode",
+    "deathEnemy": "player.kill",
+    "ability_magnetic_field": "aetherion.abi.sphere_field",
+    "ability_barrier": "aetherion.abi.sphere_barrier",
+    "spawn": "player.spawn"
+  },
+  "2023": {
+    "race": "Фантом-берсерк",
+    "sound": "weapons.g36.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "ui.tech_alarm",
+    "castUltimate": "grenade.frag.explode",
+    "deathEnemy": "player.kill",
+    "ability_frenzy": "aetherion.abi.phantom_frenzy",
+    "ability_blood_dark": "aetherion.abi.phantom_blood",
+    "spawn": "player.spawn"
+  },
+  "2024": {
+    "race": "Небесный арбитр",
+    "sound": "weapons.revolver.fire",
+    "customSound": "",
+    "levelUp": "ui.rankup",
+    "castActive": "weapons.knife.hit",
+    "castUltimate": "player.headshot",
+    "deathEnemy": "player.kill",
+    "ability_verdict": "aetherion.abi.arbiter_verdict",
+    "ability_judgment": "aetherion.abi.arbiter_judgment",
+    "spawn": "player.spawn"
+  },
+
+  "3000": {
+    "event": "system",
+    "category": "boss",
+    "sound": "aetherion.boss.awaken",
+    "customSound": "sound/boss/boss_awaken.wav",
+    "description": "Звук пробуждения и появления босса"
+  },
+  "3001": {
+    "event": "system",
+    "category": "boss",
+    "sound": "aetherion.boss.enrage",
+    "customSound": "sound/boss/boss_enrage.wav",
+    "description": "Звук входа босса в состояние ярости"
+  },
+  "3002": {
+    "event": "system",
+    "category": "boss",
+    "sound": "aetherion.boss.death",
+    "customSound": "sound/boss/boss_death.wav",
+    "description": "Звук гибели босса"
+  },
+  "3003": {
+    "event": "system",
+    "category": "boss",
+    "sound": "aetherion.boss.hurt",
+    "customSound": "sound/boss/boss_hurt.wav",
+    "description": "Звук получения урона боссом"
+  },
+  "3004": {
+    "event": "system",
+    "category": "boss",
+    "sound": "aetherion.boss.vote_start",
+    "customSound": "sound/boss/vote_start.wav",
+    "description": "Звук начала голосования за призыв босса"
+  },
+  "3005": {
+    "event": "system",
+    "category": "boss",
+    "sound": "aetherion.boss.vote_pass",
+    "customSound": "sound/boss/vote_pass.wav",
+    "description": "Звук успешного прохождения голосования"
+  },
+  "3006": {
+    "event": "system",
+    "category": "boss",
+    "sound": "aetherion.boss.vote_fail",
+    "customSound": "sound/boss/vote_fail.wav",
+    "description": "Звук отклонения голосования"
+  },
+  "4000": {
+    "event": "system",
+    "category": "ambient",
+    "sound": "aetherion.ambient.menu",
+    "customSound": "sound/ambient/menu_loop.wav",
+    "description": "Фоновая музыка главного меню"
+  },
+  "4001": {
+    "event": "system",
+    "category": "ambient",
+    "sound": "aetherion.ambient.lobby",
+    "customSound": "sound/ambient/lobby_loop.wav",
+    "description": "Фоновая музыка лобби"
+  },
+  "4002": {
+    "event": "system",
+    "category": "ambient",
+    "sound": "aetherion.ambient.storm",
+    "customSound": "sound/ambient/storm_loop.wav",
+    "description": "Фоновая музыка Эфирной бури"
+  },
+  "4003": {
+    "event": "system",
+    "category": "ambient",
+    "sound": "aetherion.ambient.rift",
+    "customSound": "sound/ambient/rift_loop.wav",
+    "description": "Фоновая музыка Эфирного разлома"
+  },
+  "4004": {
+    "event": "system",
+    "category": "ambient",
+    "sound": "aetherion.ambient.map_desert",
+    "customSound": "sound/ambient/map_desert.wav",
+    "description": "Атмосферный звук пустынной карты"
+  },
+  "4005": {
+    "event": "system",
+    "category": "ambient",
+    "sound": "aetherion.ambient.map_arctic",
+    "customSound": "sound/ambient/map_arctic.wav",
+    "description": "Атмосферный звук арктической карты"
+  },
+  "4006": {
+    "event": "system",
+    "category": "ambient",
+    "sound": "aetherion.ambient.map_cyber",
+    "customSound": "sound/ambient/map_cyber.wav",
+    "description": "Атмосферный звук кибер-карты"
+  },
+  "4007": {
+    "event": "system",
+    "category": "ambient",
+    "sound": "aetherion.ambient.map_void",
+    "customSound": "sound/ambient/map_void.wav",
+    "description": "Атмосферный звук пустотной карты"
+  },
+  "5000": {
+    "event": "system",
+    "category": "ui",
+    "sound": "ui.button_click",
+    "customSound": "sound/ui/button_click.wav",
+    "description": "Звук клика по кнопке интерфейса"
+  },
+  "5001": {
+    "event": "system",
+    "category": "ui",
+    "sound": "ui.button_hover",
+    "customSound": "sound/ui/button_hover.wav",
+    "description": "Звук наведения на кнопку интерфейса"
+  },
+  "5002": {
+    "event": "system",
+    "category": "ui",
+    "sound": "ui.menu_open",
+    "customSound": "",
+    "description": "Встроенный звук открытия меню"
+  },
+  "5003": {
+    "event": "system",
+    "category": "ui",
+    "sound": "ui.menu_close",
+    "customSound": "",
+    "description": "Встроенный звук закрытия меню"
+  },
+  "5004": {
+    "event": "system",
+    "category": "ui",
+    "sound": "ui.menu_select",
+    "customSound": "",
+    "description": "Встроенный звук выбора в меню"
+  },
+  "5005": {
+    "event": "system",
+    "category": "ui",
+    "sound": "ui.success",
+    "customSound": "sound/ui/success.wav",
+    "description": "Звук успешного действия интерфейса"
+  },
+  "5006": {
+    "event": "system",
+    "category": "ui",
+    "sound": "ui.error",
+    "customSound": "sound/ui/error.wav",
+    "description": "Звук ошибки интерфейса"
+  },
+  "5007": {
+    "event": "system",
+    "category": "ui",
+    "sound": "ui.notify",
+    "customSound": "sound/ui/notify.wav",
+    "description": "Звук уведомления интерфейса"
+  },
+  "5008": {
+    "event": "system",
+    "category": "ui",
+    "sound": "ui.wheel_open",
+    "customSound": "sound/ui/wheel_open.wav",
+    "description": "Звук открытия AETHER WHEEL"
+  },
+  "5009": {
+    "event": "system",
+    "category": "ui",
+    "sound": "ui.wheel_close",
+    "customSound": "sound/ui/wheel_close.wav",
+    "description": "Звук закрытия AETHER WHEEL"
+  },
+  "5010": {
+    "event": "system",
+    "category": "ui",
+    "sound": "ui.ability_select",
+    "customSound": "sound/ui/ability_select.wav",
+    "description": "Звук выбора способности в колесе"
+  },
+  "6000": {
+    "event": "milestone",
+    "category": "round",
+    "sound": "aetherion.round.start",
+    "customSound": "sound/round/round_start.wav",
+    "description": "Звук начала раунда"
+  },
+  "6001": {
+    "event": "milestone",
+    "category": "round",
+    "sound": "aetherion.round.end_win",
+    "customSound": "sound/round/round_win.wav",
+    "description": "Звук победы в раунде"
+  },
+  "6002": {
+    "event": "milestone",
+    "category": "round",
+    "sound": "aetherion.round.end_lose",
+    "customSound": "sound/round/round_lose.wav",
+    "description": "Звук поражения в раунде"
+  },
+  "6003": {
+    "event": "milestone",
+    "category": "round",
+    "sound": "aetherion.round.firstblood",
+    "customSound": "sound/round/firstblood.wav",
+    "description": "Звук первой крови в раунде"
+  },
+  "6004": {
+    "event": "milestone",
+    "category": "round",
+    "sound": "aetherion.round.bomb_plant",
+    "customSound": "sound/round/bomb_plant.wav",
+    "description": "Звук установки бомбы"
+  },
+  "6005": {
+    "event": "milestone",
+    "category": "round",
+    "sound": "aetherion.round.bomb_defuse",
+    "customSound": "sound/round/bomb_defuse.wav",
+    "description": "Звук обезвреживания бомбы"
+  },
+  "6006": {
+    "event": "milestone",
+    "category": "milestone",
+    "sound": "aetherion.milestone.level10",
+    "customSound": "sound/milestone/level10.wav",
+    "description": "Звук достижения 10-го уровня"
+  },
+  "6007": {
+    "event": "milestone",
+    "category": "milestone",
+    "sound": "aetherion.milestone.level25",
+    "customSound": "sound/milestone/level25.wav",
+    "description": "Звук достижения 25-го уровня"
+  },
+  "6008": {
+    "event": "milestone",
+    "category": "milestone",
+    "sound": "aetherion.milestone.level50",
+    "customSound": "sound/milestone/level50.wav",
+    "description": "Звук достижения 50-го уровня"
+  },
+  "6009": {
+    "event": "milestone",
+    "category": "milestone",
+    "sound": "aetherion.milestone.division_up",
+    "customSound": "sound/milestone/division_up.wav",
+    "description": "Звук повышения дивизиона"
+  },
+  "6010": {
+    "event": "milestone",
+    "category": "milestone",
+    "sound": "aetherion.milestone.ace",
+    "customSound": "sound/milestone/ace.wav",
+    "description": "Звук выполнения ACE (5 убийств подряд)"
+  },
+  "6011": {
+    "event": "milestone",
+    "category": "milestone",
+    "sound": "aetherion.milestone.mvp",
+    "customSound": "sound/milestone/mvp.wav",
+    "description": "Звук звания MVP раунда"
+  },
+  "6012": {
+    "event": "milestone",
+    "category": "milestone",
+    "sound": "aetherion.milestone.duel_win",
+    "customSound": "sound/milestone/duel_win.wav",
+    "description": "Звук победы в дуэли"
+  },
+  "6013": {
+    "event": "milestone",
+    "category": "milestone",
+    "sound": "aetherion.milestone.duel_start",
+    "customSound": "sound/milestone/duel_start.wav",
+    "description": "Звук начала дуэли"
+  },
+  "6014": {
+    "event": "milestone",
+    "category": "milestone",
+    "sound": "aetherion.milestone.guild_war",
+    "customSound": "sound/milestone/guild_war.wav",
+    "description": "Звук начала гильдейской войны"
+  },
+  "6015": {
+    "event": "milestone",
+    "category": "storm",
+    "sound": "aetherion.storm.start",
+    "customSound": "sound/storm/storm_start.wav",
+    "description": "Звук начала Эфирной бури"
+  },
+  "6016": {
+    "event": "milestone",
+    "category": "storm",
+    "sound": "aetherion.storm.x2xp",
+    "customSound": "sound/storm/x2xp.wav",
+    "description": "Звук активации двойного XP"
+  },
+  "6017": {
+    "event": "milestone",
+    "category": "storm",
+    "sound": "aetherion.storm.x3xp",
+    "customSound": "sound/storm/x3xp.wav",
+    "description": "Звук активации тройного XP"
+  },
+  "6018": {
+    "event": "system",
+    "category": "rift",
+    "sound": "aetherion.rift.open",
+    "customSound": "sound/rift/rift_open.wav",
+    "description": "Звук открытия Эфирного разлома"
+  },
+  "6019": {
+    "event": "system",
+    "category": "rift",
+    "sound": "aetherion.rift.collect",
+    "customSound": "sound/rift/rift_collect.wav",
+    "description": "Звук сбора ресурса из разлома"
+  },
+  "6020": {
+    "event": "system",
+    "category": "rift",
+    "sound": "aetherion.rift.detonate",
+    "customSound": "sound/rift/rift_detonate.wav",
+    "description": "Звук детонации разлома"
+  },
+  "6021": {
+    "event": "system",
+    "category": "economy",
+    "sound": "aetherion.economy.gold_gain",
+    "customSound": "sound/economy/gold_gain.wav",
+    "description": "Звук получения голды"
+  },
+  "6022": {
+    "event": "system",
+    "category": "economy",
+    "sound": "aetherion.economy.gold_spend",
+    "customSound": "sound/economy/gold_spend.wav",
+    "description": "Звук траты голды"
+  },
+  "6023": {
+    "event": "system",
+    "category": "ability",
+    "sound": "aetherion.ability.miss",
+    "customSound": "sound/ability/miss.wav",
+    "description": "Звук промаха способностью"
+  },
+  "6024": {
+    "event": "system",
+    "category": "ability",
+    "sound": "aetherion.ability.hit",
+    "customSound": "sound/ability/hit.wav",
+    "description": "Звук попадания способностью"
+  },
+  "6025": {
+    "event": "system",
+    "category": "ability",
+    "sound": "aetherion.ability.low_mana",
+    "customSound": "sound/ability/low_mana.wav",
+    "description": "Звук нехватки эфира для способности"
+  },
+  "6026": {
+    "event": "system",
+    "category": "ability",
+    "sound": "aetherion.ability.cooldown",
+    "customSound": "sound/ability/cooldown.wav",
+    "description": "Звук сброса перезарядки способности"
+  },
+  "6027": {
+    "event": "system",
+    "category": "daily",
+    "sound": "aetherion.daily.login",
+    "customSound": "sound/daily/login_bonus.wav",
+    "description": "Звук получения ежедневного бонуса"
+  },
+  "6028": {
+    "event": "system",
+    "category": "daily",
+    "sound": "aetherion.daily.reward",
+    "customSound": "sound/daily/daily_reward.wav",
+    "description": "Звук получения ежедневной награды"
+  },
+  "6029": {
+    "event": "system",
+    "category": "wisp",
+    "sound": "aetherion.wisp.bond",
+    "customSound": "sound/wisp/wisp_bond.wav",
+    "description": "Звук привязки духов-компаньонов"
+  },
+  "6030": {
+    "event": "system",
+    "category": "wisp",
+    "sound": "aetherion.wisp.evolve",
+    "customSound": "sound/wisp/wisp_evolve.wav",
+    "description": "Звук эволюции духов-компаньонов"
+  },
+  "6031": {
+    "event": "system",
+    "category": "guild",
+    "sound": "aetherion.guild.join",
+    "customSound": "sound/guild/guild_join.wav",
+    "description": "Звук вступления в гильдию"
+  },
+  "6032": {
+    "event": "system",
+    "category": "guild",
+    "sound": "aetherion.guild.war_start",
+    "customSound": "sound/guild/war_start.wav",
+    "description": "Звук начала гильдейской войны"
+  },
+  "6033": {
+    "event": "system",
+    "category": "guild",
+    "sound": "aetherion.guild.banner",
+    "customSound": "sound/guild/banner_capture.wav",
+    "description": "Звук захвата баннера гильдии"
+  }
+}

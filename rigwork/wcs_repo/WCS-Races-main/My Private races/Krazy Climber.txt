@@ -1,0 +1,20 @@
+Krazy Climber
+Knife only
+
+Ice Pick
+Damage dealt with the knife is increased by 100%
+
+Fall Immunity
+Take no fall damage
+
+Rope
+Teleport like beholder.
+
+Checkpoint
+sets the place where you are standing as the place where the next abiliuty teleports you to. (ability)
+
+Revert
+Teleports you to the last place you set your checkpoint. (ability2)
+
+KZMOD
+Respawn like Timeshifter.

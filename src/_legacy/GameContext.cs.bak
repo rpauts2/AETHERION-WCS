@@ -1,0 +1,42 @@
+using WcsInfinity.Models;
+
+namespace WcsInfinity.Races;
+
+// Обёртка над игроком + доступ к движку для способностей.
+// В реальной интеграции тут будет CCSPlayerController/pawn из CounterStrikeSharp.
+public class GameContext
+{
+    public PlayerData Player { get; set; } = null!;
+    public RaceProgress Race { get; set; } = null!;
+    public int? VictimSlot { get; set; }
+    public int? AttackerSlot { get; set; }
+
+    // Сервисы движка (инжектируются движком, заглушки для абстракции)
+    public IEngineApi Engine { get; set; } = null!;
+
+    public int SkillLevel(int skillIndex) =>
+        Race.SkillLevels.TryGetValue(skillIndex, out var lv) ? lv : 0;
+}
+
+public class DamageInfo
+{
+    public float Damage { get; set; }
+    public bool IsHeadshot { get; set; }
+    public string Weapon { get; set; } = "";
+}
+
+// Абстракция движка — то, что способности могут делать с игроком/миром.
+public interface IEngineApi
+{
+    void SetHealth(int slot, int hp);
+    void AddHealth(int slot, int amount);
+    void SetSpeed(int slot, float multiplier);
+    void SetGravity(int slot, float multiplier);
+    void Teleport(int slot, float x, float y, float z);
+    void GiveWeaponInfiniteAmmo(int slot, string weapon);
+    void SpawnParticle(string effect, float x, float y, float z);
+    void PrintToCenter(int slot, string msg);
+    void PrintToChat(int slot, string msg);
+    (float x, float y, float z) GetPosition(int slot);
+    (float x, float y, float z) GetAimEndPosition(int slot); // куда смотрит — для телепорта/платформы
+}

@@ -1,0 +1,56 @@
+{
+  "wisp": {
+    "companionId": "wisp_core",
+    "baseModel": "models/wisp_evolution_concept.png",
+    "tiers": [
+      {
+        "tier": "Common",
+        "label_en": "Lesser Wispling",
+        "label_ru": "Младший Искорка",
+        "color": "#8fd3ff",
+        "model": "models/wisp_evolution_concept.png",
+        "aura": "",
+        "followOffset": [ 0, 0, -25 ],
+        "followSpeed": 1.05
+      },
+      {
+        "tier": "Rare",
+        "label_en": "Dawn Wisp",
+        "label_ru": "Заряной Искр",
+        "color": "#ffe9a4",
+        "model": "models/wisp_evolution_concept.png",
+        "aura": "particles/wisp/dust_dawn.vpcf",
+        "followOffset": [ 0, 0, -24 ],
+        "followSpeed": 1.15
+      },
+      {
+        "tier": "Epic",
+        "label_en": "Arc Warden",
+        "label_ru": "Архизащитник",
+        "color": "#c7b9ff",
+        "model": "models/wisp_evolution_concept.png",
+        "aura": "particles/wisp/arc_walk.vpcf",
+        "followOffset": [ 0, 0, -22 ],
+        "followSpeed": 1.25
+      },
+      {
+        "tier": "Legendary",
+        "label_en": "Aether King",
+        "label_ru": "Эфирный Царь",
+        "color": "#ffd166",
+        "model": "models/wisp_evolution_concept.png",
+        "aura": "particles/wisp/crown_flame.vpcf",
+        "followOffset": [ 0, 0, -20 ],
+        "followSpeed": 1.35
+      }
+    ],
+    "ui": {
+      "previewHint_en": "Preview: {Tier} variant — soul radius {Radius}m",
+      "previewHint_ru": "Обзор: косметика {Tier} — радиус души {Radius} м",
+      "activeAbility_en": "Active: {Ability}",
+      "activeAbility_ru": "Активная: {Ability}",
+      "bond_en": "Bond",
+      "bond_ru": "Связь"
+    }
+  }
+}

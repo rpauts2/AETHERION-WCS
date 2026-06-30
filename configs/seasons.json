@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "active_season_id": 1,
+  "seasons": [
+    {
+      "id": 1,
+      "name": "Пробуждение",
+      "name_en": "Awakening",
+      "start_utc": "2026-06-29T00:00:00Z",
+      "end_utc": "2027-05-31T23:59:59Z",
+      "weeks": 5,
+      "season_pass": {
+        "free_tier_max_level": 50,
+        "premium_tier_max_level": 50,
+        "premium_tag": "Aether+",
+        "premium_tag_en": "Aether+",
+        "auto_claim_unlocked_free": true,
+        "auto_claim_unlocked_premium": false
+      },
+      "balance_mods": {
+        "2004": 0.95,
+        "2007": 1.05,
+        "2023": 1.02,
+        "2016": 1.03,
+        "2008": 0.97,
+        "2024": 1.01,
+        "2021": 0.96,
+        "2000": 1.04,
+        "2014": 1.05,
+        "2011": 0.98
+      },
+      "cosmetics": [
+        {
+          "id": "cosmetic_title_awakening",
+          "type": "Title",
+          "label_ru": "Покоритель Шторма",
+          "label_en": "Storm Conqueror",
+          "rarity": "Epic",
+          "tier_level": 5
+        },
+        {
+          "id": "cosmetic_namecolor_awakening",
+          "type": "NameColor",
+          "label_ru": "Эфирный индиго",
+          "label_en": "Aether Indigo",
+          "color": "#2A00FF",
+          "rarity": "Rare",
+          "tier_level": 12
+        },
+        {
+          "id": "cosmetic_trail_awakening",
+          "type": "EtherTrail",
+          "label_ru": "След Эфира: Штормовой",
+          "label_en": "Aether Trail: Storm",
+          "rarity": "Epic",
+          "tier_level": 18
+        },
+        {
+          "id": "cosmetic_skill_awakening",
+          "type": "SkillTrailColor",
+          "label_ru": "Цвет способности: Эфир",
+          "label_en": "Ability glow: Aether",
+          "color": "#7B2FFF",
+          "rarity": "Rare",
+          "tier_level": 25
+        },
+        {
+          "id": "cosmetic_killsound_awakening",
+          "type": "KillSound",
+          "label_ru": "Звук килла: Гром",
+          "label_en": "Kill sound: Thunder",
+          "rarity": "Rare",
+          "tier_level": 30
+        },
+        {
+          "id": "cosmetic_ultimate_awakening",
+          "type": "UltimateSkin",
+          "label_ru": "Скин ульты: Небесный огонь",
+          "label_en": "Ult skin: Skyfire",
+          "rarity": "Legendary",
+          "tier_level": 35
+        },
+        {
+          "id": "cosmetic_model_awakening",
+          "type": "PlayermodelPreview",
+          "label_ru": "Эксклюзивный превью-скин",
+          "label_en": "Exclusive preview skin",
+          "rarity": "Legendary",
+          "tier_level": 40
+        },
+        {
+          "id": "cosmetic_particle_awakening",
+          "type": "ParticleSkin",
+          "label_ru": "Скин частиц: Звёздная пыль",
+          "label_en": "Particle skin: Stardust",
+          "rarity": "Rare",
+          "tier_level": 45
+        },
+        {
+          "id": "cosmetic_pass_backer_awakening",
+          "type": "PassFrame",
+          "label_ru": "Рамка Battle Pass: Золото",
+          "label_en": "Battle Pass frame: Gold",
+          "rarity": "Exclusive",
+          "tier_level": 50
+        }
+      ]
+    }
+  ]
+}

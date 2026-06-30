@@ -1,0 +1,5608 @@
+[
+  {
+    "id": 1000,
+    "name": "Странник",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "baseline",
+    "lore": "Первый шаг Пробуждённого. Чистый потенциал Эфира.",
+    "abilities": [
+      {
+        "n": "Закалка",
+        "t": "Passive",
+        "max": 8,
+        "d": "+8 HP за уровень (макс +64).",
+        "effect": "bonus_hp",
+        "value": 8
+      },
+      {
+        "n": "Регенерация",
+        "t": "Passive",
+        "max": 8,
+        "d": "+1 HP/сек за уровень вне боя.",
+        "effect": "bonus_hp",
+        "value": 1
+      },
+      {
+        "n": "Меткость",
+        "t": "Passive",
+        "max": 8,
+        "d": "+3% урон за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Второе дыхание",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 45,
+        "ether": 60,
+        "d": "Мгновенный хил +75 HP при HP<35.",
+        "effect": "bonus_hp",
+        "value": 75
+      }
+    ]
+  },
+  {
+    "id": 1001,
+    "name": "Кровопийца",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "sustain",
+    "lore": "Эфир научил его пить чужую жизнь.",
+    "abilities": [
+      {
+        "n": "Вампиризм",
+        "t": "Passive",
+        "max": 8,
+        "d": "5% урона за уровень возвращается в HP.",
+        "effect": "lifesteal",
+        "value": 15
+      },
+      {
+        "n": "Жажда",
+        "t": "Passive",
+        "max": 8,
+        "d": "+2 HP за уровень за килл.",
+        "effect": "bonus_hp",
+        "value": 2
+      },
+      {
+        "n": "Когти",
+        "t": "Passive",
+        "max": 8,
+        "d": "+5 урон ножом за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Кровавый пир",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "ether": 70,
+        "d": "Вампиризм x3 на 6 сек.",
+        "effect": "lifesteal",
+        "value": 15
+      }
+    ]
+  },
+  {
+    "id": 1002,
+    "name": "Хладокровный",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "control",
+    "lore": "В его венах течёт жидкий лёд.",
+    "abilities": [
+      {
+        "n": "Ледяная кожа",
+        "t": "Passive",
+        "max": 8,
+        "d": "-3% входящий урон за уровень.",
+        "effect": "slow_aura",
+        "value": 0.15
+      },
+      {
+        "n": "Иней",
+        "t": "Passive",
+        "max": 8,
+        "d": "6% шанс/ур. замедлить врага на 1 сек.",
+        "effect": "freeze_aoe",
+        "value": 40
+      },
+      {
+        "n": "Морозный удар",
+        "t": "Passive",
+        "max": 8,
+        "d": "Шанс заморозить на 0.4 сек при попадании.",
+        "effect": "freeze_aoe",
+        "value": 40
+      },
+      {
+        "n": "Метель",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 40,
+        "ether": 65,
+        "d": "Замедляет всех врагов в радиусе 400 на 3 сек.",
+        "effect": "slow_aura",
+        "value": 30
+      }
+    ]
+  },
+  {
+    "id": 1003,
+    "name": "Скороход",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "mobility",
+    "lore": "Эфир сделал его быстрее ветра.",
+    "abilities": [
+      {
+        "n": "Скорость",
+        "t": "Passive",
+        "max": 8,
+        "d": "+4% скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Лёгкость",
+        "t": "Passive",
+        "max": 8,
+        "d": "-5% гравитация за уровень.",
+        "effect": "low_gravity",
+        "value": 0.05
+      },
+      {
+        "n": "Мягкое приземление",
+        "t": "Passive",
+        "max": 8,
+        "d": "-12% урон от падения за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Рывок",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 18,
+        "ether": 35,
+        "d": "Резкий рывок в сторону прицела.",
+        "effect": "dash_forward",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1004,
+    "name": "Дуэлянт Искры",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "duelist",
+    "lore": "Признаёт только дуэль один на один.",
+    "abilities": [
+      {
+        "n": "Верный Deagle",
+        "t": "Passive",
+        "max": 1,
+        "d": "Deagle с бесконечными патронами.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Твёрдая рука",
+        "t": "Passive",
+        "max": 8,
+        "d": "-4% разброс за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Хедшот",
+        "t": "Passive",
+        "max": 8,
+        "d": "+4% урон в голову за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Дуэль",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 30,
+        "ether": 50,
+        "d": "Мгновенная перезарядка + 1.5 сек +20% урон.",
+        "effect": "poison_dot",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1005,
+    "name": "Бастион",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "tank",
+    "lore": "Стоит как скала, пока другие падают.",
+    "abilities": [
+      {
+        "n": "Толстая шкура",
+        "t": "Passive",
+        "max": 8,
+        "d": "+12 HP за уровень (макс +96).",
+        "effect": "bonus_hp",
+        "value": 12
+      },
+      {
+        "n": "Броня",
+        "t": "Passive",
+        "max": 8,
+        "d": "-3% урон за уровень.",
+        "effect": "shield",
+        "value": 5
+      },
+      {
+        "n": "Стойкость",
+        "t": "Passive",
+        "max": 8,
+        "d": "4% шанс/ур. поглотить удар.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Несокрушимость",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 60,
+        "ether": 80,
+        "d": "-70% урон на 4 сек, но -30% скорость.",
+        "effect": "speed_buff",
+        "value": 0.3
+      }
+    ]
+  },
+  {
+    "id": 1006,
+    "name": "Светоносец",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "support",
+    "lore": "Несёт свет Эфира своим союзникам.",
+    "abilities": [
+      {
+        "n": "Аура исцеления",
+        "t": "Passive",
+        "max": 8,
+        "d": "+1 HP/сек союзникам в радиусе 300 за уровень.",
+        "effect": "bonus_hp",
+        "value": 1
+      },
+      {
+        "n": "Самовосстановление",
+        "t": "Passive",
+        "max": 8,
+        "d": "+1.5 HP/сек себе за уровень.",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Щит света",
+        "t": "Passive",
+        "max": 8,
+        "d": "Союзникам +5 брони за уровень при спавне.",
+        "effect": "team_heal",
+        "value": 40
+      },
+      {
+        "n": "Возрождение",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 90,
+        "ether": 100,
+        "d": "Хил-всплеск +60 HP всей команде.",
+        "effect": "bonus_hp",
+        "value": 60
+      }
+    ]
+  },
+  {
+    "id": 1007,
+    "name": "Тень",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "mobility",
+    "lore": "Двигается там, где никто не смотрит.",
+    "abilities": [
+      {
+        "n": "Бесшумность",
+        "t": "Passive",
+        "max": 8,
+        "d": "-10% громкость шагов за уровень.",
+        "effect": "lightning_strike",
+        "value": 30
+      },
+      {
+        "n": "Уворот",
+        "t": "Passive",
+        "max": 8,
+        "d": "3% шанс/ур. уклониться от пули.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Растворение",
+        "t": "Passive",
+        "max": 8,
+        "d": "Полупрозрачность в покое (до 60% за макс).",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Прыжок в тень",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 35,
+        "ether": 55,
+        "d": "Телепорт за спину врага в прицеле.",
+        "effect": "dash_forward",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1008,
+    "name": "Небокрыл",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "mobility",
+    "lore": "Эфир подарил ему крылья.",
+    "abilities": [
+      {
+        "n": "Пёрышко",
+        "t": "Passive",
+        "max": 8,
+        "d": "-15% урон от падения за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Парение",
+        "t": "Passive",
+        "max": 8,
+        "d": "-6% гравитация за уровень.",
+        "effect": "low_gravity",
+        "value": 0.05
+      },
+      {
+        "n": "Зоркость",
+        "t": "Passive",
+        "max": 8,
+        "d": "Подсветка врагов в радиусе за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Полёт",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 25,
+        "ether": 45,
+        "d": "3 сек свободного полёта.",
+        "effect": "low_gravity",
+        "value": 0.05
+      }
+    ]
+  },
+  {
+    "id": 1009,
+    "name": "Берсерк",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "aggressor",
+    "lore": "Чем ближе смерть — тем сильнее ярость.",
+    "abilities": [
+      {
+        "n": "Ярость",
+        "t": "Passive",
+        "max": 8,
+        "d": "+3% урон за уровень.",
+        "effect": "berserk",
+        "value": 5
+      },
+      {
+        "n": "Жажда крови",
+        "t": "Passive",
+        "max": 8,
+        "d": "+5% скорость на 2 сек после килла за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Боль = сила",
+        "t": "Passive",
+        "max": 8,
+        "d": "При HP<50 ещё +2% урон за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Неистовство",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 45,
+        "ether": 60,
+        "d": "+35% урон, +20% скорость, -20 HP/сек на 5 сек.",
+        "effect": "regen",
+        "value": 1.5
+      }
+    ]
+  },
+  {
+    "id": 1010,
+    "name": "Крюкохват",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "control",
+    "lore": "Притягивает добычу цепью Эфира. (аналог Пуджа)",
+    "abilities": [
+      {
+        "n": "Толщина",
+        "t": "Passive",
+        "max": 8,
+        "d": "+10 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Гниль",
+        "t": "Passive",
+        "max": 8,
+        "d": "+4% урон за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Вампиризм",
+        "t": "Passive",
+        "max": 8,
+        "d": "4% урона в HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Крюк",
+        "t": "Active",
+        "max": 5,
+        "cd": 9,
+        "ether": 40,
+        "d": "Притягивает врага в прицеле к себе + урон.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Расчленёнка",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 55,
+        "ether": 75,
+        "d": "Притянутый враг получает x2 урона 3 сек.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1011,
+    "name": "Стальной Жнец",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "tank",
+    "lore": "Машина войны, что не знает усталости. (аналог Терминатора)",
+    "abilities": [
+      {
+        "n": "Броневой корпус",
+        "t": "Passive",
+        "max": 8,
+        "d": "+15 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 15
+      },
+      {
+        "n": "Тяжёлый калибр",
+        "t": "Passive",
+        "max": 8,
+        "d": "+4% урон из винтовок за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Авторемонт",
+        "t": "Passive",
+        "max": 8,
+        "d": "+2 HP/сек за уровень.",
+        "effect": "bonus_hp",
+        "value": 2
+      },
+      {
+        "n": "Подавление",
+        "t": "Passive",
+        "max": 8,
+        "d": "Враги рядом -3% скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Режим уничтожения",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 60,
+        "ether": 85,
+        "d": "+40% урон, +50 HP, -25% получаемый урон на 6 сек.",
+        "effect": "bonus_hp",
+        "value": 50
+      }
+    ]
+  },
+  {
+    "id": 1012,
+    "name": "Винтокрыл",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Хозяин неба с залпом ракет. (аналог Вертолёта)",
+    "abilities": [
+      {
+        "n": "Лопасти",
+        "t": "Passive",
+        "max": 8,
+        "d": "-6% гравитация за уровень.",
+        "effect": "low_gravity",
+        "value": 0.05
+      },
+      {
+        "n": "Бронепластины",
+        "t": "Passive",
+        "max": 8,
+        "d": "+12 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 12
+      },
+      {
+        "n": "Вампиражор",
+        "t": "Passive",
+        "max": 8,
+        "d": "5% урона в HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Зависание",
+        "t": "Active",
+        "max": 5,
+        "cd": 20,
+        "ether": 50,
+        "d": "Левитация на месте 4 сек.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Залп ракет",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "ether": 80,
+        "d": "Запуск 3 самонаводящихся ракет.",
+        "effect": "aoe_explosion",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1013,
+    "name": "Архитектор",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Строит укрепления силой мысли. (аналог Строителя)",
+    "abilities": [
+      {
+        "n": "Прочность",
+        "t": "Passive",
+        "max": 8,
+        "d": "+8 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 8
+      },
+      {
+        "n": "Инженер",
+        "t": "Passive",
+        "max": 8,
+        "d": "Постройки +10% HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Стена Эфира",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 55,
+        "d": "Ставит барьер, блокирующий пули.",
+        "effect": "shield",
+        "value": 60
+      },
+      {
+        "n": "Турель",
+        "t": "Active",
+        "max": 5,
+        "cd": 35,
+        "ether": 65,
+        "d": "Автотурель, стреляющая по врагам 10 сек.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Крепость",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 70,
+        "ether": 90,
+        "d": "Купол-щит вокруг себя и союзников 5 сек.",
+        "effect": "aoe_explosion",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1014,
+    "name": "Куролис",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "mobility",
+    "lore": "Превращается в неуловимую птицу. (аналог Курицы)",
+    "abilities": [
+      {
+        "n": "Перепонки",
+        "t": "Passive",
+        "max": 8,
+        "d": "-15% урон от падения за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Хрупкая цель",
+        "t": "Passive",
+        "max": 8,
+        "d": "-8% хитбокс... +6% уворот за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Кудах-турбо",
+        "t": "Passive",
+        "max": 8,
+        "d": "+4% скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Порхание",
+        "t": "Active",
+        "max": 5,
+        "cd": 12,
+        "ether": 30,
+        "d": "Тройной прыжок.",
+        "effect": "dash_forward",
+        "value": 250
+      },
+      {
+        "n": "Птичий вихрь",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 40,
+        "ether": 60,
+        "d": "5 сек полёт + 70% уворот.",
+        "effect": "low_gravity",
+        "value": 0.05
+      }
+    ]
+  },
+  {
+    "id": 1015,
+    "name": "Бог Тотемов",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "support",
+    "lore": "Возводит алтари, питающие союзников Эфиром.",
+    "abilities": [
+      {
+        "n": "Благословение",
+        "t": "Passive",
+        "max": 8,
+        "d": "+10 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Тотем Хила",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 60,
+        "d": "Алтарь лечит союзников +5 HP/сек 12 сек.",
+        "effect": "bonus_hp",
+        "value": 5
+      },
+      {
+        "n": "Тотем Скорости",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 55,
+        "d": "Алтарь +20% скорость союзникам.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Тотем Щита",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 65,
+        "d": "Алтарь даёт +40 брони рядом.",
+        "effect": "shield",
+        "value": 60
+      },
+      {
+        "n": "Вознесение",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 100,
+        "d": "Все тотемы x2 эффект 8 сек + хил команды.",
+        "effect": "heal_self",
+        "value": 50
+      }
+    ]
+  },
+  {
+    "id": 1016,
+    "name": "Архангел Гнева",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Низвергает кару тотемами разрушения.",
+    "abilities": [
+      {
+        "n": "Святая броня",
+        "t": "Passive",
+        "max": 8,
+        "d": "+12 HP, -2% урон за уровень.",
+        "effect": "bonus_hp",
+        "value": 12
+      },
+      {
+        "n": "Тотем Урона",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 65,
+        "d": "Алтарь бьёт врагов 8 урона/сек 12 сек.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Тотем Кары",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 70,
+        "d": "Алтарь замедляет и жжёт врагов.",
+        "effect": "slow_aura",
+        "value": 30
+      },
+      {
+        "n": "Крылья",
+        "t": "Passive",
+        "max": 8,
+        "d": "-6% гравитация за уровень.",
+        "effect": "low_gravity",
+        "value": 0.05
+      },
+      {
+        "n": "Суд",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 75,
+        "ether": 100,
+        "d": "Столб света бьёт всех врагов в зоне на 50 урона.",
+        "effect": "aoe_damage",
+        "value": 60
+      }
+    ]
+  },
+  {
+    "id": 1017,
+    "name": "Палач Дуэлей",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "duelist",
+    "lore": "Изолирует жертву на арене, где нет спасения.",
+    "abilities": [
+      {
+        "n": "Мастер Deagle",
+        "t": "Passive",
+        "max": 1,
+        "d": "Только Deagle, но +25% урон и ∞ патроны.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Глаз орла",
+        "t": "Passive",
+        "max": 8,
+        "d": "+5% точность за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Рефлексы",
+        "t": "Passive",
+        "max": 8,
+        "d": "4% уворот за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Арена",
+        "t": "Active",
+        "max": 5,
+        "cd": 40,
+        "ether": 80,
+        "d": "Создаёт платформу-арену для 1v1 с врагом в прицеле.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Точность бога",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 60,
+        "ether": 90,
+        "d": "3 сек авто-наведение Deagle на врага.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1018,
+    "name": "Дитя Хаоса",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "chaos",
+    "lore": "Эфир в нём нестабилен — каждый раз новый.",
+    "abilities": [
+      {
+        "n": "Нестабильность",
+        "t": "Passive",
+        "max": 8,
+        "d": "Случайно +HP или +урон каждый раунд за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Везение",
+        "t": "Passive",
+        "max": 8,
+        "d": "+2% шанс крит x2 за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Искажение",
+        "t": "Passive",
+        "max": 8,
+        "d": "Случайная гравитация/скорость каждый спавн.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Рулетка судьбы",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 50,
+        "d": "Случайный мощный эффект на 5 сек.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Полный хаос",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 55,
+        "ether": 75,
+        "d": "Случайно 1 из 5 ультимейтов других рас.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1019,
+    "name": "Властелин Времени",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "control",
+    "lore": "Сгибает мгновения под свою волю.",
+    "abilities": [
+      {
+        "n": "Ускорение",
+        "t": "Passive",
+        "max": 8,
+        "d": "+3% скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Предвидение",
+        "t": "Passive",
+        "max": 8,
+        "d": "5% уворот за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Откат",
+        "t": "Active",
+        "max": 5,
+        "cd": 35,
+        "ether": 60,
+        "d": "Возврат к позиции и HP 3 сек назад.",
+        "effect": "teleport_spawn",
+        "value": 0
+      },
+      {
+        "n": "Заморозка времени",
+        "t": "Active",
+        "max": 5,
+        "cd": 45,
+        "ether": 75,
+        "d": "Враги в зоне замедлены на 80% 2 сек.",
+        "effect": "freeze_aoe",
+        "value": 40
+      },
+      {
+        "n": "Стазис",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 90,
+        "ether": 110,
+        "d": "Полная остановка всех врагов на 1.5 сек.",
+        "effect": "stun_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1020,
+    "name": "Страж Ордена",
+    "tier": 4,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "support",
+    "guild": true,
+    "lore": "Раса, доступная только членам гильдии. Сила растёт с активностью гильдии.",
+    "abilities": [
+      {
+        "n": "Узы братства",
+        "t": "Passive",
+        "max": 8,
+        "d": "+HP за каждого согильдийца рядом.",
+        "effect": "poison_dot",
+        "value": 5
+      },
+      {
+        "n": "Знамя гильдии",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 60,
+        "d": "Бафф всем согильдийцам в радиусе.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Клятва",
+        "t": "Passive",
+        "max": 8,
+        "d": "+урон рядом с согильдийцами.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Призыв Ордена",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 100,
+        "d": "Хил+щит всем согильдийцам на карте.",
+        "effect": "heal_self",
+        "value": 50
+      }
+    ]
+  },
+  {
+    "id": 1021,
+    "name": "Громовержец",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "aggressor",
+    "lore": "В кулаках его спит гроза.",
+    "abilities": [
+      {
+        "n": "Заряд",
+        "t": "Passive",
+        "max": 8,
+        "d": "+4% урон за уровень.",
+        "effect": "poison_dot",
+        "value": 5
+      },
+      {
+        "n": "Статика",
+        "t": "Passive",
+        "max": 8,
+        "d": "Шанс/ур. нанести +5 урона молнией при попадании.",
+        "effect": "lightning_strike",
+        "value": 30
+      },
+      {
+        "n": "Проводник",
+        "t": "Passive",
+        "max": 8,
+        "d": "+3% скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Цепная молния",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 40,
+        "ether": 60,
+        "d": "Молния прыгает между 3 врагами по 30 урона.",
+        "effect": "lightning_strike",
+        "value": 30
+      }
+    ]
+  },
+  {
+    "id": 1022,
+    "name": "Каменный",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "tank",
+    "lore": "Кожа его — гранит.",
+    "abilities": [
+      {
+        "n": "Гранит",
+        "t": "Passive",
+        "max": 8,
+        "d": "+11 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 11
+      },
+      {
+        "n": "Землетряс",
+        "t": "Passive",
+        "max": 8,
+        "d": "-3% урон за уровень.",
+        "effect": "nova_knockback",
+        "value": 55
+      },
+      {
+        "n": "Корни",
+        "t": "Passive",
+        "max": 8,
+        "d": "Иммунитет к отбрасыванию за уровень.",
+        "effect": "slow_aura",
+        "value": 0.15
+      },
+      {
+        "n": "Окаменение",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 55,
+        "ether": 75,
+        "d": "Неуязвимость 3 сек, но нельзя двигаться.",
+        "effect": "death_save",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1023,
+    "name": "Огнерождённый",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "aggressor",
+    "lore": "Пламя — его кровь.",
+    "abilities": [
+      {
+        "n": "Жар",
+        "t": "Passive",
+        "max": 8,
+        "d": "+3% урон за уровень.",
+        "effect": "ignite_aoe",
+        "value": 5
+      },
+      {
+        "n": "Поджог",
+        "t": "Passive",
+        "max": 8,
+        "d": "Шанс/ур. поджечь врага (5 урона/сек 3 сек).",
+        "effect": "ignite_aoe",
+        "value": 5
+      },
+      {
+        "n": "Тепловой щит",
+        "t": "Passive",
+        "max": 8,
+        "d": "-2% урон за уровень.",
+        "effect": "shield",
+        "value": 5
+      },
+      {
+        "n": "Огненный взрыв",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 45,
+        "ether": 65,
+        "d": "AOE-взрыв 40 урона вокруг.",
+        "effect": "dash_forward",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1024,
+    "name": "Знахарь",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "support",
+    "lore": "Лечит травами Эфира.",
+    "abilities": [
+      {
+        "n": "Травы",
+        "t": "Passive",
+        "max": 8,
+        "d": "+1.5 HP/сек себе за уровень.",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Антидот",
+        "t": "Passive",
+        "max": 8,
+        "d": "Снижает эффект замедления/поджога за уровень.",
+        "effect": "slow_aura",
+        "value": 30
+      },
+      {
+        "n": "Целебный дым",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 45,
+        "d": "Облако лечит союзников рядом.",
+        "effect": "heal_self",
+        "value": 50
+      },
+      {
+        "n": "Эликсир жизни",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 70,
+        "ether": 90,
+        "d": "+100 HP себе и ближайшему союзнику.",
+        "effect": "bonus_hp",
+        "value": 100
+      }
+    ]
+  },
+  {
+    "id": 1025,
+    "name": "Дезертир",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "duelist",
+    "lore": "Выживает любой ценой.",
+    "abilities": [
+      {
+        "n": "Чуйка",
+        "t": "Passive",
+        "max": 8,
+        "d": "Предупреждение о враге за спиной за уровень.",
+        "effect": "dash_forward",
+        "value": 5
+      },
+      {
+        "n": "Дымовая завеса",
+        "t": "Active",
+        "max": 5,
+        "cd": 20,
+        "ether": 40,
+        "d": "Мгновенный дым вокруг себя.",
+        "effect": "aoe_explosion",
+        "value": 250
+      },
+      {
+        "n": "Контрвыстрел",
+        "t": "Passive",
+        "max": 8,
+        "d": "Шанс/ур. отразить часть урона.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Бегство",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 35,
+        "ether": 55,
+        "d": "+50% скорость, неуязвимость 1.5 сек.",
+        "effect": "death_save",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1026,
+    "name": "Призыватель",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Зовёт духов Эфира в бой.",
+    "abilities": [
+      {
+        "n": "Связь духов",
+        "t": "Passive",
+        "max": 8,
+        "d": "+8 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 8
+      },
+      {
+        "n": "Дух-воин",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Призывает бота-союзника на 15 сек.",
+        "effect": "summon",
+        "value": 40
+      },
+      {
+        "n": "Дух-щит",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "Дух поглощает урон 8 сек.",
+        "effect": "lifesteal_aoe",
+        "value": 50
+      },
+      {
+        "n": "Аура духов",
+        "t": "Passive",
+        "max": 8,
+        "d": "Призванные сильнее за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Армия теней",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 75,
+        "ether": 95,
+        "d": "Призыв 3 духов-воинов.",
+        "effect": "summon",
+        "value": 40
+      }
+    ]
+  },
+  {
+    "id": 1027,
+    "name": "Берсерк-Волк",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "aggressor",
+    "lore": "Оборотень, что рвёт в клочья.",
+    "abilities": [
+      {
+        "n": "Звериная стать",
+        "t": "Passive",
+        "max": 8,
+        "d": "+10 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Клыки",
+        "t": "Passive",
+        "max": 8,
+        "d": "+5% урон ножом за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Нюх крови",
+        "t": "Passive",
+        "max": 8,
+        "d": "Подсветка раненых за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Прыжок зверя",
+        "t": "Active",
+        "max": 5,
+        "cd": 15,
+        "ether": 35,
+        "d": "Прыжок к врагу + урон когтями.",
+        "effect": "dash_forward",
+        "value": 250
+      },
+      {
+        "n": "Облик волка",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 55,
+        "ether": 80,
+        "d": "+40% скорость, +30% урон, вампиризм 6 сек.",
+        "effect": "lifesteal",
+        "value": 15
+      }
+    ]
+  },
+  {
+    "id": 1028,
+    "name": "Снайпер-Призрак",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "duelist",
+    "lore": "Один выстрел — одна душа.",
+    "abilities": [
+      {
+        "n": "Стальные нервы",
+        "t": "Passive",
+        "max": 8,
+        "d": "-5% покачивание прицела за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Бронебой",
+        "t": "Passive",
+        "max": 8,
+        "d": "+4% урон из снайперок за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Маскировка",
+        "t": "Passive",
+        "max": 8,
+        "d": "Невидимость при неподвижности за уровень.",
+        "effect": "invisibility",
+        "value": 1
+      },
+      {
+        "n": "Метка",
+        "t": "Active",
+        "max": 5,
+        "cd": 20,
+        "ether": 45,
+        "d": "Помечает врага, +урон по нему.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Глаз бога",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "ether": 75,
+        "d": "Видит всех врагов сквозь стены 5 сек.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1029,
+    "name": "Пожиратель Душ",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "sustain",
+    "lore": "Каждая убитая душа делает его сильнее.",
+    "abilities": [
+      {
+        "n": "Сбор душ",
+        "t": "Passive",
+        "max": 8,
+        "d": "+2 макс.HP навсегда за килл (до лимита) за уровень.",
+        "effect": "soul_collect",
+        "value": 2
+      },
+      {
+        "n": "Тьма",
+        "t": "Passive",
+        "max": 8,
+        "d": "5% урона в HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Проклятие",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 55,
+        "d": "Враг получает +20% урона 5 сек.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Жатва",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 60,
+        "d": "Вытягивает HP у врагов рядом.",
+        "effect": "lifesteal",
+        "value": 15
+      },
+      {
+        "n": "Власть над смертью",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 100,
+        "d": "Воскрешение на месте смерти 1 раз/раунд.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1030,
+    "name": "Повелитель Бурь",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Командует ветром и молнией.",
+    "abilities": [
+      {
+        "n": "Грозовая аура",
+        "t": "Passive",
+        "max": 8,
+        "d": "Враги рядом получают 3 урона/сек за уровень.",
+        "effect": "chain_lightning",
+        "value": 40
+      },
+      {
+        "n": "Полёт на ветре",
+        "t": "Passive",
+        "max": 8,
+        "d": "-6% гравитация за уровень.",
+        "effect": "low_gravity",
+        "value": 0.05
+      },
+      {
+        "n": "Торнадо",
+        "t": "Active",
+        "max": 5,
+        "cd": 35,
+        "ether": 65,
+        "d": "Смерч подбрасывает врагов в зоне.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Разряд",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 55,
+        "d": "Молния в прицел 45 урона.",
+        "effect": "lightning_strike",
+        "value": 30
+      },
+      {
+        "n": "Буря",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 105,
+        "d": "Шторм на карте: враги замедлены и горят молниями 6 сек.",
+        "effect": "lightning_strike",
+        "value": 30
+      }
+    ]
+  },
+  {
+    "id": 1031,
+    "name": "Аватар Эфира",
+    "tier": 5,
+    "division": 4,
+    "unlock": 0,
+    "archetype": "mythic",
+    "lore": "Высшая форма Пробуждённого. Сам выбирает свою силу.",
+    "abilities": [
+      {
+        "n": "Сосуд Эфира",
+        "t": "Passive",
+        "max": 99,
+        "d": "+5 HP и +1% урон за Paragon-уровень (бесконечно).",
+        "effect": "bonus_hp",
+        "value": 5
+      },
+      {
+        "n": "Поток",
+        "t": "Passive",
+        "max": 8,
+        "d": "+скорость накопления Эфира за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Модуль I",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "Выбираемый модуль: урон/хил/контроль/мобильность.",
+        "effect": "heal_self",
+        "value": 50
+      },
+      {
+        "n": "Модуль II",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 60,
+        "d": "Второй выбираемый модуль.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Вознесение Эфира",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 70,
+        "ether": 120,
+        "d": "Конструктор: собери ульту из 5 эффектов.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1032,
+    "name": "Хронарх",
+    "tier": 5,
+    "division": 4,
+    "unlock": 0,
+    "archetype": "mythic",
+    "lore": "Властелин самого времени на пике Вечности.",
+    "abilities": [
+      {
+        "n": "Вечность",
+        "t": "Passive",
+        "max": 99,
+        "d": "+0.5% КД-редукция за Paragon-уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Эхо",
+        "t": "Passive",
+        "max": 8,
+        "d": "Шанс не тратить КД за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Перемотка",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Откат HP и позиции 4 сек назад.",
+        "effect": "bonus_hp",
+        "value": 15
+      },
+      {
+        "n": "Ускорение мира",
+        "t": "Active",
+        "max": 5,
+        "cd": 35,
+        "ether": 65,
+        "d": "+50% своя скорость атаки 5 сек.",
+        "effect": "speed_buff",
+        "value": 0.3
+      },
+      {
+        "n": "Конец времён",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 100,
+        "ether": 130,
+        "d": "Стоп-время для всех врагов 2.5 сек.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1033,
+    "name": "Авангард Ордена",
+    "tier": 4,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "aggressor",
+    "guild": true,
+    "lore": "Ударная гильд-раса. Тем сильнее, чем активнее гильдия.",
+    "abilities": [
+      {
+        "n": "Боевое братство",
+        "t": "Passive",
+        "max": 8,
+        "d": "+урон за каждого согильдийца на сервере.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Штурм",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "Рывок + урон, делится с согильдийцами рядом.",
+        "effect": "dash_forward",
+        "value": 250
+      },
+      {
+        "n": "Флаг войны",
+        "t": "Passive",
+        "max": 8,
+        "d": "+скорость рядом с согильдийцами.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Натиск Ордена",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 75,
+        "ether": 100,
+        "d": "Бафф урона всей гильдии на карте 8 сек.",
+        "effect": "team_speed",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 1034,
+    "name": "Ветродув",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "duelist",
+    "lore": "Дитя степных ветров, что танцует меж пуль.",
+    "abilities": [
+      {
+        "n": "Лёгкость",
+        "t": "Passive",
+        "max": 8,
+        "d": "+3% скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Попутный ветер",
+        "t": "Passive",
+        "max": 8,
+        "d": "-4% гравитация за уровень — выше прыжок.",
+        "effect": "low_gravity",
+        "value": 0.05
+      },
+      {
+        "n": "Вихрь уклонения",
+        "t": "Passive",
+        "max": 8,
+        "d": "Шанс/ур. полностью уклониться от выстрела.",
+        "effect": "slow_aura",
+        "value": 30
+      },
+      {
+        "n": "Шквал",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 40,
+        "ether": 55,
+        "d": "Рывок-вихрь вперёд, сбивает врагов с ног.",
+        "effect": "dash_forward",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1035,
+    "name": "Углежог",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "aggressor",
+    "lore": "Кузнец, чьё дыхание — раскалённый горн.",
+    "abilities": [
+      {
+        "n": "Жар горна",
+        "t": "Passive",
+        "max": 8,
+        "d": "+3% урон за уровень.",
+        "effect": "ignite_aoe",
+        "value": 5
+      },
+      {
+        "n": "Тлеющие угли",
+        "t": "Passive",
+        "max": 8,
+        "d": "Шанс/ур. поджечь врага при попадании.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Закалка",
+        "t": "Passive",
+        "max": 8,
+        "d": "+9 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 9
+      },
+      {
+        "n": "Огненное клеймо",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 45,
+        "ether": 60,
+        "d": "Взрыв жара вокруг, поджигает всех рядом.",
+        "effect": "dash_forward",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1036,
+    "name": "Следопыт",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "support",
+    "lore": "Глаза леса видят то, что скрыто.",
+    "abilities": [
+      {
+        "n": "Острый глаз",
+        "t": "Passive",
+        "max": 8,
+        "d": "Подсветка раненых врагов за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Тихий шаг",
+        "t": "Passive",
+        "max": 8,
+        "d": "Тише передвижение за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Ловушка",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 45,
+        "d": "Ставит капкан, замедляющий врага.",
+        "effect": "slow_aura",
+        "value": 30
+      },
+      {
+        "n": "Соколиный взор",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 55,
+        "ether": 70,
+        "d": "Видит всех врагов сквозь стены 4 сек.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1037,
+    "name": "Послушник",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "support",
+    "lore": "Молодой адепт Эфира, познающий исцеление.",
+    "abilities": [
+      {
+        "n": "Малое исцеление",
+        "t": "Passive",
+        "max": 8,
+        "d": "+1.5 HP/сек реген за уровень.",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Мантра",
+        "t": "Passive",
+        "max": 8,
+        "d": "+быстрее накопление Эфира за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Длань света",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 45,
+        "d": "Лечит себя и союзника рядом.",
+        "effect": "heal_self",
+        "value": 50
+      },
+      {
+        "n": "Благословение",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 70,
+        "ether": 85,
+        "d": "Исцеляет +100 HP себе и команде рядом.",
+        "effect": "bonus_hp",
+        "value": 100
+      }
+    ]
+  },
+  {
+    "id": 1038,
+    "name": "Задира",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "aggressor",
+    "lore": "Уличный боец, что прёт напролом.",
+    "abilities": [
+      {
+        "n": "Толстокожий",
+        "t": "Passive",
+        "max": 8,
+        "d": "+10 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Кулачный боец",
+        "t": "Passive",
+        "max": 8,
+        "d": "+6% урон ножом за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Кураж",
+        "t": "Passive",
+        "max": 8,
+        "d": "+2% урон при HP ниже 50% за уровень.",
+        "effect": "berserk",
+        "value": 5
+      },
+      {
+        "n": "Берсерк-раж",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 45,
+        "ether": 60,
+        "d": "+30% урон и +15% скорость на 6 сек.",
+        "effect": "berserk",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1039,
+    "name": "Шептун",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "duelist",
+    "lore": "Говорит с тенями, и тени отвечают.",
+    "abilities": [
+      {
+        "n": "Тень",
+        "t": "Passive",
+        "max": 8,
+        "d": "Тише и незаметнее за уровень.",
+        "effect": "invisibility",
+        "value": 5
+      },
+      {
+        "n": "Скрытность",
+        "t": "Passive",
+        "max": 8,
+        "d": "Невидимость при неподвижности за уровень.",
+        "effect": "invisibility",
+        "value": 1
+      },
+      {
+        "n": "Удар из тьмы",
+        "t": "Passive",
+        "max": 8,
+        "d": "+урон по врагу со спины за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Растворение",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "ether": 65,
+        "d": "Полная невидимость 4 сек.",
+        "effect": "invisibility",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "id": 1040,
+    "name": "Звонарь",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Колокол его души оглушает врагов.",
+    "abilities": [
+      {
+        "n": "Резонанс",
+        "t": "Passive",
+        "max": 8,
+        "d": "+8 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 8
+      },
+      {
+        "n": "Гул",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "Звуковая волна замедляет врагов рядом.",
+        "effect": "slow_aura",
+        "value": 30
+      },
+      {
+        "n": "Эхо защиты",
+        "t": "Passive",
+        "max": 8,
+        "d": "-2% урон за уровень.",
+        "effect": "shield",
+        "value": 5
+      },
+      {
+        "n": "Набат",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 55,
+        "ether": 75,
+        "d": "Оглушающая ударная волна вокруг.",
+        "effect": "aoe_explosion",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1041,
+    "name": "Лозоход",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "support",
+    "lore": "Чувствует течения Эфира под землёй.",
+    "abilities": [
+      {
+        "n": "Чутьё Эфира",
+        "t": "Passive",
+        "max": 8,
+        "d": "+накопление Эфира за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Источник",
+        "t": "Passive",
+        "max": 8,
+        "d": "+1 HP/сек реген за уровень.",
+        "effect": "bonus_hp",
+        "value": 1
+      },
+      {
+        "n": "Родник",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 50,
+        "d": "Создаёт зону лечения на земле.",
+        "effect": "regen",
+        "value": 60
+      },
+      {
+        "n": "Половодье",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 70,
+        "ether": 85,
+        "d": "Большая зона исцеления для команды.",
+        "effect": "heal_self",
+        "value": 50
+      }
+    ]
+  },
+  {
+    "id": 1042,
+    "name": "Камнетёс",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "tank",
+    "lore": "Терпелив как скала, твёрд как гранит.",
+    "abilities": [
+      {
+        "n": "Твердыня",
+        "t": "Passive",
+        "max": 8,
+        "d": "+12 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 12
+      },
+      {
+        "n": "Несокрушимость",
+        "t": "Passive",
+        "max": 8,
+        "d": "-3% урон за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Устойчивость",
+        "t": "Passive",
+        "max": 8,
+        "d": "Сопротивление отбрасыванию за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Каменная стена",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 60,
+        "ether": 80,
+        "d": "+80 HP щит на 5 сек.",
+        "effect": "bonus_hp",
+        "value": 80
+      }
+    ]
+  },
+  {
+    "id": 1043,
+    "name": "Бегун",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "duelist",
+    "lore": "Быстрее всех — значит живее всех.",
+    "abilities": [
+      {
+        "n": "Спринт",
+        "t": "Passive",
+        "max": 8,
+        "d": "+4% скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Второе дыхание",
+        "t": "Passive",
+        "max": 8,
+        "d": "Реген при беге за уровень.",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Скольжение",
+        "t": "Active",
+        "max": 5,
+        "cd": 15,
+        "ether": 30,
+        "d": "Быстрый рывок-подкат вперёд.",
+        "effect": "dash_forward",
+        "value": 250
+      },
+      {
+        "n": "Сверхскорость",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 40,
+        "ether": 55,
+        "d": "+50% скорость на 5 сек.",
+        "effect": "speed_buff",
+        "value": 0.3
+      }
+    ]
+  },
+  {
+    "id": 1044,
+    "name": "Искрожог",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "aggressor",
+    "lore": "В пальцах его пляшут первые искры Эфира.",
+    "abilities": [
+      {
+        "n": "Искра",
+        "t": "Passive",
+        "max": 8,
+        "d": "+3% урон за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Статический заряд",
+        "t": "Passive",
+        "max": 8,
+        "d": "Шанс/ур. ударить врага разрядом.",
+        "effect": "lightning_strike",
+        "value": 30
+      },
+      {
+        "n": "Перегрузка",
+        "t": "Passive",
+        "max": 8,
+        "d": "+скорость накопления Эфира за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Разряд молнии",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 45,
+        "ether": 60,
+        "d": "Молния в прицел, цепной урон.",
+        "effect": "lightning_strike",
+        "value": 30
+      }
+    ]
+  },
+  {
+    "id": 1045,
+    "name": "Знаменосец",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "support",
+    "lore": "Его флаг вдохновляет идущих рядом.",
+    "abilities": [
+      {
+        "n": "Воодушевление",
+        "t": "Passive",
+        "max": 8,
+        "d": "+7 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 7
+      },
+      {
+        "n": "Клич",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 50,
+        "d": "Бафф скорости союзникам рядом.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Стойкость",
+        "t": "Passive",
+        "max": 8,
+        "d": "-2% урон по союзникам рядом за уровень.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Знамя битвы",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 65,
+        "ether": 80,
+        "d": "Ставит знамя: команда рядом +урон и реген 8 сек.",
+        "effect": "regen",
+        "value": 1.5
+      }
+    ]
+  },
+  {
+    "id": 1046,
+    "name": "Дымокур",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Прячет союзников в эфирной дымке.",
+    "abilities": [
+      {
+        "n": "Завеса",
+        "t": "Passive",
+        "max": 8,
+        "d": "Тише передвижение за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Дымовая бомба",
+        "t": "Active",
+        "max": 5,
+        "cd": 20,
+        "ether": 40,
+        "d": "Мгновенное облако дыма вокруг.",
+        "effect": "aoe_explosion",
+        "value": 250
+      },
+      {
+        "n": "Маскировка",
+        "t": "Passive",
+        "max": 8,
+        "d": "Невидимость в дыму за уровень.",
+        "effect": "invisibility",
+        "value": 1
+      },
+      {
+        "n": "Туман войны",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "ether": 65,
+        "d": "Большое облако: враги слепнут, союзники скрыты.",
+        "effect": "invisibility",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1047,
+    "name": "Точильщик",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "aggressor",
+    "lore": "Его клинок всегда жаждет крови.",
+    "abilities": [
+      {
+        "n": "Заточка",
+        "t": "Passive",
+        "max": 8,
+        "d": "+7% урон ножом за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Кровопускание",
+        "t": "Passive",
+        "max": 8,
+        "d": "Вампиризм при убийстве ножом за уровень.",
+        "effect": "lifesteal",
+        "value": 15
+      },
+      {
+        "n": "Ловкость",
+        "t": "Passive",
+        "max": 8,
+        "d": "+3% скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Танец клинков",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 45,
+        "ether": 60,
+        "d": "Рывок к врагу + серия ударов.",
+        "effect": "dash_forward",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1048,
+    "name": "Подмастерье Бурь",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Учится укрощать грозу, что внутри.",
+    "abilities": [
+      {
+        "n": "Заряд тучи",
+        "t": "Passive",
+        "max": 8,
+        "d": "+накопление Эфира за уровень.",
+        "effect": "poison_dot",
+        "value": 5
+      },
+      {
+        "n": "Статика",
+        "t": "Passive",
+        "max": 8,
+        "d": "+2% урон за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Разрядка",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "Электроволна замедляет врагов рядом.",
+        "effect": "lightning_strike",
+        "value": 30
+      },
+      {
+        "n": "Гроза",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 55,
+        "ether": 75,
+        "d": "Удары молний по площади вокруг.",
+        "effect": "lightning_strike",
+        "value": 30
+      }
+    ]
+  },
+  {
+    "id": 1049,
+    "name": "Чумной Лекарь",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Лечит своих и травит чужих одним дыханием.",
+    "abilities": [
+      {
+        "n": "Иммунитет",
+        "t": "Passive",
+        "max": 8,
+        "d": "+9 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 9
+      },
+      {
+        "n": "Ядовитое облако",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 55,
+        "d": "Облако яда: враги получают урон/сек.",
+        "effect": "poison_dot",
+        "value": 20
+      },
+      {
+        "n": "Целебный пар",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "Лечит союзников в облаке.",
+        "effect": "heal_self",
+        "value": 50
+      },
+      {
+        "n": "Эпидемия",
+        "t": "Passive",
+        "max": 8,
+        "d": "Яд распространяется между врагами за уровень.",
+        "effect": "poison_dot",
+        "value": 5
+      },
+      {
+        "n": "Великий Мор",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 75,
+        "ether": 95,
+        "d": "Чумная буря: урон врагам, хил союзникам вокруг.",
+        "effect": "aoe_explosion",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1050,
+    "name": "Двуликий",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "duelist",
+    "lore": "Две души в одном теле — атака и защита.",
+    "abilities": [
+      {
+        "n": "Маска войны",
+        "t": "Passive",
+        "max": 8,
+        "d": "+4% урон за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Маска щита",
+        "t": "Passive",
+        "max": 8,
+        "d": "-3% урон за уровень.",
+        "effect": "shield",
+        "value": 5
+      },
+      {
+        "n": "Смена лика",
+        "t": "Active",
+        "max": 5,
+        "cd": 12,
+        "ether": 30,
+        "d": "Переключает режим: атака/защита (баффы).",
+        "effect": "shield",
+        "value": 60
+      },
+      {
+        "n": "Равновесие",
+        "t": "Passive",
+        "max": 8,
+        "d": "+6 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Слияние ликов",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 60,
+        "ether": 80,
+        "d": "Оба режима сразу на 6 сек.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1051,
+    "name": "Костяной Маг",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Поднимает павших в эфирных костяных стражей.",
+    "abilities": [
+      {
+        "n": "Связь смерти",
+        "t": "Passive",
+        "max": 8,
+        "d": "+8 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 8
+      },
+      {
+        "n": "Костяной страж",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Призывает скелета-союзника.",
+        "effect": "summon",
+        "value": 40
+      },
+      {
+        "n": "Костяная броня",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "Щит из костей поглощает урон.",
+        "effect": "lifesteal_aoe",
+        "value": 50
+      },
+      {
+        "n": "Жатва костей",
+        "t": "Passive",
+        "max": 8,
+        "d": "Реген за убийство за уровень.",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Армия костей",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 100,
+        "d": "Призыв 3 костяных стражей.",
+        "effect": "summon",
+        "value": 40
+      }
+    ]
+  },
+  {
+    "id": 1052,
+    "name": "Громовой Кулак",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "aggressor",
+    "lore": "Каждый удар — раскат грома.",
+    "abilities": [
+      {
+        "n": "Электрокулак",
+        "t": "Passive",
+        "max": 8,
+        "d": "+5% урон ножом за уровень.",
+        "effect": "lightning_strike",
+        "value": 30
+      },
+      {
+        "n": "Разряд при ударе",
+        "t": "Passive",
+        "max": 8,
+        "d": "Удар ножом бьёт молнией за уровень.",
+        "effect": "lightning_strike",
+        "value": 30
+      },
+      {
+        "n": "Скорость грозы",
+        "t": "Passive",
+        "max": 8,
+        "d": "+3% скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Громовой рывок",
+        "t": "Active",
+        "max": 5,
+        "cd": 15,
+        "ether": 35,
+        "d": "Рывок к врагу с электроударом.",
+        "effect": "dash_forward",
+        "value": 250
+      },
+      {
+        "n": "Кулак Зевса",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 55,
+        "ether": 80,
+        "d": "Удар по земле: молнии веером вокруг.",
+        "effect": "lightning_strike",
+        "value": 30
+      }
+    ]
+  },
+  {
+    "id": 1053,
+    "name": "Зеркальный",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "duelist",
+    "lore": "Отражает чужую боль обратно.",
+    "abilities": [
+      {
+        "n": "Отражение",
+        "t": "Passive",
+        "max": 8,
+        "d": "Шанс/ур. отразить часть урона.",
+        "effect": "berserk",
+        "value": 5
+      },
+      {
+        "n": "Зеркальная кожа",
+        "t": "Passive",
+        "max": 8,
+        "d": "+7 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 7
+      },
+      {
+        "n": "Контра",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "3 сек: весь урон возвращается врагу.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Блик",
+        "t": "Passive",
+        "max": 8,
+        "d": "Шанс ослепить стрелявшего за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Зеркальный зал",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 65,
+        "ether": 85,
+        "d": "Создаёт копии-обманки + отражение урона.",
+        "effect": "berserk",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1054,
+    "name": "Ледяная Дева",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Там, где ступает она, стынет даже Эфир.",
+    "abilities": [
+      {
+        "n": "Морозная аура",
+        "t": "Passive",
+        "max": 8,
+        "d": "Враги рядом замедлены за уровень.",
+        "effect": "slow_aura",
+        "value": 30
+      },
+      {
+        "n": "Ледяная корка",
+        "t": "Passive",
+        "max": 8,
+        "d": "+8 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 8
+      },
+      {
+        "n": "Сосулька",
+        "t": "Active",
+        "max": 5,
+        "cd": 20,
+        "ether": 45,
+        "d": "Снаряд льда замедляет и ранит.",
+        "effect": "freeze_aoe",
+        "value": 40
+      },
+      {
+        "n": "Иней",
+        "t": "Passive",
+        "max": 8,
+        "d": "Шанс заморозить врага за уровень.",
+        "effect": "freeze_aoe",
+        "value": 40
+      },
+      {
+        "n": "Вечная мерзлота",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 70,
+        "ether": 90,
+        "d": "Замораживает всех врагов в зоне 2 сек.",
+        "effect": "freeze_aoe",
+        "value": 40
+      }
+    ]
+  },
+  {
+    "id": 1055,
+    "name": "Песчаный Странник",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "duelist",
+    "lore": "Растворяется в песке и бьёт из ниоткуда.",
+    "abilities": [
+      {
+        "n": "Песчаная поступь",
+        "t": "Passive",
+        "max": 8,
+        "d": "+3% скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Слияние с песком",
+        "t": "Passive",
+        "max": 8,
+        "d": "Невидимость при неподвижности за уровень.",
+        "effect": "invisibility",
+        "value": 1
+      },
+      {
+        "n": "Песчаный вихрь",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "Ослепляет врагов рядом.",
+        "effect": "slow_aura",
+        "value": 30
+      },
+      {
+        "n": "Мираж",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Оставляет обманку-копию.",
+        "effect": "berserk",
+        "value": 20
+      },
+      {
+        "n": "Самум",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 70,
+        "ether": 90,
+        "d": "Песчаная буря: слепота и урон по площади.",
+        "effect": "aoe_explosion",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1056,
+    "name": "Кровавый Жрец",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "sustain",
+    "lore": "Платит кровью за силу — своей и чужой.",
+    "abilities": [
+      {
+        "n": "Жажда крови",
+        "t": "Passive",
+        "max": 8,
+        "d": "Вампиризм при убийстве за уровень.",
+        "effect": "lifesteal",
+        "value": 15
+      },
+      {
+        "n": "Кровавый щит",
+        "t": "Passive",
+        "max": 8,
+        "d": "+9 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 9
+      },
+      {
+        "n": "Жертва",
+        "t": "Active",
+        "max": 5,
+        "cd": 20,
+        "ether": 40,
+        "d": "Тратит HP → большой бафф урона.",
+        "effect": "bonus_hp",
+        "value": 15
+      },
+      {
+        "n": "Переливание",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Вытягивает HP у врага рядом.",
+        "effect": "lifesteal",
+        "value": 15
+      },
+      {
+        "n": "Кровавая луна",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 75,
+        "ether": 95,
+        "d": "Мощный вампиризм со всех врагов вокруг.",
+        "effect": "aoe_explosion",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1057,
+    "name": "Часовой",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "tank",
+    "lore": "Страж рубежа, что не пропустит никого.",
+    "abilities": [
+      {
+        "n": "Бастион",
+        "t": "Passive",
+        "max": 8,
+        "d": "+11 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 11
+      },
+      {
+        "n": "Окоп",
+        "t": "Passive",
+        "max": 8,
+        "d": "-урон при неподвижности за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Турель",
+        "t": "Active",
+        "max": 5,
+        "cd": 35,
+        "ether": 60,
+        "d": "Ставит авто-турель на время.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Барьер",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "Стена-щит перед собой.",
+        "effect": "shield",
+        "value": 60
+      },
+      {
+        "n": "Крепость",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 100,
+        "d": "+150 HP щит и неуязвимость к отбрасыванию 5 сек.",
+        "effect": "bonus_hp",
+        "value": 150
+      }
+    ]
+  },
+  {
+    "id": 1058,
+    "name": "Эфирный Вор",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "duelist",
+    "lore": "Крадёт не золото — чужую силу.",
+    "abilities": [
+      {
+        "n": "Ловкие руки",
+        "t": "Passive",
+        "max": 8,
+        "d": "+золото за убийство за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Карманник",
+        "t": "Passive",
+        "max": 8,
+        "d": "Крадёт Эфир у жертвы за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Дымовая уловка",
+        "t": "Active",
+        "max": 5,
+        "cd": 20,
+        "ether": 40,
+        "d": "Дым + рывок в сторону.",
+        "effect": "dash_forward",
+        "value": 250
+      },
+      {
+        "n": "Подножка",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 45,
+        "d": "Замедляет и обкрадывает врага.",
+        "effect": "slow_aura",
+        "value": 30
+      },
+      {
+        "n": "Большой куш",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 60,
+        "ether": 80,
+        "d": "Крадёт Эфир и золото у всех врагов рядом.",
+        "effect": "poison_dot",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1059,
+    "name": "Друид Эфира",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "support",
+    "lore": "Слышит, как растут эфирные травы.",
+    "abilities": [
+      {
+        "n": "Связь природы",
+        "t": "Passive",
+        "max": 8,
+        "d": "+1.5 HP/сек реген за уровень.",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Шипы",
+        "t": "Passive",
+        "max": 8,
+        "d": "Отражает часть урона шипами за уровень.",
+        "effect": "berserk",
+        "value": 5
+      },
+      {
+        "n": "Лоза",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "Опутывает врага, замедляя его.",
+        "effect": "slow_aura",
+        "value": 30
+      },
+      {
+        "n": "Цветение",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Зона исцеления союзникам.",
+        "effect": "heal_self",
+        "value": 50
+      },
+      {
+        "n": "Гнев природы",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 75,
+        "ether": 90,
+        "d": "Лозы оплетают всех врагов в зоне.",
+        "effect": "aoe_damage",
+        "value": 60
+      }
+    ]
+  },
+  {
+    "id": 1060,
+    "name": "Дуэлянт",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "duelist",
+    "lore": "Один на один ему нет равных.",
+    "abilities": [
+      {
+        "n": "Честь",
+        "t": "Passive",
+        "max": 8,
+        "d": "+урон 1v1 (когда рядом 1 враг) за уровень.",
+        "effect": "poison_dot",
+        "value": 5
+      },
+      {
+        "n": "Парирование",
+        "t": "Passive",
+        "max": 8,
+        "d": "Шанс блокировать выстрел за уровень.",
+        "effect": "shield",
+        "value": 5
+      },
+      {
+        "n": "Выпад",
+        "t": "Active",
+        "max": 5,
+        "cd": 15,
+        "ether": 35,
+        "d": "Быстрый рывок-укол к врагу.",
+        "effect": "dash_forward",
+        "value": 250
+      },
+      {
+        "n": "Фокус",
+        "t": "Passive",
+        "max": 8,
+        "d": "+точность за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Дуэль чести",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 55,
+        "ether": 75,
+        "d": "Метит врага: +50% урон по нему и от него 6 сек.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1061,
+    "name": "Заклинатель Огня",
+    "tier": 2,
+    "division": 2,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Пламя послушно его воле.",
+    "abilities": [
+      {
+        "n": "Огненное тело",
+        "t": "Passive",
+        "max": 8,
+        "d": "+7 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 7
+      },
+      {
+        "n": "Огненный шар",
+        "t": "Active",
+        "max": 5,
+        "cd": 20,
+        "ether": 45,
+        "d": "Снаряд огня, поджигает врага.",
+        "effect": "ignite_aoe",
+        "value": 45
+      },
+      {
+        "n": "Стена огня",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Огненная стена на пути врагов.",
+        "effect": "ignite_aoe",
+        "value": 45
+      },
+      {
+        "n": "Жар",
+        "t": "Passive",
+        "max": 8,
+        "d": "Поджог сильнее за уровень.",
+        "effect": "ignite_aoe",
+        "value": 5
+      },
+      {
+        "n": "Армагеддон",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 100,
+        "d": "Огненный дождь по большой зоне.",
+        "effect": "ignite_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1062,
+    "name": "Повелитель Бури",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Сам Шторм склоняется пред его волей.",
+    "abilities": [
+      {
+        "n": "Дитя грозы",
+        "t": "Passive",
+        "max": 10,
+        "d": "+10 HP и +2% скорость за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Цепная молния",
+        "t": "Active",
+        "max": 6,
+        "cd": 18,
+        "ether": 60,
+        "d": "Молния прыгает по 3 врагам.",
+        "effect": "lightning_strike",
+        "value": 30
+      },
+      {
+        "n": "Грозовой покров",
+        "t": "Passive",
+        "max": 10,
+        "d": "Бьёт молнией атакующего за уровень.",
+        "effect": "lightning_strike",
+        "value": 30
+      },
+      {
+        "n": "Ураган",
+        "t": "Active",
+        "max": 6,
+        "cd": 30,
+        "ether": 70,
+        "d": "Вихрь подбрасывает врагов вокруг.",
+        "effect": "aoe_explosion",
+        "value": 250
+      },
+      {
+        "n": "Гнев Небес",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 90,
+        "ether": 130,
+        "d": "Ливень молний по всей видимой зоне 4 сек.",
+        "effect": "lightning_strike",
+        "value": 30
+      }
+    ]
+  },
+  {
+    "id": 1063,
+    "name": "Пожиратель Душ",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "sustain",
+    "lore": "С каждой душой он становится сильнее — навсегда в раунде.",
+    "abilities": [
+      {
+        "n": "Сбор душ",
+        "t": "Passive",
+        "max": 10,
+        "d": "+1 стак за килл: +HP и урон (до конца раунда).",
+        "effect": "soul_collect",
+        "value": 2
+      },
+      {
+        "n": "Голод",
+        "t": "Passive",
+        "max": 10,
+        "d": "Вампиризм растёт со стаками за уровень.",
+        "effect": "lifesteal",
+        "value": 15
+      },
+      {
+        "n": "Вытягивание",
+        "t": "Active",
+        "max": 6,
+        "cd": 20,
+        "ether": 55,
+        "d": "Тянет душу врага: урон + стак.",
+        "effect": "lifesteal",
+        "value": 15
+      },
+      {
+        "n": "Печать души",
+        "t": "Active",
+        "max": 6,
+        "cd": 30,
+        "ether": 65,
+        "d": "Метит врага: при его смерти +2 стака.",
+        "effect": "soul_collect",
+        "value": 2
+      },
+      {
+        "n": "Пир Бездны",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 85,
+        "ether": 120,
+        "d": "Поглощает души всех врагов в зоне (большие стаки).",
+        "effect": "soul_collect",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "id": 1064,
+    "name": "Хронолог",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "control",
+    "lore": "Время — глина в его пальцах.",
+    "abilities": [
+      {
+        "n": "Ускорение",
+        "t": "Passive",
+        "max": 10,
+        "d": "+3% скорость атаки/движения за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Откат",
+        "t": "Active",
+        "max": 6,
+        "cd": 35,
+        "ether": 70,
+        "d": "Возврат на позицию и HP 3 сек назад.",
+        "effect": "teleport_spawn",
+        "value": 0
+      },
+      {
+        "n": "Стазис",
+        "t": "Active",
+        "max": 6,
+        "cd": 30,
+        "ether": 65,
+        "d": "Замораживает врага во времени 2 сек.",
+        "effect": "berserk",
+        "value": 20
+      },
+      {
+        "n": "Предвидение",
+        "t": "Passive",
+        "max": 10,
+        "d": "Шанс уклониться от выстрела за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Остановка Времени",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 95,
+        "ether": 140,
+        "d": "Замирают все враги на 3 сек.",
+        "effect": "stun_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1065,
+    "name": "Титан",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "tank",
+    "lore": "Гора, что научилась ходить.",
+    "abilities": [
+      {
+        "n": "Колосс",
+        "t": "Passive",
+        "max": 10,
+        "d": "+18 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 18
+      },
+      {
+        "n": "Несокрушимость",
+        "t": "Passive",
+        "max": 10,
+        "d": "-урон за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Землетрясение",
+        "t": "Active",
+        "max": 6,
+        "cd": 25,
+        "ether": 60,
+        "d": "Удар по земле: оглушение и урон вокруг.",
+        "effect": "aoe_explosion",
+        "value": 250
+      },
+      {
+        "n": "Разлом",
+        "t": "Active",
+        "max": 6,
+        "cd": 30,
+        "ether": 65,
+        "d": "Трещина замедляет врагов на линии.",
+        "effect": "slow_aura",
+        "value": 30
+      },
+      {
+        "n": "Пробуждение Титана",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 90,
+        "ether": 130,
+        "d": "+250 HP, иммун к контролю, +урон 8 сек.",
+        "effect": "bonus_hp",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1066,
+    "name": "Жнец",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "assassin",
+    "lore": "Приходит за теми, чей час пробил.",
+    "abilities": [
+      {
+        "n": "Поступь смерти",
+        "t": "Passive",
+        "max": 10,
+        "d": "Бесшумность + скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Метка жнеца",
+        "t": "Active",
+        "max": 6,
+        "cd": 20,
+        "ether": 55,
+        "d": "Метит цель: +урон по ней.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Коса",
+        "t": "Active",
+        "max": 6,
+        "cd": 18,
+        "ether": 50,
+        "d": "Размашистый удар по дуге перед собой.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Казнь",
+        "t": "Passive",
+        "max": 10,
+        "d": "+урон по врагам с низким HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Жатва",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 120,
+        "d": "Мгновенно казнит всех врагов <30% HP в зоне.",
+        "effect": "lifesteal",
+        "value": 15
+      }
+    ]
+  },
+  {
+    "id": 1067,
+    "name": "Архимаг",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "caster",
+    "lore": "Магия Эфира течёт сквозь него рекой.",
+    "abilities": [
+      {
+        "n": "Резервуар",
+        "t": "Passive",
+        "max": 10,
+        "d": "+макс Эфир и реген Эфира за уровень.",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Чародейский залп",
+        "t": "Active",
+        "max": 6,
+        "cd": 15,
+        "ether": 45,
+        "d": "Тройной снаряд Эфира.",
+        "effect": "poison_dot",
+        "value": 20
+      },
+      {
+        "n": "Телепорт",
+        "t": "Active",
+        "max": 6,
+        "cd": 25,
+        "ether": 55,
+        "d": "Мгновенный рывок взглядом.",
+        "effect": "dash_forward",
+        "value": 250
+      },
+      {
+        "n": "Усиление чар",
+        "t": "Passive",
+        "max": 10,
+        "d": "-КД всех навыков за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Метеор Эфира",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 85,
+        "ether": 130,
+        "d": "Огромный снаряд: взрыв по зоне.",
+        "effect": "dash_forward",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1068,
+    "name": "Берсерк Бури",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "aggressor",
+    "lore": "Чем ближе смерть, тем страшнее его ярость.",
+    "abilities": [
+      {
+        "n": "Ярость",
+        "t": "Passive",
+        "max": 10,
+        "d": "+урон при низком HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Боевой клич",
+        "t": "Active",
+        "max": 6,
+        "cd": 25,
+        "ether": 55,
+        "d": "Бафф урона себе и согильдийцам.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Кровавый рывок",
+        "t": "Active",
+        "max": 6,
+        "cd": 15,
+        "ether": 45,
+        "d": "Рывок + удар, хил при попадании.",
+        "effect": "dash_forward",
+        "value": 250
+      },
+      {
+        "n": "Несгибаемость",
+        "t": "Passive",
+        "max": 10,
+        "d": "Шанс выжить на 1 HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 1
+      },
+      {
+        "n": "Безумие Бури",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 120,
+        "d": "+80% урон, +скорость, вампиризм 7 сек.",
+        "effect": "lifesteal",
+        "value": 15
+      }
+    ]
+  },
+  {
+    "id": 1069,
+    "name": "Призыватель",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "summoner",
+    "lore": "Один в поле не воин — но он никогда не один.",
+    "abilities": [
+      {
+        "n": "Связь призыва",
+        "t": "Passive",
+        "max": 10,
+        "d": "+HP призыванным существам за уровень.",
+        "effect": "summon",
+        "value": 40
+      },
+      {
+        "n": "Эфирный волк",
+        "t": "Active",
+        "max": 6,
+        "cd": 25,
+        "ether": 55,
+        "d": "Призывает волка-охотника.",
+        "effect": "summon",
+        "value": 40
+      },
+      {
+        "n": "Голем Эфира",
+        "t": "Active",
+        "max": 6,
+        "cd": 35,
+        "ether": 70,
+        "d": "Призывает голема-танка.",
+        "effect": "summon",
+        "value": 40
+      },
+      {
+        "n": "Стая",
+        "t": "Passive",
+        "max": 10,
+        "d": "Лимит существ +1 за N уровней.",
+        "effect": "summon",
+        "value": 40
+      },
+      {
+        "n": "Зов Легиона",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 95,
+        "ether": 140,
+        "d": "Призывает стаю из 4 существ сразу.",
+        "effect": "summon",
+        "value": 40
+      }
+    ]
+  },
+  {
+    "id": 1070,
+    "name": "Палач Света",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "paladin",
+    "lore": "Свет, что выжигает скверну дотла.",
+    "abilities": [
+      {
+        "n": "Святая аура",
+        "t": "Passive",
+        "max": 10,
+        "d": "Реген себе и союзникам рядом за уровень.",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Луч кары",
+        "t": "Active",
+        "max": 6,
+        "cd": 18,
+        "ether": 50,
+        "d": "Луч света прожигает врага.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Длань защиты",
+        "t": "Active",
+        "max": 6,
+        "cd": 30,
+        "ether": 65,
+        "d": "Щит союзнику или себе.",
+        "effect": "team_heal",
+        "value": 40
+      },
+      {
+        "n": "Воздаяние",
+        "t": "Passive",
+        "max": 10,
+        "d": "Отражает урон светом за уровень.",
+        "effect": "berserk",
+        "value": 5
+      },
+      {
+        "n": "Суд Небесный",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 90,
+        "ether": 130,
+        "d": "Столбы света по всем врагам в зоне.",
+        "effect": "aoe_damage",
+        "value": 60
+      }
+    ]
+  },
+  {
+    "id": 1071,
+    "name": "Теневой Клинок",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "assassin",
+    "lore": "Тень с тысячью клинков.",
+    "abilities": [
+      {
+        "n": "Слияние с тенью",
+        "t": "Passive",
+        "max": 10,
+        "d": "Невидимость в тени + скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Теневой шаг",
+        "t": "Active",
+        "max": 6,
+        "cd": 15,
+        "ether": 45,
+        "d": "Телепорт за спину врага.",
+        "effect": "dash_forward",
+        "value": 20
+      },
+      {
+        "n": "Веер клинков",
+        "t": "Active",
+        "max": 6,
+        "cd": 20,
+        "ether": 55,
+        "d": "Метает теневые клинки веером.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Удар из тьмы",
+        "t": "Passive",
+        "max": 10,
+        "d": "+урон в спину за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Танец Теней",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 120,
+        "d": "Серия мгновенных рывков по врагам вокруг.",
+        "effect": "dash_forward",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1072,
+    "name": "Чумной Лорд",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "zone",
+    "lore": "Его дыхание — конец для целых отрядов.",
+    "abilities": [
+      {
+        "n": "Носитель",
+        "t": "Passive",
+        "max": 10,
+        "d": "Иммун к ядам + HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Зараза",
+        "t": "Active",
+        "max": 6,
+        "cd": 20,
+        "ether": 55,
+        "d": "Заражает врага: урон + распространение.",
+        "effect": "berserk",
+        "value": 20
+      },
+      {
+        "n": "Гнилостный туман",
+        "t": "Active",
+        "max": 6,
+        "cd": 30,
+        "ether": 65,
+        "d": "Зона яда и замедления.",
+        "effect": "slow_aura",
+        "value": 30
+      },
+      {
+        "n": "Пандемия",
+        "t": "Passive",
+        "max": 10,
+        "d": "Зараза прыгает дальше за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Чёрная Смерть",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 90,
+        "ether": 130,
+        "d": "Мор по всей зоне: нарастающий урон.",
+        "effect": "aoe_damage",
+        "value": 60
+      }
+    ]
+  },
+  {
+    "id": 1073,
+    "name": "Драконорождённый",
+    "tier": 3,
+    "division": 3,
+    "unlock": 0,
+    "archetype": "bruiser",
+    "lore": "В его венах течёт кровь древних драконов.",
+    "abilities": [
+      {
+        "n": "Драконья чешуя",
+        "t": "Passive",
+        "max": 10,
+        "d": "+14 HP и -урон за уровень.",
+        "effect": "bonus_hp",
+        "value": 14
+      },
+      {
+        "n": "Драконье дыхание",
+        "t": "Active",
+        "max": 6,
+        "cd": 20,
+        "ether": 60,
+        "d": "Конус пламени, поджигает врагов.",
+        "effect": "ignite_aoe",
+        "value": 45
+      },
+      {
+        "n": "Крылья",
+        "t": "Active",
+        "max": 6,
+        "cd": 25,
+        "ether": 55,
+        "d": "Рывок-полёт в воздухе.",
+        "effect": "low_gravity",
+        "value": 0.05
+      },
+      {
+        "n": "Ярость дракона",
+        "t": "Passive",
+        "max": 10,
+        "d": "+урон огнём за уровень.",
+        "effect": "berserk",
+        "value": 5
+      },
+      {
+        "n": "Облик Дракона",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 95,
+        "ether": 140,
+        "d": "Превращение: +HP, дыхание-конус, страх врагов.",
+        "effect": "fear_aoe",
+        "value": 60
+      }
+    ]
+  },
+  {
+    "id": 1074,
+    "name": "Аватар Шторма",
+    "tier": 5,
+    "division": 4,
+    "unlock": 0,
+    "archetype": "god",
+    "lore": "Сам Эфирный Шторм обрёл плоть. Ходячая буря.",
+    "abilities": [
+      {
+        "n": "Воплощённая буря",
+        "t": "Passive",
+        "max": 12,
+        "d": "+22 HP, +3% скорость, реген Эфира за уровень.",
+        "effect": "bonus_hp",
+        "value": 22
+      },
+      {
+        "n": "Грозовой шквал",
+        "t": "Active",
+        "max": 8,
+        "cd": 14,
+        "ether": 50,
+        "d": "Залп из 5 молний по конусу.",
+        "effect": "lightning_strike",
+        "value": 30
+      },
+      {
+        "n": "Глаз бури",
+        "t": "Active",
+        "max": 8,
+        "cd": 28,
+        "ether": 65,
+        "d": "Аура: союзникам бафф, врагам замедление.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Эфирный заряд",
+        "t": "Passive",
+        "max": 12,
+        "d": "Каждый 3-й выстрел бьёт молнией за уровень.",
+        "effect": "lightning_strike",
+        "value": 30
+      },
+      {
+        "n": "Апокалипсис Бури",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 100,
+        "ether": 160,
+        "d": "Континентальный шторм: молнии+вихри по всей карте 5 сек.",
+        "effect": "lightning_strike",
+        "value": 30
+      }
+    ]
+  },
+  {
+    "id": 1075,
+    "name": "Вечный",
+    "tier": 5,
+    "division": 4,
+    "unlock": 0,
+    "archetype": "immortal",
+    "lore": "Он умирал тысячи раз и всегда возвращался.",
+    "abilities": [
+      {
+        "n": "Бессмертная плоть",
+        "t": "Passive",
+        "max": 12,
+        "d": "+20 HP и +реген за уровень.",
+        "effect": "bonus_hp",
+        "value": 20
+      },
+      {
+        "n": "Перерождение",
+        "t": "Active",
+        "max": 8,
+        "cd": 40,
+        "ether": 80,
+        "d": "При смерти — воскрешение на месте (раз/жизнь).",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Эфирная печать",
+        "t": "Active",
+        "max": 8,
+        "cd": 25,
+        "ether": 60,
+        "d": "Якорь: вернуться к нему по желанию.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Цикл жизни",
+        "t": "Passive",
+        "max": 12,
+        "d": "Килл сбрасывает часть КД за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Вечное Возвращение",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 110,
+        "ether": 170,
+        "d": "3 жизни на 12 сек: каждая смерть = мгновенный респаун + бафф.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1076,
+    "name": "Архитектор Реальности",
+    "tier": 5,
+    "division": 4,
+    "unlock": 0,
+    "archetype": "control",
+    "lore": "Он переписывает правила поля боя.",
+    "abilities": [
+      {
+        "n": "Искажение",
+        "t": "Passive",
+        "max": 12,
+        "d": "Шанс игнорировать урон за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Куб",
+        "t": "Active",
+        "max": 8,
+        "cd": 25,
+        "ether": 60,
+        "d": "Барьер-куб запирает зону.",
+        "effect": "lifesteal_aoe",
+        "value": 50
+      },
+      {
+        "n": "Гравитация",
+        "t": "Active",
+        "max": 8,
+        "cd": 30,
+        "ether": 70,
+        "d": "Сжимает врагов в точку, замедляя.",
+        "effect": "low_gravity",
+        "value": 0.05
+      },
+      {
+        "n": "Перестройка",
+        "t": "Passive",
+        "max": 12,
+        "d": "-КД и +Эфир за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Коллапс Реальности",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 105,
+        "ether": 165,
+        "d": "Чёрная дыра: тянет и уничтожает врагов в зоне.",
+        "effect": "aoe_damage",
+        "value": 60
+      }
+    ]
+  },
+  {
+    "id": 1077,
+    "name": "Бог Войны",
+    "tier": 5,
+    "division": 4,
+    "unlock": 0,
+    "archetype": "god",
+    "lore": "Война — его молитва, поле боя — его храм.",
+    "abilities": [
+      {
+        "n": "Воин богов",
+        "t": "Passive",
+        "max": 12,
+        "d": "+урон и +HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Клинки хаоса",
+        "t": "Active",
+        "max": 8,
+        "cd": 16,
+        "ether": 50,
+        "d": "Цепи-клинки бьют по дуге, притягивая.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Ярость Ареса",
+        "t": "Active",
+        "max": 8,
+        "cd": 28,
+        "ether": 65,
+        "d": "Бафф урона и скорости себе и гильдии.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Жажда битвы",
+        "t": "Passive",
+        "max": 12,
+        "d": "Килл = +стак урона (без лимита в раунде) за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Гнев Олимпа",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 100,
+        "ether": 160,
+        "d": "Дождь клинков + неуязвимость к контролю 8 сек.",
+        "effect": "stun_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1078,
+    "name": "Пожиратель Миров",
+    "tier": 5,
+    "division": 4,
+    "unlock": 0,
+    "archetype": "sustain",
+    "lore": "Голод, что поглотил звёзды.",
+    "abilities": [
+      {
+        "n": "Бездонный голод",
+        "t": "Passive",
+        "max": 12,
+        "d": "Вампиризм + HP за уровень.",
+        "effect": "bonus_hp",
+        "value": 10
+      },
+      {
+        "n": "Поглощение",
+        "t": "Active",
+        "max": 8,
+        "cd": 18,
+        "ether": 55,
+        "d": "Тянет HP и Эфир у врага.",
+        "effect": "bonus_hp",
+        "value": 15
+      },
+      {
+        "n": "Гравитационная пасть",
+        "t": "Active",
+        "max": 8,
+        "cd": 30,
+        "ether": 70,
+        "d": "Зона: тянет врагов и грызёт уроном.",
+        "effect": "low_gravity",
+        "value": 0.05
+      },
+      {
+        "n": "Растущая масса",
+        "t": "Passive",
+        "max": 12,
+        "d": "+макс HP за каждый килл (раунд) за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Конец Всего",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 110,
+        "ether": 170,
+        "d": "Поглощает HP всех врагов на карте, превращая в свой щит.",
+        "effect": "lifesteal",
+        "value": 15
+      }
+    ]
+  },
+  {
+    "id": 1079,
+    "name": "Светоносный",
+    "tier": 5,
+    "division": 4,
+    "unlock": 0,
+    "archetype": "paladin",
+    "lore": "Первый свет, рассеявший Тьму до начала времён.",
+    "abilities": [
+      {
+        "n": "Сияние",
+        "t": "Passive",
+        "max": 12,
+        "d": "Мощный реген себе и союзникам за уровень.",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Копьё рассвета",
+        "t": "Active",
+        "max": 8,
+        "cd": 16,
+        "ether": 50,
+        "d": "Пронзающий луч сквозь врагов.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Святилище",
+        "t": "Active",
+        "max": 8,
+        "cd": 30,
+        "ether": 70,
+        "d": "Зона: неуязвимость союзникам короткое время.",
+        "effect": "death_save",
+        "value": 20
+      },
+      {
+        "n": "Возмездие света",
+        "t": "Passive",
+        "max": 12,
+        "d": "Отражает урон + слепит за уровень.",
+        "effect": "berserk",
+        "value": 5
+      },
+      {
+        "n": "Рассвет Творения",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 105,
+        "ether": 165,
+        "d": "Вспышка: воскрешает павших согильдийцев, выжигает врагов.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1080,
+    "name": "Владыка Тьмы",
+    "tier": 5,
+    "division": 4,
+    "unlock": 0,
+    "archetype": "god",
+    "lore": "Тьма между звёзд, что помнит конец вселенной.",
+    "abilities": [
+      {
+        "n": "Покров ночи",
+        "t": "Passive",
+        "max": 12,
+        "d": "Невидимость в движении + скорость за уровень.",
+        "effect": "speed_buff",
+        "value": 0.03
+      },
+      {
+        "n": "Щупальца бездны",
+        "t": "Active",
+        "max": 8,
+        "cd": 18,
+        "ether": 55,
+        "d": "Тёмные щупальца притягивают и ранят.",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Поле ужаса",
+        "t": "Active",
+        "max": 8,
+        "cd": 30,
+        "ether": 70,
+        "d": "Враги в зоне в страхе (теряют контроль).",
+        "effect": "fear_aoe",
+        "value": 60
+      },
+      {
+        "n": "Питание тьмой",
+        "t": "Passive",
+        "max": 12,
+        "d": "+урон по освещённым/видимым врагам за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Вечная Ночь",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 110,
+        "ether": 170,
+        "d": "Тьма накрывает карту: враги ослеплены, ты усилен 6 сек.",
+        "effect": "dash_forward",
+        "value": 250
+      }
+    ]
+  },
+  {
+    "id": 1081,
+    "name": "Первородный",
+    "tier": 5,
+    "division": 4,
+    "unlock": 0,
+    "archetype": "god",
+    "lore": "То, что было до Эфира. Источник всего.",
+    "abilities": [
+      {
+        "n": "Источник",
+        "t": "Passive",
+        "max": 12,
+        "d": "+всё: HP, урон, Эфир, реген за уровень (слабее по чуть-чуть).",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Творение",
+        "t": "Active",
+        "max": 8,
+        "cd": 25,
+        "ether": 60,
+        "d": "Призывает эфирного аватара-помощника.",
+        "effect": "summon",
+        "value": 40
+      },
+      {
+        "n": "Слово силы",
+        "t": "Active",
+        "max": 8,
+        "cd": 20,
+        "ether": 55,
+        "d": "Импульс: урон + отброс по кругу.",
+        "effect": "nova_knockback",
+        "value": 55
+      },
+      {
+        "n": "Воля Первого",
+        "t": "Passive",
+        "max": 12,
+        "d": "Шанс обнулить КД навыка за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Акт Творения",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 120,
+        "ether": 180,
+        "d": "Перезапуск: полный HP/Эфир, сброс всех КД, аватары, бафф 10 сек.",
+        "effect": "bonus_hp",
+        "value": 15
+      }
+    ]
+  },
+  {
+    "id": 1082,
+    "name": "Знаменосец Гильдии",
+    "tier": 4,
+    "division": 3,
+    "unlock": 0,
+    "guild": true,
+    "archetype": "support",
+    "lore": "Несёт Знамя — и братья по гильдии становятся непобедимы.",
+    "abilities": [
+      {
+        "n": "Воля гильдии",
+        "t": "Passive",
+        "max": 8,
+        "d": "+HP всем согильдийцам рядом за уровень.",
+        "effect": "poison_dot",
+        "value": 5
+      },
+      {
+        "n": "Поднять знамя",
+        "t": "Active",
+        "max": 5,
+        "cd": 35,
+        "ether": 60,
+        "d": "Знамя: зона баффа урона для гильдии.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Сплочение",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Хил всем согильдийцам в зоне.",
+        "effect": "heal_self",
+        "value": 50
+      },
+      {
+        "n": "Боевое братство",
+        "t": "Passive",
+        "max": 8,
+        "d": "+урон рядом с согильдийцем за уровень.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Клич Гильдии",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 110,
+        "d": "Все согильдийцы: +урон, +скорость, реген 8 сек.",
+        "effect": "regen",
+        "value": 1.5
+      }
+    ]
+  },
+  {
+    "id": 1083,
+    "name": "Хранитель Казны",
+    "tier": 4,
+    "division": 3,
+    "unlock": 0,
+    "guild": true,
+    "archetype": "economy",
+    "lore": "Богатство гильдии — его оружие.",
+    "abilities": [
+      {
+        "n": "Меценат",
+        "t": "Passive",
+        "max": 8,
+        "d": "+золото в казну гильдии за килл за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Золотой щит",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Тратит золото казны → щит себе.",
+        "effect": "shield",
+        "value": 60
+      },
+      {
+        "n": "Подкуп",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "Замедляет врага золотой пылью.",
+        "effect": "slow_aura",
+        "value": 30
+      },
+      {
+        "n": "Процент",
+        "t": "Passive",
+        "max": 8,
+        "d": "Часть урона конвертится в золото за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Золотой Ливень",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 75,
+        "ether": 100,
+        "d": "Дождь золота: урон врагам + золото гильдии.",
+        "effect": "team_speed",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 1084,
+    "name": "Кузнец Эфира",
+    "tier": 4,
+    "division": 3,
+    "unlock": 0,
+    "guild": true,
+    "archetype": "support",
+    "lore": "Кует эфирное оружие для всей гильдии.",
+    "abilities": [
+      {
+        "n": "Мастер",
+        "t": "Passive",
+        "max": 8,
+        "d": "+урон согильдийцам рядом за уровень.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Заточка",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Бафф урона выбранному союзнику.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Эфирная броня",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Щит согильдийцу.",
+        "effect": "team_heal",
+        "value": 40
+      },
+      {
+        "n": "Горн",
+        "t": "Passive",
+        "max": 8,
+        "d": "Реген Эфира согильдийцам за уровень.",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Оружие Богов",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 110,
+        "d": "Вся гильдия: +50% урон 7 сек.",
+        "effect": "team_speed",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 1085,
+    "name": "Маршал Гильдии",
+    "tier": 4,
+    "division": 3,
+    "unlock": 0,
+    "guild": true,
+    "archetype": "commander",
+    "lore": "Полководец, чьи приказы меняют ход битвы.",
+    "abilities": [
+      {
+        "n": "Командир",
+        "t": "Passive",
+        "max": 8,
+        "d": "+HP и +урон согильдийцам в радиусе за уровень.",
+        "effect": "team_speed",
+        "value": 0
+      },
+      {
+        "n": "Приказ: Атака",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Гильдия: +урон рывком.",
+        "effect": "dash_forward",
+        "value": 250
+      },
+      {
+        "n": "Приказ: Защита",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Гильдия: -получаемый урон.",
+        "effect": "team_heal",
+        "value": 40
+      },
+      {
+        "n": "Тактика",
+        "t": "Passive",
+        "max": 8,
+        "d": "-КД согильдийцам за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Тотальная Война",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 85,
+        "ether": 120,
+        "d": "Гильдия: все баффы сразу + видимость врагов 8 сек.",
+        "effect": "team_speed",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 1086,
+    "name": "Дух Предков",
+    "tier": 4,
+    "division": 3,
+    "unlock": 0,
+    "guild": true,
+    "archetype": "summoner",
+    "lore": "Призывает павших героев гильдии на подмогу.",
+    "abilities": [
+      {
+        "n": "Память рода",
+        "t": "Passive",
+        "max": 8,
+        "d": "+HP за каждого согильдийца онлайн за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Призрак-воин",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 60,
+        "d": "Призывает духа-бойца.",
+        "effect": "summon",
+        "value": 40
+      },
+      {
+        "n": "Благословение предков",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Реген + щит согильдийцу.",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Наследие",
+        "t": "Passive",
+        "max": 8,
+        "d": "Призраки сильнее за уровень.",
+        "effect": "summon",
+        "value": 40
+      },
+      {
+        "n": "Зов Павших",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 85,
+        "ether": 120,
+        "d": "Призыв 3 духов-героев на стороне гильдии.",
+        "effect": "summon",
+        "value": 40
+      }
+    ]
+  },
+  {
+    "id": 1087,
+    "name": "Эфирный Оракул",
+    "tier": 4,
+    "division": 3,
+    "unlock": 0,
+    "guild": true,
+    "archetype": "support",
+    "lore": "Видит будущее и ведёт гильдию к победе.",
+    "abilities": [
+      {
+        "n": "Прозрение",
+        "t": "Passive",
+        "max": 8,
+        "d": "Подсветка врагов согильдийцам за уровень.",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Щит судьбы",
+        "t": "Active",
+        "max": 5,
+        "cd": 30,
+        "ether": 55,
+        "d": "Согильдиец получает шанс уклонения.",
+        "effect": "team_heal",
+        "value": 40
+      },
+      {
+        "n": "Видение",
+        "t": "Active",
+        "max": 5,
+        "cd": 25,
+        "ether": 50,
+        "d": "Раскрывает позиции врагов в зоне.",
+        "effect": "dash_forward",
+        "value": 250
+      },
+      {
+        "n": "Благая весть",
+        "t": "Passive",
+        "max": 8,
+        "d": "Реген Эфира гильдии за уровень.",
+        "effect": "regen",
+        "value": 1.5
+      },
+      {
+        "n": "Предначертание",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 80,
+        "ether": 110,
+        "d": "Гильдия видит всех врагов + уклонение 8 сек.",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1088,
+    "name": "Скибиди-Оператор",
+    "tier": 1,
+    "division": 1,
+    "unlock": 0,
+    "archetype": "baseline",
+    "lore": "Камера-голова, что видит всё. Транслирует поле боя в Эфир.",
+    "abilities": [
+      {
+        "n": "Всевидящий объектив",
+        "t": "Passive",
+        "max": 8,
+        "d": "подсветка врагов в радиусе при ранении",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Прямой эфир",
+        "t": "Active",
+        "max": 8,
+        "d": "+скорость когда есть фраги на отделение",
+        "effect": "speed_buff",
+        "value": 0.3
+      },
+      {
+        "n": "Зум",
+        "t": "Passive",
+        "max": 8,
+        "d": "бесшумная ходьба и точность в прицеле",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "СТРИМ-РЕЙД",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "на 6с видит всех врагов сквозь стены всей команде",
+        "effect": "team_speed",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1089,
+    "name": "Герта, Гений Кукол",
+    "tier": 3,
+    "division": 3,
+    "unlock": 3000,
+    "archetype": "caster",
+    "lore": "Гениальный учёный Эфира, дублирует себя марионетками.",
+    "abilities": [
+      {
+        "n": "Ледяной интеллект",
+        "t": "Passive",
+        "max": 8,
+        "d": "заморозка при крите",
+        "effect": "slow_aura",
+        "value": 0.15
+      },
+      {
+        "n": "Кукловод",
+        "t": "Active",
+        "max": 8,
+        "d": "призыв ледяной куклы-приманки",
+        "effect": "slow_aura",
+        "value": 0.3
+      },
+      {
+        "n": "Анализ",
+        "t": "Passive",
+        "max": 8,
+        "d": "+урон по уже ослабленным целям",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "АБСОЛЮТНЫЙ НОЛЬ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "ледяная нова, заморозка всех врагов вокруг на 2.5с",
+        "effect": "freeze_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1090,
+    "name": "Лего-Рыцарь Тьмы",
+    "tier": 2,
+    "division": 2,
+    "unlock": 3000,
+    "archetype": "bruiser",
+    "lore": "Кубический мститель ночи.",
+    "abilities": [
+      {
+        "n": "Крюк-кошка",
+        "t": "Passive",
+        "max": 8,
+        "d": "рывок к врагу",
+        "effect": "dash_forward",
+        "value": 5
+      },
+      {
+        "n": "Бэтаранг",
+        "t": "Active",
+        "max": 8,
+        "d": "замедляющий бросок при ранении",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Из тени",
+        "t": "Passive",
+        "max": 8,
+        "d": "невидимость 1с после убийства",
+        "effect": "invisibility",
+        "value": 5
+      },
+      {
+        "n": "ЛЕТУЧАЯ ТЬМА",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "ослепление и страх врагов в конусе",
+        "effect": "fear_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1091,
+    "name": "Лего-Вдова",
+    "tier": 2,
+    "division": 2,
+    "unlock": 4000,
+    "archetype": "bruiser",
+    "lore": "Шпионка-кубик, мастер ближнего боя.",
+    "abilities": [
+      {
+        "n": "Укус Вдовы",
+        "t": "Passive",
+        "max": 8,
+        "d": "шок при крите",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Акробатика",
+        "t": "Active",
+        "max": 8,
+        "d": "+уворот при низком HP",
+        "effect": "speed_buff",
+        "value": 0.3
+      },
+      {
+        "n": "Двойные пистолеты",
+        "t": "Passive",
+        "max": 8,
+        "d": "шанс двойного урона",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "ВДОВЬЯ ХВАТКА",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "телепорт за спину врага + гарант. крит",
+        "effect": "root_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1092,
+    "name": "Лего-Капитан",
+    "tier": 2,
+    "division": 2,
+    "unlock": 5000,
+    "archetype": "bruiser",
+    "lore": "Несокрушимый щитоносец.",
+    "abilities": [
+      {
+        "n": "Щит-отражатель",
+        "t": "Passive",
+        "max": 8,
+        "d": "блок части урона спереди",
+        "effect": "berserk",
+        "value": 5
+      },
+      {
+        "n": "Рикошет",
+        "t": "Active",
+        "max": 8,
+        "d": "бросок щита между врагами",
+        "effect": "shield",
+        "value": 20
+      },
+      {
+        "n": "Стяг",
+        "t": "Passive",
+        "max": 8,
+        "d": "+HP союзникам рядом",
+        "effect": "poison_dot",
+        "value": 5
+      },
+      {
+        "n": "ЗОВ ГЕРОЯ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "неуязвимый щит на команду 3с",
+        "effect": "death_save",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1093,
+    "name": "Лего-Протокол CE-P0",
+    "tier": 3,
+    "division": 3,
+    "unlock": 9000,
+    "archetype": "caster",
+    "lore": "Кубический дроид-страж с протоколом аннигиляции.",
+    "abilities": [
+      {
+        "n": "Лазерный прицел",
+        "t": "Passive",
+        "max": 8,
+        "d": "+урон на дистанции",
+        "effect": "stun_aoe",
+        "value": 5
+      },
+      {
+        "n": "ЭМИ",
+        "t": "Active",
+        "max": 8,
+        "d": "глушит ульты врагов при ранении",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Самопочинка",
+        "t": "Passive",
+        "max": 8,
+        "d": "реген брони вне боя",
+        "effect": "regen",
+        "value": 3
+      },
+      {
+        "n": "ПРОТОКОЛ ЗАЧИСТКИ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "залп самонаводящихся ракет",
+        "effect": "aoe_explosion",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1094,
+    "name": "Лего-Клон-Солдат",
+    "tier": 1,
+    "division": 1,
+    "unlock": 1400,
+    "archetype": "baseline",
+    "lore": "Солдат армии клонов.",
+    "abilities": [
+      {
+        "n": "Бластер",
+        "t": "Passive",
+        "max": 8,
+        "d": "+точность очередями",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Приказ 66",
+        "t": "Active",
+        "max": 8,
+        "d": "+урон когда рядом 2+ союзника",
+        "effect": "poison_dot",
+        "value": 20
+      },
+      {
+        "n": "Броня клона",
+        "t": "Passive",
+        "max": 8,
+        "d": "-урон от взрывов",
+        "effect": "shield",
+        "value": 5
+      },
+      {
+        "n": "ПОДКРЕПЛЕНИЕ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "вызов залпа орбитального удара по точке",
+        "effect": "team_speed",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1095,
+    "name": "Лего-Лорд Ситхов",
+    "tier": 3,
+    "division": 3,
+    "unlock": 12000,
+    "archetype": "caster",
+    "lore": "Тёмный владыка Силы в кубической форме.",
+    "abilities": [
+      {
+        "n": "Удушение Силой",
+        "t": "Passive",
+        "max": 8,
+        "d": "подвешивание+замедление врага",
+        "effect": "stun_aoe",
+        "value": 5
+      },
+      {
+        "n": "Тёмная сторона",
+        "t": "Active",
+        "max": 8,
+        "d": "+урон при низком HP",
+        "effect": "bonus_hp",
+        "value": 15
+      },
+      {
+        "n": "Отражение",
+        "t": "Passive",
+        "max": 8,
+        "d": "меч отбивает часть урона",
+        "effect": "berserk",
+        "value": 5
+      },
+      {
+        "n": "ГНЕВ СИТХА",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "волна Силы, отброс и стан всех врагов вокруг",
+        "effect": "stun_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1096,
+    "name": "Лего-Болтун",
+    "tier": 2,
+    "division": 2,
+    "unlock": 9000,
+    "archetype": "bruiser",
+    "lore": "Бессмертный наёмник-кубик.",
+    "abilities": [
+      {
+        "n": "Регенерация",
+        "t": "Passive",
+        "max": 8,
+        "d": "восстановление HP вне боя ускорено",
+        "effect": "stun_aoe",
+        "value": 5
+      },
+      {
+        "n": "Безумие",
+        "t": "Active",
+        "max": 8,
+        "d": "+урон чем меньше HP",
+        "effect": "berserk",
+        "value": 20
+      },
+      {
+        "n": "Чимичанга",
+        "t": "Passive",
+        "max": 8,
+        "d": "лечение при фраге",
+        "effect": "regen",
+        "value": 3
+      },
+      {
+        "n": "НЕ УБИВАЕМ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "4с нельзя опустить ниже 1 HP",
+        "effect": "death_save",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1097,
+    "name": "Лего-Соколиный Глаз",
+    "tier": 1,
+    "division": 1,
+    "unlock": 2000,
+    "archetype": "baseline",
+    "lore": "Лучник, не знающий промаха.",
+    "abilities": [
+      {
+        "n": "Меткий выстрел",
+        "t": "Passive",
+        "max": 8,
+        "d": "+урон в голову",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Разрывная стрела",
+        "t": "Active",
+        "max": 8,
+        "d": "AOE при крите",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Острый глаз",
+        "t": "Passive",
+        "max": 8,
+        "d": "подсветка дальних врагов",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "КОЛЧАН ХАОСА",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "следующие 3 выстрела — гарант. криты",
+        "effect": "freeze_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1098,
+    "name": "Лего-Железный",
+    "tier": 3,
+    "division": 3,
+    "unlock": 16500,
+    "archetype": "caster",
+    "lore": "Гений в кубической броне.",
+    "abilities": [
+      {
+        "n": "Репульсор",
+        "t": "Passive",
+        "max": 8,
+        "d": "пробивающий выстрел",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Полёт",
+        "t": "Active",
+        "max": 8,
+        "d": "краткий рывок-джетпак",
+        "effect": "speed_buff",
+        "value": 0.3
+      },
+      {
+        "n": "Реактор",
+        "t": "Passive",
+        "max": 8,
+        "d": "щит-энергия восстанавливается",
+        "effect": "stun_aoe",
+        "value": 5
+      },
+      {
+        "n": "ЕДИНОРОГ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "луч из реактора, мощный прямой урон по линии",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1099,
+    "name": "Лего-Костяк",
+    "tier": 1,
+    "division": 1,
+    "unlock": 2400,
+    "archetype": "baseline",
+    "lore": "Весёлый кубический скелет.",
+    "abilities": [
+      {
+        "n": "Костяная броня",
+        "t": "Passive",
+        "max": 8,
+        "d": "небольшой шанс блока",
+        "effect": "shield",
+        "value": 5
+      },
+      {
+        "n": "Перетряска",
+        "t": "Active",
+        "max": 8,
+        "d": "реген HP при ходьбе",
+        "effect": "regen",
+        "value": 60
+      },
+      {
+        "n": "Гремучий",
+        "t": "Passive",
+        "max": 8,
+        "d": "пугает врага при ранении",
+        "effect": "fear_aoe",
+        "value": 5
+      },
+      {
+        "n": "АРМИЯ КОСТЕЙ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "призыв 2 костяных миньонов-приманок",
+        "effect": "aoe_damage",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1100,
+    "name": "Лего-Громовержец",
+    "tier": 3,
+    "division": 3,
+    "unlock": 19500,
+    "archetype": "caster",
+    "lore": "Бог грома в кубической форме.",
+    "abilities": [
+      {
+        "n": "Мьёльнир",
+        "t": "Passive",
+        "max": 8,
+        "d": "бросок молота с возвратом",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Заряд",
+        "t": "Active",
+        "max": 8,
+        "d": "+урон после промаха врага",
+        "effect": "poison_dot",
+        "value": 20
+      },
+      {
+        "n": "Асгардец",
+        "t": "Passive",
+        "max": 8,
+        "d": "-урон от стихий",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "БУРЯ БИФРОСТА",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "цепная молния по всем врагам в зоне",
+        "effect": "chain_lightning",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1101,
+    "name": "Маалик, Адский Владыка",
+    "tier": 4,
+    "division": 4,
+    "unlock": 28000,
+    "archetype": "god",
+    "lore": "Инфернальный князь из бездны Эфира.",
+    "abilities": [
+      {
+        "n": "Адское пламя",
+        "t": "Passive",
+        "max": 8,
+        "d": "поджог врагов вокруг",
+        "effect": "ignite_aoe",
+        "value": 5
+      },
+      {
+        "n": "Печать боли",
+        "t": "Active",
+        "max": 8,
+        "d": "урон возвращается врагу",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Власть бездны",
+        "t": "Passive",
+        "max": 8,
+        "d": "+урон по горящим",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "ВРАТА АДА",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "огненная зона, непрерывный урон всем врагам в ней 5с",
+        "effect": "ignite_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1102,
+    "name": "НекоАрк, Хаос-Кот",
+    "tier": 2,
+    "division": 2,
+    "unlock": 15000,
+    "archetype": "bruiser",
+    "lore": "Безумный кот-вампир, ломающий реальность.",
+    "abilities": [
+      {
+        "n": "Бурлеск",
+        "t": "Passive",
+        "max": 8,
+        "d": "случайный бафф при спавне",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Мяу-рывок",
+        "t": "Active",
+        "max": 8,
+        "d": "непредсказуемый телепорт",
+        "effect": "dash_forward",
+        "value": 20
+      },
+      {
+        "n": "Девятая жизнь",
+        "t": "Passive",
+        "max": 8,
+        "d": "1 раз за раунд воскрешение с 30 HP",
+        "effect": "death_save",
+        "value": 5
+      },
+      {
+        "n": "ХАОС-МЯУ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "случайный мощный эффект (стан/лечение/урон-нова)",
+        "effect": "stun_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1103,
+    "name": "Костяной Жнец",
+    "tier": 2,
+    "division": 2,
+    "unlock": 16000,
+    "archetype": "bruiser",
+    "lore": "Восставший воин-скелет.",
+    "abilities": [
+      {
+        "n": "Жатва",
+        "t": "Passive",
+        "max": 8,
+        "d": "лечение при фраге",
+        "effect": "lifesteal",
+        "value": 5
+      },
+      {
+        "n": "Костяной доспех",
+        "t": "Active",
+        "max": 8,
+        "d": "блок первого удара",
+        "effect": "shield",
+        "value": 20
+      },
+      {
+        "n": "Проклятие",
+        "t": "Passive",
+        "max": 8,
+        "d": "замедление при ранении",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "ПЛЯСКА СМЕРТИ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "страх и DoT всем врагам вокруг",
+        "effect": "fear_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1104,
+    "name": "Мистер Морожко",
+    "tier": 1,
+    "division": 1,
+    "unlock": 3400,
+    "archetype": "baseline",
+    "lore": "Зловещий мороженщик из кошмаров.",
+    "abilities": [
+      {
+        "n": "Заморозка",
+        "t": "Passive",
+        "max": 8,
+        "d": "замедление при ранении",
+        "effect": "slow_aura",
+        "value": 0.15
+      },
+      {
+        "n": "Сладкий сон",
+        "t": "Active",
+        "max": 8,
+        "d": "усыпляет врага при крите (микростан)",
+        "effect": "stun_aoe",
+        "value": 20
+      },
+      {
+        "n": "Холодок",
+        "t": "Passive",
+        "max": 8,
+        "d": "-урон по льду",
+        "effect": "slow_aura",
+        "value": 0.15
+      },
+      {
+        "n": "ЛЕДЯНОЙ ФУРГОН",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "AOE заморозка + замедление всех врагов вокруг",
+        "effect": "freeze_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1105,
+    "name": "Миямото, Клинок Чести",
+    "tier": 3,
+    "division": 3,
+    "unlock": 27000,
+    "archetype": "caster",
+    "lore": "Странствующий самурай Эфира.",
+    "abilities": [
+      {
+        "n": "Иайдо",
+        "t": "Passive",
+        "max": 8,
+        "d": "первый удар из ножа усилен",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Бусидо",
+        "t": "Active",
+        "max": 8,
+        "d": "+урон 1на1 без союзников рядом",
+        "effect": "poison_dot",
+        "value": 20
+      },
+      {
+        "n": "Парирование",
+        "t": "Passive",
+        "max": 8,
+        "d": "блок ближнего урона",
+        "effect": "shield",
+        "value": 5
+      },
+      {
+        "n": "СТО РАЗРЕЗОВ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "серия мгновенных ударов по врагам в конусе",
+        "effect": "team_speed",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1106,
+    "name": "Акулий Хищник",
+    "tier": 2,
+    "division": 2,
+    "unlock": 19000,
+    "archetype": "bruiser",
+    "lore": "Двуногая акула, чующая кровь.",
+    "abilities": [
+      {
+        "n": "Чую кровь",
+        "t": "Passive",
+        "max": 8,
+        "d": "+скорость к раненым врагам",
+        "effect": "speed_buff",
+        "value": 0.15
+      },
+      {
+        "n": "Укус",
+        "t": "Active",
+        "max": 8,
+        "d": "усиленный урон в ближнем бою",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Шкура",
+        "t": "Passive",
+        "max": 8,
+        "d": "-урон сзади",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "КРОВАВЫЙ ШТОРМ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "рывок-френзи, +урон и вампиризм 5с",
+        "effect": "lifesteal",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1107,
+    "name": "Гарант Стабильности",
+    "tier": 4,
+    "division": 4,
+    "unlock": 40000,
+    "archetype": "god",
+    "lore": "Воплощение абсолютной власти Эфира.",
+    "abilities": [
+      {
+        "n": "Стабильность",
+        "t": "Passive",
+        "max": 8,
+        "d": "иммунитет к замедлениям",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Вертикаль",
+        "t": "Active",
+        "max": 8,
+        "d": "+урон по нижестоящим (низкий HP)",
+        "effect": "bonus_hp",
+        "value": 15
+      },
+      {
+        "n": "Указ",
+        "t": "Passive",
+        "max": 8,
+        "d": "бафф скорости команде",
+        "effect": "speed_buff",
+        "value": 0.15
+      },
+      {
+        "n": "ПРЯМАЯ ЛИНИЯ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "оглушение всех врагов на карте на 1.5с",
+        "effect": "stun_aoe",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1108,
+    "name": "Тёмный Санта",
+    "tier": 2,
+    "division": 2,
+    "unlock": 21000,
+    "archetype": "bruiser",
+    "lore": "Санта, раздающий не только подарки.",
+    "abilities": [
+      {
+        "n": "Мешок",
+        "t": "Passive",
+        "max": 8,
+        "d": "случайный предмет при спавне",
+        "effect": "bonus_hp",
+        "value": 6
+      },
+      {
+        "n": "Список",
+        "t": "Active",
+        "max": 8,
+        "d": "+урон по 'непослушным' (фраггерам)",
+        "effect": "aoe_damage",
+        "value": 20
+      },
+      {
+        "n": "Олени",
+        "t": "Passive",
+        "max": 8,
+        "d": "бафф скорости",
+        "effect": "speed_buff",
+        "value": 0.15
+      },
+      {
+        "n": "ПОДАРКИ ВСЕМ",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "лечение и щит всей команде + урон врагам рядом",
+        "effect": "poison_dot",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "id": 1109,
+    "name": "Тролль-Лик",
+    "tier": 1,
+    "division": 1,
+    "unlock": 4400,
+    "archetype": "baseline",
+    "lore": "Само воплощение троллинга.",
+    "abilities": [
+      {
+        "n": "Problem?",
+        "t": "Passive",
+        "max": 8,
+        "d": "отражение части урона",
+        "effect": "berserk",
+        "value": 5
+      },
+      {
+        "n": "Trololo",
+        "t": "Active",
+        "max": 8,
+        "d": "дезориентация врага при ранении",
+        "effect": "fear_aoe",
+        "value": 20
+      },
+      {
+        "n": "Rage",
+        "t": "Passive",
+        "max": 8,
+        "d": "+урон после смерти союзника",
+        "effect": "team_speed",
+        "value": 5
+      },
+      {
+        "n": "U MAD?",
+        "t": "Ultimate",
+        "max": 1,
+        "cd": 50,
+        "d": "телепорт-обмен местами с врагом + его дезориентация",
+        "effect": "fear_aoe",
+        "value": 45
+      }
+    ]
+  }
+]

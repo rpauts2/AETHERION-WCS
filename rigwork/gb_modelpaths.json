@@ -1,0 +1,94 @@
+[
+  {
+    "base": "cameraman_ported_cs2",
+    "path": "characters/models/cameraman_ported_lev/cameraman_ported_cs2.vmdl"
+  },
+  {
+    "base": "hsr_the_herta",
+    "path": "characters/models/toppi/hsr/hsr_the_herta.vmdl"
+  },
+  {
+    "base": "lego_batman",
+    "path": "characters/models/nozb1/lego_pack_player_model/lego_batman_player_model/lego_batman.vmdl"
+  },
+  {
+    "base": "lego_black_widow",
+    "path": "characters/models/nozb1/lego_pack_player_model/lego_black_widow_player_model/lego_black_widow.vmdl"
+  },
+  {
+    "base": "lego_captain_america_pm",
+    "path": "characters/models/nozb1/lego_pack_player_model/lego_captain_america_player_model/lego_captain_america_pm.vmdl"
+  },
+  {
+    "base": "lego_ce-p0",
+    "path": "characters/models/nozb1/lego_pack_player_model/lego_ce_p0_player_model/lego_ce-p0.vmdl"
+  },
+  {
+    "base": "lego_star_wars_clonetrooper",
+    "path": "characters/models/nozb1/lego_pack_player_model/star_wars_clonetrooper_pm/lego_star_wars_clonetrooper.vmdl"
+  },
+  {
+    "base": "lego_darth_vader",
+    "path": "characters/models/nozb1/lego_pack_player_model/lego_darth_vader_player_model/lego_darth_vader.vmdl"
+  },
+  {
+    "base": "lego_deadpool",
+    "path": "characters/models/nozb1/lego_pack_player_model/lego_deadpool_player_model/lego_deadpool.vmdl"
+  },
+  {
+    "base": "lego_hawkeye",
+    "path": "characters/models/nozb1/lego_pack_player_model/lego_hawkeye_player_model/lego_hawkeye.vmdl"
+  },
+  {
+    "base": "lego_iron_man_pm",
+    "path": "characters/models/nozb1/lego_pack_player_model/lego_iron_man_player_model/lego_iron_man_pm.vmdl"
+  },
+  {
+    "base": "lego_skeleton",
+    "path": "characters/models/nozb1/lego_pack_player_model/lego_skeleton_player_model/lego_skeleton.vmdl"
+  },
+  {
+    "base": "lego_thor",
+    "path": "characters/models/nozb1/lego_pack_player_model/lego_thor_player_model/lego_thor.vmdl"
+  },
+  {
+    "base": "maalik_infernal_player_model",
+    "path": "characters/models/nozb1/maalik_infernal_player_model/maalik_infernal_player_model.vmdl"
+  },
+  {
+    "base": "necoarc_player_model",
+    "path": "characters/models/nozb1/necoarc_player_model/necoarc_player_model.vmdl"
+  },
+  {
+    "base": "skeleton_player_model",
+    "path": "characters/models/nozb1/skeleton_player_model/skeleton_player_model.vmdl"
+  },
+  {
+    "base": "icecream_player_model",
+    "path": "characters/models/nozb1/icecream_player_model/icecream_player_model.vmdl"
+  },
+  {
+    "base": "miamoto_fr_player_model",
+    "path": "characters/models/nozb1/miamoto_fr_player_model/miamoto_fr_player_model.vmdl"
+  },
+  {
+    "base": "shark_player_model",
+    "path": "characters/models/nozb1/shark_player_model/shark_player_model.vmdl"
+  },
+  {
+    "base": "putin_player_model",
+    "path": "characters/models/nozb1/putin_player_model/putin_player_model.vmdl"
+  },
+  {
+    "base": "santa_player_model",
+    "path": "characters/models/nozb1/santa_player_model/santa_player_model.vmdl"
+  },
+  {
+    "base": "santa_player_model_ct",
+    "path": "characters/models/nozb1/santa_player_model/santa_player_model_ct.vmdl"
+  },
+  {
+    "base": "trollface_player_model",
+    "path": "characters/models/nozb1/trollface_player_model/trollface_player_model.vmdl"
+  }
+]
