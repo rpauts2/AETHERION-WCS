@@ -107,7 +107,8 @@ public static class EffectLibrary
             ctx.Engine.SpawnParticle("particles/aether_dash.vpcf", tx, ty, pos.z);
         },
 
-        ["crit_chance"] = v => ctx => { /* hook into damage multiplier */ },
+        ["crit_chance"] = v => ctx =>
+            ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, Math.Clamp(v, 0f, 1f), 8f),
 
         ["evasion_chance"] = v => ctx =>
             ctx.Combat.Apply(EffectTag.Evasion, ctx.Slot, v, 5f),
@@ -118,7 +119,14 @@ public static class EffectLibrary
                 ctx.Engine.SetHealth(ctx.VictimSlot.Value, 0);
         },
 
-        ["armor_break"] = v => ctx => { /* armor reduction hook */ },
+        ["armor_break"] = v => ctx =>
+        {
+            if(ctx.VictimSlot.HasValue && v > 0)
+            {
+                var p = ctx.Engine.GetArmor(ctx.VictimSlot.Value);
+                ctx.Engine.SetArmor(ctx.VictimSlot.Value, Math.Max(0, p - (int)v));
+            }
+        },
 
         ["mana_shield"] = v => ctx =>
             ctx.Combat.Apply(EffectTag.ManaShield, ctx.Slot, v, 8f),
@@ -311,8 +319,15 @@ public static class EffectLibrary
 
         ["flash_ult"] = v => ctx =>
         {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
             int team = ctx.Player.TeamNum;
-            foreach(var s in ctx.Combat.EnemiesInRadius(0,0,0, 9999f, team)) { /* flash hook removed */ }
+            int count = 0;
+            foreach(var s in ctx.Combat.EnemiesInRadius(p.x, p.y, p.z, 600f, team))
+            {
+                ctx.Engine.Blind(s, 3.0f, 2.5f);
+                count++;
+            }
+            if(count > 0) ctx.Engine.PrintToCenter(ctx.Slot, $"⚡ Ослеплено {count} врагов!");
         },
 
         ["damage_reduction"] = v => ctx =>
@@ -545,7 +560,12 @@ public static class EffectLibrary
 
         ["bullet_wall"] = v => ctx => { /* wall hook */ },
 
-        ["silent_steps"] = v => ctx => { /* volume hook */ },
+        ["silent_steps"] = v => ctx =>
+        {
+            if(ctx.VictimSlot.HasValue)
+                ctx.Engine.Blind(ctx.VictimSlot.Value, 0.1f, 0.1f);
+            ctx.Engine.SetSpeed(ctx.Slot, 0.75f);
+        },
 
         ["clone_ult"] = v => ctx => { /* clone hook */ },
 
@@ -588,7 +608,19 @@ public static class EffectLibrary
                 ctx.Combat.Apply(EffectTag.Stun, ctx.VictimSlot.Value, 1, 3.5f);
         },
 
-        ["execute_bonus"] = v => ctx => { /* bonus vs low hp */ },
+        ["execute_bonus"] = v => ctx =>
+        {
+            if(ctx.VictimSlot.HasValue && v > 0)
+            {
+                var hp = ctx.Engine.GetHealth(ctx.VictimSlot.Value);
+                var maxHp = 100;
+                if(hp < maxHp * v)
+                {
+                    ctx.Engine.SetHealth(ctx.VictimSlot.Value, 0);
+                    ctx.Engine.PrintToCenter(ctx.Slot, "☠️ Казнь!");
+                }
+            }
+        },
 
         ["double_slash"] = v => ctx =>
         {
@@ -689,10 +721,20 @@ public static class EffectLibrary
         {
             var p = ctx.Engine.GetPosition(ctx.Slot);
             ctx.Engine.DamageRadius(ctx.Slot, 220f, (int)v);
-            foreach(var s in ctx.Combat.EnemiesInRadius(p.x,p.y,p.z,220f, ctx.Player.TeamNum)) { }
+            int team = ctx.Player.TeamNum;
+            foreach(var s in ctx.Combat.EnemiesInRadius(p.x, p.y, p.z, 220f, team))
+            {
+                ctx.Engine.Blind(s, 2.0f, 1.5f);
+                ctx.Engine.SetSpeed(s, 0.6f);
+            }
+            ctx.Engine.PrintToCenter(ctx.Slot, "🔊 Оглушение!");
         },
 
-        ["stack_kill"] = v => ctx => { /* kill stack hook */ },
+        ["stack_kill"] = v => ctx =>
+        {
+            ctx.Combat.Apply(EffectTag.Lifesteal, ctx.Slot, 0.15f, 10f);
+            ctx.Engine.PrintToCenter(ctx.Slot, "💀 Стек убийства! +15% вампиризм");
+        },
 
         ["freeze_chance"] = v => ctx =>
         {

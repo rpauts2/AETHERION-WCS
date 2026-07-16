@@ -259,7 +259,7 @@ public class AetherionPlugin : BasePlugin
                 d.Division, rp.WispBond, VipMult(d), def.Tier);
             _nameplates.Attach(p, html);
         }
-        catch { }
+        catch (Exception ex) { Console.WriteLine($"[AETHERION] nameplate attach err: {ex.Message}"); }
     }
 
     private void ApplyPassivesOnSpawn(CCSPlayerController p, PlayerData d, RaceProgress rp)
@@ -267,7 +267,7 @@ public class AetherionPlugin : BasePlugin
         var def = _races.Get(d.CurrentRaceId);
         if (def == null) return;
         var ctx = BuildCtx(p, d, rp, p.Slot);
-        try { _runtime.ApplyPassives(ctx, def, rp); } catch { }
+        try { _runtime.ApplyPassives(ctx, def, rp); } catch (Exception ex) { Console.WriteLine($"[AETHERION] passive apply err: {ex.Message}"); }
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -306,7 +306,7 @@ public class AetherionPlugin : BasePlugin
             RefreshNameplate(p, d, rp, def);
 
             // Дух-компаньон V2 — спавн тела над головой
-            try { _wispCompanion.NotifyKill(p, false); } catch { } // форсирует спавн/апдейт тира
+            try { _wispCompanion.NotifyKill(p, false); } catch (Exception ex) { Console.WriteLine($"[AETHERION] wisp notify err: {ex.Message}"); }
 
             // Welcome-биндинг (один раз)
             if (!_boundOnce.Contains(p.SteamID))
@@ -424,7 +424,7 @@ public class AetherionPlugin : BasePlugin
 
             // Прока пассивок «на удар» — хуки combat (лестник/reflect/etc) обрабатываются в CombatEffects
         }
-        catch { }
+        catch (Exception ex) { Console.WriteLine($"[AETHERION] OnHurt err: {ex.Message}"); }
         return HookResult.Continue;
     }
 
@@ -439,7 +439,7 @@ public class AetherionPlugin : BasePlugin
             LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), _races.Get(d.CurrentRaceId)?.TierEnum ?? RaceTier.T1_Spark, 60);
             p.PrintToChat(" \x04[+з за установку бомбы]\x01");
         }
-        catch { }
+        catch (Exception ex) { Console.WriteLine($"[AETHERION] bomb planted err: {ex.Message}"); }
         return HookResult.Continue;
     }
 
@@ -453,7 +453,7 @@ public class AetherionPlugin : BasePlugin
             EconomySystem.AddGold(d, EconomySystem.GoldBombObjective);
             LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), _races.Get(d.CurrentRaceId)?.TierEnum ?? RaceTier.T1_Spark, 60);
         }
-        catch { }
+        catch (Exception ex) { Console.WriteLine($"[AETHERION] bomb defused err: {ex.Message}"); }
         return HookResult.Continue;
     }
 
@@ -471,7 +471,7 @@ public class AetherionPlugin : BasePlugin
         GuildTournamentSystem.OnRoundEnd();
 
         // Периодическое сохранение гильдий
-        try { SaveGuilds(); } catch { }
+        try { SaveGuilds(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] guild save err: {ex.Message}"); }
 
         // Награда всем онлайн-игрокам
         foreach (var kv in _online)
@@ -501,9 +501,9 @@ public class AetherionPlugin : BasePlugin
 
     private void OnClientDisconnect(int slot)
     {
-        try { _nameplates.Remove(slot); } catch { }
-        try { _wispCompanion.CleanupSlot(slot); } catch { }
-        try { _customWeapons.CleanupSlot(slot); } catch { }
+        try { _nameplates.Remove(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] nameplate remove err: {ex.Message}"); }
+        try { _wispCompanion.CleanupSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] wisp cleanup err: {ex.Message}"); }
+        try { _customWeapons.CleanupSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] weapon cleanup err: {ex.Message}"); }
         // Clean up SteamID-keyed caches
         var player = Utilities.GetPlayerFromSlot(slot);
         if (player != null && player.IsValid)
@@ -524,7 +524,7 @@ public class AetherionPlugin : BasePlugin
     // ═══════════════════════════════════════════════════════════════════════
     private void RiftTick()
     {
-        try { _combat.TickAll(); } catch { }
+        try { _combat.TickAll(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] combat tick err: {ex.Message}"); }
         // AetherRiftEvent.Tick нужен список игроков + IEngineApi
         try
         {
@@ -534,7 +534,7 @@ public class AetherionPlugin : BasePlugin
                 .ToList();
             _rift.Tick(players, _engine, 0.5f);
         }
-        catch { }
+        catch (Exception ex) { Console.WriteLine($"[AETHERION] rift tick err: {ex.Message}"); }
     }
 
     private void EtherRegen()
@@ -549,7 +549,7 @@ public class AetherionPlugin : BasePlugin
 
     private void HudTick()
     {
-        try { _nameplates.Tick(); } catch { }
+        try { _nameplates.Tick(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] nameplate tick err: {ex.Message}"); }
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -1214,7 +1214,7 @@ public class AetherionPlugin : BasePlugin
             int streak = _roundKills.GetValueOrDefault(killer.SteamID, 0);
             _achievements.OnRoundStreak(d, killer, streak);
         }
-        catch { }
+        catch (Exception ex) { Console.WriteLine($"[AETHERION] kill achievement err: {ex.Message}"); }
     }
 
     private void OpenWispMenu(CCSPlayerController p)

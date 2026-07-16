@@ -190,7 +190,7 @@ public sealed class WispCompanionV2
                 var o = p.PlayerPawn.Value.AbsOrigin;
                 float z = o.Z + HoverZ + MathF.Sin(s.HoverPhase) * HoverAmp;
                 try { s.Prop.Teleport(new Vector(o.X, o.Y, z), new QAngle(0, s.HoverPhase * 40f, 0), new Vector(0, 0, 0)); }
-                catch { }
+                catch (Exception ex) { Console.WriteLine($"[Wisp] teleport err: {ex.Message}"); }
             }
 
             // Пассивки по тиру
@@ -220,7 +220,7 @@ public sealed class WispCompanionV2
         var o = pawn.AbsOrigin;
         prop.Teleport(new Vector(o.X, o.Y, o.Z + HoverZ), new QAngle(0, 0, 0), new Vector(0, 0, 0));
         prop.DispatchSpawn();
-        try { prop.AcceptInput("SetParent", pawn, null, "!activator"); } catch { }
+        try { prop.AcceptInput("SetParent", pawn, null, "!activator"); } catch (Exception ex) { Console.WriteLine($"[Wisp] SetParent err: {ex.Message}"); }
 
         // Тинт по цвету тира
         var col = ParseColor(cfg.Color);
@@ -229,7 +229,7 @@ public sealed class WispCompanionV2
             prop.Render = Color.FromArgb(255, col.R, col.G, col.B);
             Utilities.SetStateChanged(prop, "CBaseModelEntity", "m_clrRender");
         }
-        catch { }
+        catch (Exception ex) { Console.WriteLine($"[Wisp] render tint err: {ex.Message}"); }
 
         s.Prop = prop;
 
@@ -243,8 +243,8 @@ public sealed class WispCompanionV2
                 fx.StartActive = true;
                 fx.Teleport(new Vector(o.X, o.Y, o.Z + HoverZ), new QAngle(0, 0, 0), new Vector(0, 0, 0));
                 fx.DispatchSpawn();
-                try { fx.AcceptInput("SetParent", pawn, null, "!activator"); } catch { }
-                try { fx.AcceptInput("Start"); } catch { }
+                try { fx.AcceptInput("SetParent", pawn, null, "!activator"); } catch (Exception ex) { Console.WriteLine($"[Wisp] aura parent err: {ex.Message}"); }
+                try { fx.AcceptInput("Start"); } catch (Exception ex) { Console.WriteLine($"[Wisp] aura start err: {ex.Message}"); }
                 s.AuraFx = fx;
             }
         }
@@ -267,8 +267,8 @@ public sealed class WispCompanionV2
 
     private void DetachVisuals(V2State s)
     {
-        if (s.Prop != null && s.Prop.IsValid) try { s.Prop.Remove(); } catch { }
-        if (s.AuraFx != null && s.AuraFx.IsValid) try { s.AuraFx.Remove(); } catch { }
+        if (s.Prop != null && s.Prop.IsValid) try { s.Prop.Remove(); } catch (Exception ex) { Console.WriteLine($"[Wisp] prop remove err: {ex.Message}"); }
+        if (s.AuraFx != null && s.AuraFx.IsValid) try { s.AuraFx.Remove(); } catch (Exception ex) { Console.WriteLine($"[Wisp] aura remove err: {ex.Message}"); }
         s.Prop = null;
         s.AuraFx = null;
     }
@@ -286,7 +286,7 @@ public sealed class WispCompanionV2
             s.SkinTier = newTier;
             s.AbilityInterval = newTier switch { "Legendary" => 1.3f, "Epic" => 1.7f, _ => 2.2f };
             SpawnCompanion(p); // пересоздать с новым цветом/аурой
-            try { OnEvolve?.Invoke(p, newTier); } catch { }
+            try { OnEvolve?.Invoke(p, newTier); } catch (Exception ex) { Console.WriteLine($"[Wisp] OnEvolve err: {ex.Message}"); }
         }
         else if (s.Prop == null || !s.Prop.IsValid)
         {
@@ -296,7 +296,7 @@ public sealed class WispCompanionV2
         if (s.SkinTier is "Epic" or "Legendary")
         {
             var burst = L10n.GetF("WispCompanion_OnKillBurst", " [Дух] ✦ Всплеск Эфира!", ("hs", headshot ? "★" : ""));
-            try { p.PrintToChat(burst ?? " [Дух] ✦ Всплеск Эфира!"); } catch { }
+            try { p.PrintToChat(burst ?? " [Дух] ✦ Всплеск Эфира!"); } catch (Exception ex) { Console.WriteLine($"[Wisp] burst chat err: {ex.Message}"); }
         }
     }
 
@@ -313,7 +313,7 @@ public sealed class WispCompanionV2
             var text = L10n.Get("WispCompanion_AmbientAura") ?? " [Дух] Аура Эфира мерцает...";
             p.PrintToChat(text);
         }
-        catch { }
+        catch (Exception ex) { Console.WriteLine($"[Wisp] ambient aura err: {ex.Message}"); }
     }
 
     private static void TryUltimateAssist(CCSPlayerController p, V2State s)
@@ -326,7 +326,7 @@ public sealed class WispCompanionV2
             p.PrintToChat(text ?? " [Дух] ✦ Ультимейт-ассист готов.");
             s.AssistCd = 15f;
         }
-        catch { }
+        catch (Exception ex) { Console.WriteLine($"[Wisp] ult assist err: {ex.Message}"); }
     }
 
     private V2State GetOrInit(CCSPlayerController p)
@@ -364,7 +364,7 @@ public sealed class WispCompanionV2
                 byte.Parse(h.Substring(2, 2), System.Globalization.NumberStyles.HexNumber),
                 byte.Parse(h.Substring(4, 2), System.Globalization.NumberStyles.HexNumber));
         }
-        catch { }
+        catch (Exception) { }
         return Color.FromArgb(143, 211, 255);
     }
 }

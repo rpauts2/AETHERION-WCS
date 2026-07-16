@@ -62,7 +62,7 @@ public sealed class NameplateManager
         ent.DispatchSpawn();
 
         // Парентим к павну — текст едет вместе с игроком автоматически.
-        try { ent.AcceptInput("SetParent", pawn, null, "!activator"); } catch { }
+        try { ent.AcceptInput("SetParent", pawn, null, "!activator"); } catch (Exception ex) { Console.WriteLine($"[Nameplate] attach err: {ex.Message}"); }
 
         _plates[p.Slot] = new Plate
         {
@@ -83,7 +83,7 @@ public sealed class NameplateManager
             plate.Entity.MessageText = html;
             Utilities.SetStateChanged(plate.Entity, "CPointWorldText", "m_MessageText");
         }
-        catch { }
+        catch (Exception ex) { Console.WriteLine($"[Nameplate] text update err: {ex.Message}"); }
     }
 
     // Обновить цвет по текущей команде (после смены команды).
@@ -97,7 +97,7 @@ public sealed class NameplateManager
             plate.Entity.Color = c;
             Utilities.SetStateChanged(plate.Entity, "CPointWorldText", "m_Color");
         }
-        catch { }
+        catch (Exception ex) { Console.WriteLine($"[Nameplate] color update err: {ex.Message}"); }
     }
 
     // Тиковая страховка: если парент потерян (респавн), поднимаем текст обратно над головой.
@@ -118,15 +118,15 @@ public sealed class NameplateManager
             if (controller == null || !controller.IsValid || pawn == null || pawn.AbsOrigin == null || !controller.PawnIsAlive)
             {
                 // мёртвый/ушёл — гасим текст, но кэш держим до респавна/Remove
-                try { ent.Enabled = false; } catch { }
+                try { ent.Enabled = false; } catch (Exception ex) { Console.WriteLine($"[Nameplate] disable err: {ex.Message}"); }
                 continue;
             }
-            try { ent.Enabled = true; } catch { }
+            try { ent.Enabled = true; } catch (Exception ex) { Console.WriteLine($"[Nameplate] enable err: {ex.Message}"); }
 
             // Если родитель «слетел» — перепарентить и выставить позицию вручную.
             if (plate.BoundPawn == null || !plate.BoundPawn.IsValid || plate.BoundPawn != pawn)
             {
-                try { ent.AcceptInput("SetParent", pawn, null, "!activator"); } catch { }
+        try { ent.AcceptInput("SetParent", pawn, null, "!activator"); } catch (Exception ex) { Console.WriteLine($"[Nameplate] SetParent err: {ex.Message}"); }
                 plate.BoundPawn = pawn;
             }
             var o = pawn.AbsOrigin;
@@ -134,7 +134,7 @@ public sealed class NameplateManager
             {
                 ent.Teleport(new Vector(o.X, o.Y, o.Z + HeadOffsetZ), PlateAngle, new Vector(0, 0, 0));
             }
-            catch { }
+            catch (Exception ex) { Console.WriteLine($"[Nameplate] teleport err: {ex.Message}"); }
         }
     }
 
@@ -143,7 +143,7 @@ public sealed class NameplateManager
         if (_plates.TryGetValue(slot, out var plate))
         {
             if (plate.Entity != null && plate.Entity.IsValid)
-                try { plate.Entity.Remove(); } catch { }
+                try { plate.Entity.Remove(); } catch (Exception ex) { Console.WriteLine($"[Nameplate] remove err: {ex.Message}"); }
             _plates.Remove(slot);
         }
     }

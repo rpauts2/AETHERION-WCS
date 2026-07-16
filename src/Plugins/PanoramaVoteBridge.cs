@@ -105,7 +105,7 @@ public sealed class VoteHost : IDisposable
 
         if (_disposed) return;
 
-        try { _panorama.ClearChannel(channelId); } catch { }
+        try { _panorama.ClearChannel(channelId); } catch (Exception ex) { Console.WriteLine($"[VOTE] clear channel err: {ex.Message}"); }
 
         if (session.TotalVotes == 0)
         {
@@ -121,7 +121,7 @@ public sealed class VoteHost : IDisposable
         if (winner.Key != null)
         {
             Console.WriteLine($"[VOTE] Результат: {winner.Key.Text} ({winner.Value}/{session.TotalVotes})");
-            try { winner.Key.OnWin(); } catch { }
+            try { winner.Key.OnWin(); } catch (Exception ex) { Console.WriteLine($"[VOTE] OnWin err: {ex.Message}"); }
         }
     }
 
@@ -143,7 +143,7 @@ public sealed class VoteHost : IDisposable
         {
             foreach (var channel in _sessions.Keys.ToList())
             {
-                try { End(channel); } catch { }
+                try { End(channel); } catch (Exception ex) { Console.WriteLine($"[VOTE] dispose cleanup err: {ex.Message}"); }
             }
             _sessions.Clear();
         }
