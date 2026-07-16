@@ -189,7 +189,7 @@ public class AetherionPlugin : BasePlugin
         AddCommand("css_reset", "Сброс навыков", CmdReset);
         AddCommand("css_boss", "Голосование за босса", (p, _) => { if (p != null) _boss.StartVote(p); });
         AddCommand("css_sigil", "Рисование Печати", (p, _) => { if (p != null) _sigils.BeginDraw(p); });
-        AddCommand("css_admin", "Админ-меню AETHERION", (p, _) => { if (p != null) OpenAdminMenu(p); });
+        AddCommand("css_admin", "Админ-меню AETHERION", CmdAdmin);
         AddCommand("css_bind", "Меню биндов клавиш", (p, _) => { if (p != null) OpenBindMenu(p); });
         AddCommand("css_shop", "Магазин", (p, _) => { if (p != null) OpenShopMenu(p); });
         AddCommand("css_buy", "Купить предмет", CmdBuy);
@@ -1085,19 +1085,106 @@ public class AetherionPlugin : BasePlugin
         _audio.PlayDailyReward(p);
     }
 
-    private void OpenAdminMenu(CCSPlayerController p)
+    private void CmdAdmin(CCSPlayerController? p, CommandInfo info)
     {
-        if (p.IsBot)
+        if (p == null || p.IsBot) return;
+        if (!CounterStrikeSharp.API.Modules.Admin.AdminManager.PlayerHasPermissions(p, "@css/config"))
         {
-            p.PrintToChat(" \x07Боты не могут использовать админ-меню.");
+            p.PrintToChat(" \x07Нет прав. Требуется флаг @css/config.");
             return;
         }
+        if (info.ArgCount < 2) { OpenAdminMenu(p); return; }
+        var sub = info.GetArg(1).ToLowerInvariant();
+        switch (sub)
+        {
+            case "gold": AdminGold(p, info); break;
+            case "vip": AdminVip(p, info); break;
+            case "lvl": AdminLvl(p, info); break;
+            case "boss": AdminBoss(p); break;
+            case "storm": AdminStorm(p); break;
+            default: OpenAdminMenu(p); break;
+        }
+    }
+
+    private void OpenAdminMenu(CCSPlayerController p)
+    {
         p.PrintToChat(" \x0B═══ АДМИН-МЕНЮ ═══");
-        p.PrintToChat(" \x04!admin gold <игрок> <сумма> — выдать золото");
-        p.PrintToChat(" \x04!admin vip <игрок> <дни> — выдать VIP");
-        p.PrintToChat(" \x04!admin lvl <игрок> <уровень> — выдать уровни");
-        p.PrintToChat(" \x04!admin boss — призвать босса");
+        p.PrintToChat(" \x04!admin gold <имя> <сумма> — выдать золото");
+        p.PrintToChat(" \x04!admin vip <имя> <дни> — выдать VIP");
+        p.PrintToChat(" \x04!admin lvl <имя> <уровни> — выдать уровни расы");
+        p.PrintToChat(" \x04!admin boss — призвать босса (голосование)");
         p.PrintToChat(" \x04!admin storm — запустить Эфирную Бурю");
+    }
+
+    private CCSPlayerController? FindPlayer(string nameOrId)
+    {
+        foreach (var pl in Utilities.GetPlayers())
+        {
+            if (pl == null || !pl.IsValid || pl.IsBot) continue;
+            if (pl.SteamID.ToString() == nameOrId) return pl;
+            if (pl.PlayerName.Contains(nameOrId, StringComparison.OrdinalIgnoreCase)) return pl;
+        }
+        return null;
+    }
+
+    private void AdminGold(CCSPlayerController p, CommandInfo info)
+    {
+        if (info.ArgCount < 4) { p.PrintToChat(" \x04!admin gold <имя> <сумма>"); return; }
+        var target = FindPlayer(info.GetArg(2));
+        if (target == null) { p.PrintToChat(" \x07Игрок не найден."); return; }
+        if (!long.TryParse(info.GetArg(3), out long amount) || amount <= 0) { p.PrintToChat(" \x07Неверная сумма."); return; }
+        var d = Data(target.SteamID);
+        EconomySystem.AddGold(d, amount);
+        SaveData(d);
+        p.PrintToChat($" \x04[ADMIN] +{amount}з\x01 выдано \x06{target.PlayerName}");
+        target.PrintToChat($" \x06[ADMIN] Тебе выдано {amount} золота.");
+    }
+
+    private void AdminVip(CCSPlayerController p, CommandInfo info)
+    {
+        if (info.ArgCount < 4) { p.PrintToChat(" \x04!admin vip <имя> <дни>"); return; }
+        var target = FindPlayer(info.GetArg(2));
+        if (target == null) { p.PrintToChat(" \x07Игрок не найден."); return; }
+        if (!int.TryParse(info.GetArg(3), out int days) || days <= 0) { p.PrintToChat(" \x07Неверное кол-во дней."); return; }
+        var d = Data(target.SteamID);
+        long extra = days * 86400L;
+        long current = d.VipExpiresUnix;
+        long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        d.VipExpiresUnix = Math.Max(current, now) + extra;
+        SaveData(d);
+        p.PrintToChat($" \x04[ADMIN] VIP +{days}д\x01 выдан \x06{target.PlayerName}");
+        target.PrintToChat($" \x06[ADMIN] Тебе выдан VIP на {days} дней.");
+    }
+
+    private void AdminLvl(CCSPlayerController p, CommandInfo info)
+    {
+        if (info.ArgCount < 4) { p.PrintToChat(" \x04!admin lvl <имя> <уровни>"); return; }
+        var target = FindPlayer(info.GetArg(2));
+        if (target == null) { p.PrintToChat(" \x07Игрок не найден."); return; }
+        if (!int.TryParse(info.GetArg(3), out int levels) || levels <= 0) { p.PrintToChat(" \x07Неверное кол-во уровней."); return; }
+        var d = Data(target.SteamID);
+        var rp = d.GetRace(d.CurrentRaceId);
+        for (int i = 0; i < levels; i++)
+        {
+            rp.Level++;
+            rp.UnspentPoints++;
+        }
+        SaveData(d);
+        var def = _races.Get(d.CurrentRaceId);
+        p.PrintToChat($" \x04[ADMIN] +{levels} ур.\x01 выдано \x06{target.PlayerName} (раса: {def?.Name ?? "?"})");
+        target.PrintToChat($" \x06[ADMIN] Тебе выдано {levels} уровней расы.");
+    }
+
+    private void AdminBoss(CCSPlayerController p)
+    {
+        _boss.StartVote(p);
+        p.PrintToChat(" \x04[ADMIN] Голосование за босса запущено!");
+    }
+
+    private void AdminStorm(CCSPlayerController p)
+    {
+        _rift.Spawn(_engine);
+        p.PrintToChat(" \x04[ADMIN] Эфирная Буря запущена!");
     }
 
     private void OpenBindMenu(CCSPlayerController p)
