@@ -115,8 +115,15 @@ public static class EffectLibrary
 
         ["Execute_low_hp"] = v => ctx =>
         {
-            if (ctx.VictimSlot.HasValue && ctx.Engine.GetHealth(ctx.VictimSlot.Value) < 30)
-                ctx.Engine.SetHealth(ctx.VictimSlot.Value, 0);
+            if (ctx.VictimSlot.HasValue && v > 0)
+            {
+                var hp = ctx.Engine.GetHealth(ctx.VictimSlot.Value);
+                if (hp < v)
+                {
+                    ctx.Engine.SetHealth(ctx.VictimSlot.Value, 0);
+                    ctx.Engine.PrintToCenter(ctx.Slot, "☠️ Казнь!");
+                }
+            }
         },
 
         ["armor_break"] = v => ctx =>
@@ -370,9 +377,25 @@ public static class EffectLibrary
             ctx.Combat.AoeApply(p.x,p.y,p.z, 140f, ctx.Player.TeamNum, EffectTag.Stun, 1f, 2f, (int)v, ctx.Slot);
         },
 
-        ["radar"] = v => ctx => { /* radar map hook */ },
+        ["radar"] = v => ctx =>
+        {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            int team = ctx.Player.TeamNum;
+            foreach(var s in ctx.Combat.EnemiesInRadius(p.x,p.y,p.z, 2000f, team))
+            {
+                var ep = ctx.Engine.GetPosition(s);
+                ctx.Engine.Beam(p.x, p.y, p.z+40, ep.x, ep.y, ep.z+40, 0, 255, 0, 0.3f);
+            }
+            ctx.Engine.PrintToCenter(ctx.Slot, "📡 Радар: враги отмечены!");
+        },
 
-        ["trap_remote"] = v => ctx => { /* remote detonate */ },
+        ["trap_remote"] = v => ctx =>
+        {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            int team = ctx.Player.TeamNum;
+            ctx.Combat.AoeApply(p.x,p.y,p.z, 180f, team, EffectTag.Freeze, 1f, 1.5f, (int)v, ctx.Slot);
+            ctx.Engine.SpawnParticle("particles/aether_explosion.vpcf", p.x, p.y, p.z);
+        },
 
         ["aoe_trap"] = v => ctx =>
         {
@@ -540,7 +563,14 @@ public static class EffectLibrary
             }
         },
 
-        ["armor_reduce"] = v => ctx => { /* armor hook: reduce target armor on hit */ },
+        ["armor_reduce"] = v => ctx =>
+        {
+            if(ctx.VictimSlot.HasValue && v > 0)
+            {
+                var armor = ctx.Engine.GetArmor(ctx.VictimSlot.Value);
+                ctx.Engine.SetArmor(ctx.VictimSlot.Value, Math.Max(0, armor - (int)v));
+            }
+        },
 
         ["accuracy_debuff"] = v => ctx =>
         {
@@ -554,11 +584,16 @@ public static class EffectLibrary
         ["revive"] = v => ctx =>
             ctx.Combat.Apply(EffectTag.Shield, ctx.Slot, 100, 8f),
 
-        ["radar"] = v => ctx => { /* radar map hook */ },
+        ["turret"] = v => ctx =>
+        {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            int team = ctx.Player.TeamNum;
+            ctx.Combat.AoeApply(p.x,p.y,p.z, 350f, team, EffectTag.Burn, 2f, 3f, (int)(v*0.5f), ctx.Slot);
+            ctx.Engine.SpawnParticle("particles/aether_explosion.vpcf", p.x, p.y, p.z);
+        },
 
-        ["turret"] = v => ctx => { /* turret hook */ },
-
-        ["bullet_wall"] = v => ctx => { /* wall hook */ },
+        ["bullet_wall"] = v => ctx =>
+            ctx.Combat.Apply(EffectTag.Shield, ctx.Slot, (int)(v*3), 6f),
 
         ["silent_steps"] = v => ctx =>
         {
@@ -567,13 +602,55 @@ public static class EffectLibrary
             ctx.Engine.SetSpeed(ctx.Slot, 0.75f);
         },
 
-        ["clone_ult"] = v => ctx => { /* clone hook */ },
+        ["clone_ult"] = v => ctx =>
+        {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            int team = ctx.Player.TeamNum;
+            int count = 0;
+            foreach(var s in ctx.Combat.EnemiesInRadius(p.x, p.y, p.z, 500f, team))
+            {
+                ctx.Engine.SetHealth(s, Math.Max(0, ctx.Engine.GetHealth(s) - (int)(v*0.7f)));
+                var ep = ctx.Engine.GetPosition(s);
+                ctx.Engine.Beam(p.x, p.y, p.z+30, ep.x, ep.y, ep.z+30, 200, 100, 255, 0.3f);
+                count++;
+            }
+            if(count > 0) ctx.Engine.PrintToCenter(ctx.Slot, $"👥 Клон: {count} врагов поражено!");
+        },
 
-        ["drone_storm"] = v => ctx => { /* drone hook */ },
+        ["drone_storm"] = v => ctx =>
+        {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            int team = ctx.Player.TeamNum;
+            foreach(var s in ctx.Combat.EnemiesInRadius(p.x,p.y,p.z, 400f, team))
+            {
+                ctx.Engine.SetHealth(s, Math.Max(0, ctx.Engine.GetHealth(s) - (int)v));
+                ctx.Combat.Apply(EffectTag.Slow, s, 0.4f, 2f);
+            }
+            ctx.Engine.SpawnParticle("particles/aether_thunder.vpcf", p.x, p.y, p.z+30);
+        },
 
-        ["illuison"] = v => ctx => { /* clone hook */ },
+        ["illuison"] = v => ctx =>
+        {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            int team = ctx.Player.TeamNum;
+            foreach(var s in ctx.Combat.EnemiesInRadius(p.x,p.y,p.z, 300f, team))
+            {
+                ctx.Engine.SetHealth(s, Math.Max(0, ctx.Engine.GetHealth(s) - (int)(v*0.5f)));
+                ctx.Combat.Apply(EffectTag.Fear, s, 1f, 2f);
+            }
+            ctx.Engine.PrintToCenter(ctx.Slot, "👻 Иллюзия дезориентирует врагов!");
+        },
 
-        ["orbiting_blades"] = v => ctx => { /* orbiting hook */ },
+        ["orbiting_blades"] = v => ctx =>
+        {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            int team = ctx.Player.TeamNum;
+            foreach(var s in ctx.Combat.EnemiesInRadius(p.x,p.y,p.z, 200f, team))
+            {
+                ctx.Engine.SetHealth(s, Math.Max(0, ctx.Engine.GetHealth(s) - (int)(v*0.8f)));
+            }
+            ctx.Engine.SpawnParticle("particles/aether_explosion.vpcf", p.x, p.y, p.z+20);
+        },
 
         ["charge_stun"] = v => ctx =>
         {
@@ -700,7 +777,14 @@ public static class EffectLibrary
             ctx.Combat.AoeApply(p.x,p.y,p.z, 230f, ctx.Player.TeamNum, EffectTag.Stun, 1f, 3.5f, (int)v, ctx.Slot);
         },
 
-        ["silent_projectile"] = v => ctx => { /* tracer hook */ },
+        ["silent_projectile"] = v => ctx =>
+        {
+            if(ctx.VictimSlot.HasValue)
+            {
+                var dmg = (int)(v + v*0.3f*ctx.SkillLevel);
+                ctx.Engine.SetHealth(ctx.VictimSlot.Value, Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - dmg));
+            }
+        },
 
         ["invisibility_combo"] = v => ctx =>
         {
