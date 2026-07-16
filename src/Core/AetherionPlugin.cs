@@ -486,9 +486,15 @@ public class AetherionPlugin : BasePlugin
                 LevelSystem.AddXp(d, rp, def?.TierEnum ?? RaceTier.T1_Spark, bonus);
                 d.SeasonXp += bonus;
                 SyncBattlePass(d);
+
+                // Ачивки и дейлики за раунд
+                var player = Utilities.GetPlayers().FirstOrDefault(p => p != null && p.IsValid && p.SteamID == kv.Key);
+                if (player != null)
+                    _achievements.OnRoundEnd(d, player, true);
+
                 _store.Save(d);
             }
-            catch { }
+            catch (Exception ex) { Console.WriteLine($"[AETHERION] OnRoundEnd player err: {ex.Message}"); }
         }
         return HookResult.Continue;
     }

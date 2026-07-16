@@ -291,8 +291,6 @@ public static class EffectLibrary
             }
         },
 
-        ["armor_reduce"] = v => ctx => { /* armor hook */ },
-
         ["execute"] = v => ctx =>
         {
             if(ctx.VictimSlot.HasValue && ctx.Engine.GetHealth(ctx.VictimSlot.Value) < 40)
@@ -310,8 +308,6 @@ public static class EffectLibrary
                 ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, 35, 3f);
             }
         },
-
-        ["silent_steps"] = v => ctx => { /* volume hook */ },
 
         ["flash_ult"] = v => ctx =>
         {
@@ -333,8 +329,6 @@ public static class EffectLibrary
             if(ctx.VictimSlot.HasValue)
                 ctx.Engine.AddArmor(ctx.VictimSlot.Value, (int)(v+10*ctx.SkillLevel), 200);
         },
-
-        ["revive"] = v => ctx => { /* rev hook */ },
 
         ["projectile"] = v => ctx =>
         {
@@ -377,8 +371,6 @@ public static class EffectLibrary
             if(ctx.VictimSlot.HasValue)
                 ctx.Engine.SetHealth(ctx.VictimSlot.Value, Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - (int)v));
         },
-
-        ["illuison"] = v => ctx => { /* clone hook */ },
 
         ["multishot"] = v => ctx =>
         {
@@ -427,8 +419,6 @@ public static class EffectLibrary
             ctx.Engine.Teleport(ctx.Slot, pos.x+MathF.Cos(yaw)*420f, pos.y+MathF.Sin(yaw)*420f, pos.z+20);
             ctx.Combat.AoeApply(pos.x+MathF.Cos(yaw)*420f, pos.y+MathF.Sin(yaw)*420f, pos.z, 150f, ctx.Player.TeamNum, EffectTag.Stun, 1f, 1f, (int)v, ctx.Slot);
         },
-
-        ["parry"] = v => ctx => { /* parry hook */ },
 
         ["counter"] = v => ctx =>
         {
@@ -574,10 +564,6 @@ public static class EffectLibrary
             }
         },
 
-        ["turret"] = v => ctx => { /* turret hook */ },
-
-        ["bullet_wall"] = v => ctx => { /* wall hook */ },
-
         ["speed_boost"] = v => ctx =>
             ctx.Engine.SetSpeed(ctx.Slot, 1f + v*0.01f * ctx.SkillLevel),
 
@@ -587,8 +573,6 @@ public static class EffectLibrary
             ctx.Engine.Teleport(ctx.Slot, p.x, p.y, p.z+10);
             ctx.Combat.AoeApply(p.x,p.y,p.z, 170f, ctx.Player.TeamNum, EffectTag.Stun, 1f, 1f, (int)v, ctx.Slot);
         },
-
-        ["orbiting_blades"] = v => ctx => { /* orbiting hook */ },
 
         ["cyclone"] = v => ctx =>
         {
@@ -605,8 +589,6 @@ public static class EffectLibrary
         },
 
         ["execute_bonus"] = v => ctx => { /* bonus vs low hp */ },
-
-        ["drone_storm"] = v => ctx => { /* drone hook */ },
 
         ["double_slash"] = v => ctx =>
         {
@@ -669,16 +651,7 @@ public static class EffectLibrary
         ["blind_chance"] = v => ctx =>
         {
             if(ctx.VictimSlot.HasValue && v > 0)
-                _ = ctx.Engine.DamageRadius(ctx.Slot, 1, 0);
-        },
-
-        ["smite"] = v => ctx =>
-        {
-            if(ctx.VictimSlot.HasValue)
-            {
-                ctx.Engine.SetHealth(ctx.VictimSlot.Value, Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - (int)v));
-                _ = ctx.Engine.DamageRadius(ctx.Slot, 1, 0);
-            }
+                ctx.Engine.Blind(ctx.VictimSlot.Value, v * ctx.SkillLevel * 0.5f);
         },
 
         ["lightning"] = v => ctx =>

@@ -209,6 +209,8 @@ public sealed class AchievementSystem
     public void OnRoundEnd(PlayerData d, CCSPlayerController p, bool won)
     {
         if (won) Inc(d, C_ROUNDS_WON);
+        CheckAchievements(p, d);
+        CheckDailies(p, d);
     }
 
     // Стрик-киллов в раунде (вызывается из плагина)
