@@ -35,6 +35,26 @@ public class GuildManager
     private static readonly Dictionary<int, Guild> _guilds = new();
     private static readonly Dictionary<ulong, int> _playerGuild = new();
     private static int _nextId = 1;
+    public Action? OnChanged { get; set; }
+
+    private void NotifyChanged() => OnChanged?.Invoke();
+
+    public void RestoreGuild(Guild g)
+    {
+        _guilds[g.Id] = g;
+        if (g.Id >= _nextId) _nextId = g.Id + 1;
+        foreach (var sid in g.Members)
+            _playerGuild[sid] = g.Id;
+    }
+
+    public void RestoreMemberMap(Dictionary<ulong, int> map)
+    {
+        foreach (var (sid, gid) in map)
+            if (!_playerGuild.ContainsKey(sid))
+                _playerGuild[sid] = gid;
+    }
+
+    public IReadOnlyDictionary<ulong, int> PlayerGuildMap => _playerGuild;
 
     public Guild? Create(CCSPlayerController leader, string name, string tag)
     {
@@ -44,6 +64,7 @@ public class GuildManager
         var g = new Guild { Id = _nextId++, Name = name, Tag = tag, LeaderSteamId = sid };
         g.Members.Add(sid); g.Officers.Add(sid);
         _guilds[g.Id] = g; _playerGuild[sid] = g.Id;
+        NotifyChanged();
         return g;
     }
 
@@ -54,6 +75,7 @@ public class GuildManager
         if (!_guilds.TryGetValue(guildId, out var g)) return false;
         if (g.Members.Count >= g.MaxMembers) return false;
         g.Members.Add(sid); _playerGuild[sid] = guildId;
+        NotifyChanged();
         return true;
     }
 
@@ -71,6 +93,7 @@ public class GuildManager
             if (heir == 0) _guilds.Remove(gid);
             else g.LeaderSteamId = heir;
         }
+        NotifyChanged();
         return true;
     }
 
@@ -87,6 +110,7 @@ public class GuildManager
     {
         g.BannerXp += xp;
         while (g.BannerXp >= g.BannerXpNeeded) { g.BannerXp -= g.BannerXpNeeded; g.BannerLevel++; }
+        NotifyChanged();
     }
 
     public IEnumerable<Guild> TopByBanner(int n) =>

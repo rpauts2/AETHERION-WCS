@@ -465,9 +465,105 @@ public static class EffectLibrary
             }
         },
 
-        ["accuracy_debuff"] = v => ctx => { /* aim punch hook */ },
+        ["silence_shot"] = v => ctx =>
+        {
+            if(ctx.VictimSlot.HasValue)
+                ctx.Combat.Apply(EffectTag.Stun, ctx.VictimSlot.Value, v * 0.3f, 3f);
+        },
+
+        ["silence_aura"] = v => ctx =>
+        {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            int team = ctx.Player.TeamNum;
+            ctx.Combat.AoeApply(p.x,p.y,p.z, 300f, team, EffectTag.Stun, 1f, 2f, (int)(v*0.3f), ctx.Slot);
+        },
+
+        ["heal_aura"] = v => ctx =>
+        {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            int team = ctx.Player.TeamNum;
+            ctx.Combat.AoeApply(p.x,p.y,p.z, 350f, team, EffectTag.Shield, 1f, 3f, (int)(v*0.5f), ctx.Slot);
+            ctx.Engine.ForAlliesInRadius(ctx.Slot, 350f, s => ctx.Engine.AddHealth(s, (int)(v+3*ctx.SkillLevel), 200));
+        },
+
+        ["kill_heal"] = v => ctx =>
+            ctx.Engine.AddHealth(ctx.Slot, (int)(v + 2*ctx.SkillLevel), 200),
+
+        ["kill_heal_aura"] = v => ctx =>
+            ctx.Engine.AddHealth(ctx.Slot, (int)(v + 2*ctx.SkillLevel), 200),
+
+        ["slow"] = v => ctx =>
+        {
+            if(ctx.VictimSlot.HasValue)
+                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, v, 3f);
+        },
+
+        ["movement_speed"] = v => ctx =>
+            ctx.Engine.SetSpeed(ctx.Slot, 1f + v * 0.01f * ctx.SkillLevel),
+
+        ["haste"] = v => ctx =>
+            ctx.Engine.SetSpeed(ctx.Slot, 1f + v * 0.01f * ctx.SkillLevel),
+
+        ["ice_bolt"] = v => ctx =>
+        {
+            if(ctx.VictimSlot.HasValue)
+            {
+                ctx.Engine.SetHealth(ctx.VictimSlot.Value, Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - (int)v));
+                ctx.Combat.Apply(EffectTag.Freeze, ctx.VictimSlot.Value, 1, 1.5f+0.1f*ctx.SkillLevel);
+            }
+        },
+
+        ["fire_breath"] = v => ctx =>
+        {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            int team = ctx.Player.TeamNum;
+            foreach(var s in ctx.Combat.EnemiesInRadius(p.x,p.y,p.z, 250f+10f*ctx.SkillLevel,team))
+            {
+                ctx.Engine.SetHealth(s, Math.Max(0, ctx.Engine.GetHealth(s) - (int)(v+3*ctx.SkillLevel)));
+                ctx.Combat.Apply(EffectTag.Burn, s, 2+ctx.SkillLevel, 4f, 1f, ctx.Slot);
+            }
+            ctx.Engine.SpawnParticle("particles/aether_explosion.vpcf", p.x, p.y, p.z);
+        },
+
+        ["smite"] = v => ctx =>
+        {
+            if(ctx.VictimSlot.HasValue)
+            {
+                ctx.Engine.SetHealth(ctx.VictimSlot.Value, Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - (int)(v+5*ctx.SkillLevel)));
+                var ep = ctx.Engine.GetPosition(ctx.VictimSlot.Value);
+                ctx.Engine.Beam(ep.x, ep.y, ep.z+300, ep.x, ep.y, ep.z, 255, 225, 100, 0.3f);
+            }
+        },
+
+        ["armor_reduce"] = v => ctx => { /* armor hook: reduce target armor on hit */ },
+
+        ["accuracy_debuff"] = v => ctx =>
+        {
+            if(ctx.VictimSlot.HasValue)
+                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, v*0.3f, 4f);
+        },
+
+        ["parry"] = v => ctx =>
+            ctx.Combat.Apply(EffectTag.Reflect, ctx.Slot, v, 5f),
+
+        ["revive"] = v => ctx =>
+            ctx.Combat.Apply(EffectTag.Shield, ctx.Slot, 100, 8f),
+
+        ["radar"] = v => ctx => { /* radar map hook */ },
+
+        ["turret"] = v => ctx => { /* turret hook */ },
+
+        ["bullet_wall"] = v => ctx => { /* wall hook */ },
+
+        ["silent_steps"] = v => ctx => { /* volume hook */ },
 
         ["clone_ult"] = v => ctx => { /* clone hook */ },
+
+        ["drone_storm"] = v => ctx => { /* drone hook */ },
+
+        ["illuison"] = v => ctx => { /* clone hook */ },
+
+        ["orbiting_blades"] = v => ctx => { /* orbiting hook */ },
 
         ["charge_stun"] = v => ctx =>
         {
@@ -533,10 +629,16 @@ public static class EffectLibrary
 
         ["knockback"] = v => ctx =>
         {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
             if(ctx.VictimSlot.HasValue)
             {
                 var vPos = ctx.Engine.GetPosition(ctx.VictimSlot.Value);
                 ctx.Engine.Knockback(ctx.VictimSlot.Value, vPos.x, vPos.y, v);
+            }
+            else
+            {
+                foreach(var s in ctx.Combat.EnemiesInRadius(p.x,p.y,p.z, 250f, ctx.Player.TeamNum))
+                    ctx.Engine.Knockback(s, p.x, p.y, v);
             }
         },
 

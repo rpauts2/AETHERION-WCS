@@ -98,6 +98,7 @@ public class AetherionPlugin : BasePlugin
 
         var cfgDir = Path.Combine(ModuleDirectory, "..", "..", "configs");
         _races.LoadFromFile(Path.Combine(cfgDir, "races.json"));
+        _races.LoadFromFile(Path.Combine(cfgDir, "races", "races_core.json"));
         // индексируем способности
         foreach (var r in _races.Races.Values) r.IndexAbilities();
         _models.Load(cfgDir);
@@ -106,6 +107,17 @@ public class AetherionPlugin : BasePlugin
 
         _store = new SqlitePlayerStore(Path.Combine(ModuleDirectory, "aetherion.db"));
         _store.Init();
+
+        // Загрузка гильдий из БД
+        if (_store is SqlitePlayerStore sqlite)
+        {
+            var savedGuilds = sqlite.LoadAllGuilds();
+            var memberMap = sqlite.LoadGuildMembers();
+            foreach (var g in savedGuilds)
+                GuildManager.Instance.RestoreGuild(g);
+            GuildManager.Instance.RestoreMemberMap(memberMap);
+            GuildManager.Instance.OnChanged = () => SaveGuilds();
+        }
 
         // Движок и боевые эффекты
         _engine = new Cs2EngineApi();
@@ -180,12 +192,14 @@ public class AetherionPlugin : BasePlugin
         AddCommand("css_admin", "Админ-меню AETHERION", (p, _) => { if (p != null) OpenAdminMenu(p); });
         AddCommand("css_bind", "Меню биндов клавиш", (p, _) => { if (p != null) OpenBindMenu(p); });
         AddCommand("css_shop", "Магазин", (p, _) => { if (p != null) OpenShopMenu(p); });
+        AddCommand("css_buy", "Купить предмет", CmdBuy);
         AddCommand("css_daily", "Ежедневная награда", (p, _) => { if (p != null) TryClaimDaily(p); });
         AddCommand("css_yes", "Да (голосование)", (p, _) => { if (p != null) _boss.VoteYes(p); });
         AddCommand("css_no", "Нет (голосование)", (p, _) => { if (p != null) _boss.VoteNo(p); });
         AddCommand("css_top", "Топ игроков", CmdTop);
         AddCommand("css_ach", "Ачивки и дейлики", (p, _) => { if (p != null) OpenAchievementsMenu(p); });
         AddCommand("css_wisp", "Дух-компаньон (статус)", (p, _) => { if (p != null) OpenWispMenu(p); });
+        AddCommand("css_bp", "Battle Pass", CmdBattlePass);
 
         // Тики
         AddTimer(0.5f, RiftTick, TimerFlags.REPEAT);
@@ -206,6 +220,14 @@ public class AetherionPlugin : BasePlugin
         if (_ether.TryGetValue(sid, out var v)) _ether[sid] = Math.Max(0, v - amount);
     }
 
+    private void SaveGuilds()
+    {
+        if (_store is not SqlitePlayerStore sqlite) return;
+        var all = GuildManager.Instance.All.Values.ToList();
+        var memberMap = GuildManager.Instance.PlayerGuildMap;
+        sqlite.SaveAllGuilds(all, memberMap);
+    }
+
     private AbilityContext BuildCtx(CCSPlayerController p, PlayerData d, RaceProgress rp, int slot)
         => new()
         {
@@ -214,6 +236,17 @@ public class AetherionPlugin : BasePlugin
         };
 
     private bool VipMult(PlayerData d) => DateTimeOffset.FromUnixTimeSeconds(d.VipExpiresUnix) > DateTimeOffset.UtcNow;
+
+    private void SyncBattlePass(PlayerData d)
+    {
+        int gained = SeasonSystem.ConvertXpToTiers(d, _seasons.Current.SeasonPass.FreeTierMaxLevel);
+        if (gained > 0)
+        {
+            var player = Utilities.GetPlayers().FirstOrDefault(p => p != null && p.IsValid && p.SteamID == d.SteamId);
+            if (player != null)
+                player.PrintToChat($" \x0B[AETHERION]\x01 Battle Pass: +{gained} тир(ов)! Ранг: \x06{d.SeasonRank}");
+        }
+    }
 
     // Построить и повесить/обновить неймплейт над игроком (ФАЗА 2b).
     private void RefreshNameplate(CCSPlayerController p, PlayerData d, RaceProgress rp, RaceDefinition? def)
@@ -330,6 +363,7 @@ public class AetherionPlugin : BasePlugin
 
             // Сезонный XP
             d.SeasonXp += xp;
+            SyncBattlePass(d);
 
             // Эфир за килл
             _ether[attacker.SteamID] = Math.Min(EtherMax, _ether.GetValueOrDefault(attacker.SteamID, 0) + (hs ? 18 : 12));
@@ -436,6 +470,9 @@ public class AetherionPlugin : BasePlugin
         // Турнирный тик
         GuildTournamentSystem.OnRoundEnd();
 
+        // Периодическое сохранение гильдий
+        try { SaveGuilds(); } catch { }
+
         // Награда всем онлайн-игрокам
         foreach (var kv in _online)
         {
@@ -448,6 +485,7 @@ public class AetherionPlugin : BasePlugin
                 EconomySystem.AddGold(d, EconomySystem.GoldRoundWin);
                 LevelSystem.AddXp(d, rp, def?.TierEnum ?? RaceTier.T1_Spark, bonus);
                 d.SeasonXp += bonus;
+                SyncBattlePass(d);
                 _store.Save(d);
             }
             catch { }
@@ -965,18 +1003,74 @@ public class AetherionPlugin : BasePlugin
 
     private void CmdTop(CCSPlayerController? p, CommandInfo info)
     {
-        if (p == null) return;
+        if (p == null || p.IsBot) return;
+        string sort = (info.ArgCount >= 2 ? info.GetArg(1).ToLower() : "level") switch
+        {
+            "gold" => "gold",
+            "xp" => "xp",
+            _ => "level"
+        };
+        if (_store is not SqlitePlayerStore sqlite)
+        {
+            p.PrintToChat(" \x07Хранилище данных недоступно.");
+            return;
+        }
+        var top = sqlite.TopPlayers(10, sort);
         p.PrintToChat(" \x0B═══ ТОП ИГРОКОВ ═══");
-        p.PrintToChat(" \x08(Включается после накопления статистики на сервере)");
+        if (top.Count == 0) { p.PrintToChat(" \x08Пока нет данных."); return; }
+        int i = 1;
+        foreach (var (sid, name, xp, lvl, gold) in top)
+            p.PrintToChat($"  \x06{i++}.\x01 {name} — ур.\x04{lvl}\x01 XP:\x06{xp}\x01 З:\x06{gold}");
+        p.PrintToChat(" \x01Сортировка: \x04!top [level|xp|gold]");
+    }
+
+    private void CmdBattlePass(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null || p.IsBot) return;
+        var d = Data(p.SteamID);
+        int maxTier = _seasons.Current.SeasonPass.FreeTierMaxLevel;
+        long need = SeasonSystem.XpForTier(d.SeasonRank);
+        p.PrintToChat(" \x0B═══ ✦ BATTLE PASS ✦ ═══");
+        p.PrintToChat($" \x01Сезон: \x06{_seasons.Current.Name}");
+        p.PrintToChat($" \x01Ранг: \x04{d.SeasonRank}/{maxTier}\x01 | XP: \x06{d.SeasonXp}/{need}");
+        if (_seasons.IsActive)
+            p.PrintToChat($" \x01Осталось: \x06{_seasons.TimeLeftLabel()}");
+        if (info.ArgCount >= 2 && int.TryParse(info.GetArg(1), out int tier))
+        {
+            bool premium = info.ArgCount >= 3 && info.GetArg(2).ToLower() == "premium";
+            if (_seasons.TryClaim(d, tier, premium))
+            {
+                SaveData(d);
+                p.PrintToChat($" \x04[AETHERION]\x01 Тир {tier} забран! (Premium: {premium})");
+            }
+            else
+                p.PrintToChat($" \x07Не удалось забрать тир {tier}.");
+        }
+        else
+        {
+            p.PrintToChat(" \x01Забрать награду: \x04!bp <номер_тира> [premium]");
+        }
     }
 
     private void OpenShopMenu(CCSPlayerController p)
     {
         var d = Data(p.SteamID);
         p.PrintToChat(" \x0B═══ МАГАЗИН ЭФИРА ═══");
+        p.PrintToChat($" \x06Твоё золото: {d.Gold}з");
         foreach (var it in ItemShop.Catalog)
             p.PrintToChat($"  \x06#{it.Id}\x01 {it.Name} — \x06{it.Price}з\x01 [{it.Rarity}]");
         p.PrintToChat(" \x01Покупка: \x04!buy <id>");
+    }
+
+    private void CmdBuy(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null || p.IsBot) return;
+        if (info.ArgCount < 2) { p.PrintToChat(" \x07Формат: !buy <id предмета>. Список: !shop"); return; }
+        if (!int.TryParse(info.GetArg(1), out int itemId)) { p.PrintToChat(" \x07Неверный ID."); return; }
+        var d = Data(p.SteamID);
+        var (ok, msg) = ItemShop.Buy(d, itemId);
+        if (ok) { SaveData(d); _audio.PlayDailyReward(p); }
+        p.PrintToChat(ok ? $" \x04[AETHERION]\x01 {msg}" : $" \x07[AETHERION] {msg}");
     }
 
     private void TryClaimDaily(CCSPlayerController p)

@@ -70,6 +70,31 @@ public class SeasonSystem
         _locProvider = locProvider;
     }
 
+    // ── XP → Tier conversion ─────────────────────────────────────────────
+    public static long XpForTier(int tier) => tier switch
+    {
+        < 10 => 500,
+        < 20 => 750,
+        < 30 => 1000,
+        < 40 => 1500,
+        < 50 => 2000,
+        _ => 2500
+    };
+
+    public static int ConvertXpToTiers(PlayerData p, int maxTier)
+    {
+        int gained = 0;
+        while (p.SeasonRank < maxTier)
+        {
+            long need = XpForTier(p.SeasonRank);
+            if (p.SeasonXp < need) break;
+            p.SeasonXp -= need;
+            p.SeasonRank++;
+            gained++;
+        }
+        return gained;
+    }
+
     // ── State helpers ────────────────────────────────────────────────────────
     public bool IsActive => DateTime.UtcNow < Current.EndUtc;
     public TimeSpan TimeLeft => Current.EndUtc - DateTime.UtcNow;

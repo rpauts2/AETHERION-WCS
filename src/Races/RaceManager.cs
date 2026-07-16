@@ -20,6 +20,11 @@ public class RaceManager
         foreach (var r in list) { r.IndexAbilities(); _races[r.Id] = r; }
     }
 
+    public void LoadFromMultiple(string[] paths)
+    {
+        foreach (var p in paths) LoadFromFile(p);
+    }
+
     public RaceDefinition? Get(int id) => _races.TryGetValue(id, out var r) ? r : null;
 
     // Расы, доступные игроку по его дивизиону
