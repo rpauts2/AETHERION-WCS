@@ -17,12 +17,11 @@ public static class DynamicRaceSystem
     private static readonly HashSet<int> _locked = new();
     private static readonly HashSet<int> _featured = new();
 
-    // Пример: локальный фильтр доступных рас
-    public static IEnumerable<RaceDefinition> Filter(RaceManager rm, CCSPlayerController player)
+    // Локальный фильтр доступных рас по дивизиону игрока
+    public static IEnumerable<RaceDefinition> Filter(RaceManager rm, CCSPlayerController player, int division)
     {
         if (rm == null || player == null || !player.IsValid) return Array.Empty<RaceDefinition>();
-        int div = 1; // упрощение: читается из PlayerData/Division при интеграции
-        return rm.RacesForDivision(div).Where(r => !_locked.Contains(r.Id));
+        return rm.RacesForDivision(division).Where(r => !_locked.Contains(r.Id));
     }
 
     public static void Lock(int raceId) => _locked.Add(raceId);
