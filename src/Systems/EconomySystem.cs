@@ -6,14 +6,10 @@ namespace WcsInfinity.Systems;
 // Баланс v2: ускорен онбординг, чтобы рулетка/магазин были достижимы за сессию.
 public static class EconomySystem
 {
-    public const long GoldKill = 25;          // было 10
-    public const long GoldHeadshot = 12;      // бонус за хедшот (было 6)
-    public const long GoldKnife = 30;         // бонус за нож
-    public const long GoldAssist = 8;         // ассист
-    public const long GoldFirstBlood = 40;    // первая кровь раунда
-    public const long GoldRoundWin = 20;      // было 8
-    public const long GoldRoundLossConsolation = 6; // утешительные проигравшим
-    public const long GoldBombObjective = 30;  // плант/дефьюз (было 12)
+    public const long GoldKill = 25;
+    public const long GoldHeadshot = 12;
+    public const long GoldRoundWin = 20;
+    public const long GoldBombObjective = 30;
 
     public static void AddGold(PlayerData p, long amount) => p.Gold += amount;
 }

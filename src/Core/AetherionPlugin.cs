@@ -50,7 +50,6 @@ public class AetherionPlugin : BasePlugin
     private AetherSigils _sigils = null!;
     private SigilResonance _resonance = null!;
     private CombatEffects _combat = null!;
-    private VipMenu _vipMenu = null!;
     private BossSystem _boss = null!;
     private AchievementSystem _achievements = null!;
     private NameplateManager _nameplates = null!;
@@ -59,6 +58,11 @@ public class AetherionPlugin : BasePlugin
     private CustomWeaponSystem _customWeapons = null!;
     private IEngineApi _engine = null!;
     private IPlayerStore _store = null!;
+    private StormWaveSystem _stormWave = null!;
+    private DuelArenaSystem _duelArena = null!;
+    private EtherPortalSystem _etherPortal = null!;
+    private ContractSystem _contracts = null!;
+    private RaceMutationSystem _mutation = null!;
 
     // — Кэши рантайма —
     private readonly Dictionary<ulong, PlayerData> _online = new();
@@ -130,7 +134,6 @@ public class AetherionPlugin : BasePlugin
         _sigils = new AetherSigils(this, _engine, sid => _ether.GetValueOrDefault(sid, 0), SpendEther);
         _resonance = new SigilResonance(_engine);
         _sigils.OnCast = (p, name) => _resonance.OnSigilCast(p, name);
-        _vipMenu = new VipMenu();
         _boss = new BossSystem(this, _engine, sid => Data(sid), pd => SaveData(pd));
         _boss.OnBossSpawn = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossAwaken(pl); };
         _boss.OnBossAttack = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossEnrage(pl); };
@@ -164,6 +167,13 @@ public class AetherionPlugin : BasePlugin
         _customWeapons = new CustomWeaponSystem(this, _engine);
         _customWeapons.Initialize();
         RegisterCustomWeapons();
+
+        // Новые системы: PvE, Арена, Порталы, Контракты, Мутации
+        _stormWave = new StormWaveSystem(_engine, sid => Data(sid), pd => SaveData(pd));
+        _duelArena = new DuelArenaSystem(_engine, sid => Data(sid), pd => SaveData(pd));
+        _etherPortal = new EtherPortalSystem(_engine, sid => Data(sid), pd => SaveData(pd));
+        _contracts = new ContractSystem(sid => Data(sid), pd => SaveData(pd));
+        _mutation = new RaceMutationSystem(_engine, _combat);
 
         // Хуки событий
         RegisterEventHandler<EventPlayerDeath>(OnDeath);
@@ -200,11 +210,17 @@ public class AetherionPlugin : BasePlugin
         AddCommand("css_ach", "Ачивки и дейлики", (p, _) => { if (p != null) OpenAchievementsMenu(p); });
         AddCommand("css_wisp", "Дух-компаньон (статус)", (p, _) => { if (p != null) OpenWispMenu(p); });
         AddCommand("css_bp", "Battle Pass", CmdBattlePass);
+        AddCommand("css_storm", "Шторм (PvE)", (p, _) => { if (p != null) _stormWave.Start(p); });
+        AddCommand("css_storm_stop", "Остановить шторм", (p, _) => { if (p != null) _stormWave.Stop(); });
+        AddCommand("css_duel", "Дуэль", CmdDuel);
+        AddCommand("css_contracts", "Контракты", (p, _) => { if (p != null) _contracts.ShowContracts(p); });
+        AddCommand("css_claim", "Забрать награду контракта", CmdClaim);
 
         // Тики
         AddTimer(0.5f, RiftTick, TimerFlags.REPEAT);
         AddTimer(1.0f, EtherRegen, TimerFlags.REPEAT);
         AddTimer(0.1f, HudTick, TimerFlags.REPEAT);
+        AddTimer(1.0f, GameTick, TimerFlags.REPEAT);
 
         // Интеграция Nexus
         NexusIntegration.Wire(this, _nexus, _races, _aetherRoulette, steamId => Data(steamId), pd => SaveData(pd));
@@ -400,6 +416,16 @@ public class AetherionPlugin : BasePlugin
             // Ачивки (заглушки — будет расширено в AchievementSystem)
             TrackAchievements(d, attacker, victim, hs);
 
+            // Контракты
+            _contracts.OnKill(attacker.SteamID);
+            if (hs) _contracts.OnHeadshot(attacker.SteamID);
+
+            // Арена дуэлей
+            _duelArena.OnKill(attacker, victim);
+
+            // Шторм: фикс убийств ботов
+            if (victim.IsBot) _stormWave.OnBotKilled();
+
             if (up > 0)
             {
                 attacker.PrintToCenter($"⬆ {def?.Name} — уровень {rp.Level}!");
@@ -421,6 +447,9 @@ public class AetherionPlugin : BasePlugin
             _boss.OnPlayerHurt(victim, attacker, ev.DmgHealth);
             if (attacker == null || !attacker.IsValid || attacker.IsBot) return HookResult.Continue;
             if (victim == null || !victim.IsValid) return HookResult.Continue;
+
+            // Контракты: урон
+            _contracts.OnDamage(attacker.SteamID, ev.DmgHealth);
 
             // Прока пассивок «на удар» — хуки combat (лестник/reflect/etc) обрабатываются в CombatEffects
         }
@@ -470,6 +499,9 @@ public class AetherionPlugin : BasePlugin
         // Турнирный тик
         GuildTournamentSystem.OnRoundEnd();
 
+        // Шторм: остановка по окончании раунда
+        _stormWave.OnRoundEnd();
+
         // Периодическое сохранение гильдий
         try { SaveGuilds(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] guild save err: {ex.Message}"); }
 
@@ -486,6 +518,9 @@ public class AetherionPlugin : BasePlugin
                 LevelSystem.AddXp(d, rp, def?.TierEnum ?? RaceTier.T1_Spark, bonus);
                 d.SeasonXp += bonus;
                 SyncBattlePass(d);
+
+                // Контракты: победа в раунде
+                _contracts.OnRoundWin(kv.Key);
 
                 // Ачивки и дейлики за раунд
                 var player = Utilities.GetPlayers().FirstOrDefault(p => p != null && p.IsValid && p.SteamID == kv.Key);
@@ -545,6 +580,14 @@ public class AetherionPlugin : BasePlugin
             if (p == null || !p.IsValid || p.IsBot || !p.PawnIsAlive) continue;
             _ether[p.SteamID] = Math.Min(EtherMax, _ether.GetValueOrDefault(p.SteamID, 0) + 1);
         }
+    }
+
+    private void GameTick()
+    {
+        try { _stormWave.Tick(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] storm tick err: {ex.Message}"); }
+        try { _etherPortal.Tick(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] portal tick err: {ex.Message}"); }
+        try { _mutation.Tick(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] mutation tick err: {ex.Message}"); }
+        try { _contracts.DailyReset(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] contract reset err: {ex.Message}"); }
     }
 
     private void HudTick()
@@ -668,7 +711,7 @@ public class AetherionPlugin : BasePlugin
     private void OpenRaceMenu(CCSPlayerController p)
     {
         var d = Data(p.SteamID);
-        var list = _races.RacesForDivision(d.Division).Take(9).ToList();
+        var list = DynamicRaceSystem.Filter(_races, p, d.Division).Take(9).ToList();
         var menu = new WasdMenu("⚔ Расы и навыки", this);
         menu.MenuTime = 30;
         menu.PrevMenu = new WasdMenu("✦ AETHERION WCS ✦", this);
@@ -842,6 +885,7 @@ public class AetherionPlugin : BasePlugin
             case "craft": GuildCraft(p, info); break;
             case "promote": GuildPromote(p, info); break;
             case "top": GuildTop(p); break;
+            case "tournament": GuildTournament(p, info); break;
             default: GuildInfo(p); break;
         }
     }
@@ -993,6 +1037,83 @@ public class AetherionPlugin : BasePlugin
         int i = 1;
         foreach (var g in list)
             p.PrintToChat($"  \x06{i++}.\x01 [{g.Tag}] {g.Name} — ур.{g.BannerLevel} XP:{g.BannerXp} Казна:{g.Treasury}з");
+    }
+
+    private void GuildTournament(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        var g = _guilds.Of(p.SteamID);
+        if (g == null) { p.PrintToChat(" \x07Ты не в гильдии."); return; }
+
+        var active = GuildTournamentSystem.ActiveTournament;
+        if (active != null)
+        {
+            if (active.State == TournamentState.Running)
+            {
+                var timeLeft = (int)active.TimeLeft.TotalMinutes;
+                p.PrintToChat($" \x06Турнир «{active.Name}» идёт! Осталось {timeLeft}мин. Счёт: {active.ScoreA}:{active.ScoreB}");
+            }
+            else if (active.State == TournamentState.Registration)
+            {
+                active.Register(g);
+                p.PrintToChat($" \x04Гильдия [{g.Tag}] зарегистрирована в турнире!");
+            }
+            return;
+        }
+
+        if (info.ArgCount < 3)
+        {
+            p.PrintToChat(" \x04!guild tournament create <имя>\x01 — создать турнир");
+            p.PrintToChat(" \x04!guild tournament join\x01 — вступить в активный");
+            return;
+        }
+
+        var sub = info.GetArg(2).ToLowerInvariant();
+        if (sub == "create")
+        {
+            string name = info.ArgCount > 3 ? info.GetArg(3) : $"Турнир {DateTime.Now:dd.MM}";
+            var tourney = GuildTournamentSystem.Create(name, TimeSpan.FromMinutes(30));
+            tourney.State = TournamentState.Registration;
+            tourney.Register(g);
+            Server.PrintToChatAll($" \x06[AETHERION] ⚔ Турнир «{name}» создан! !guild tournament join для участия.");
+        }
+        else if (sub == "join")
+        {
+            if (active == null) { p.PrintToChat(" \x07Нет активного турнира."); return; }
+            active.Register(g);
+            p.PrintToChat($" \x04Гильдия [{g.Tag}] зарегистрирована!");
+        }
+    }
+
+    private void CmdDuel(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        if (info.ArgCount < 2)
+        {
+            _duelArena.ShowStatus(p);
+            p.PrintToChat(" \x04!duel <name>\x01 — вызвать");
+            p.PrintToChat(" \x04!duel accept\x01 — принять");
+            p.PrintToChat(" \x04!duel leave\x01 — покинуть");
+            return;
+        }
+        var sub = info.GetArg(1).ToLowerInvariant();
+        if (sub == "accept") { _duelArena.Accept(p); return; }
+        if (sub == "leave") { _duelArena.Leave(p); return; }
+
+        string targetName = info.GetArg(1);
+        var target = Utilities.GetPlayers()
+            .FirstOrDefault(pl => pl != null && pl.IsValid && !pl.IsBot
+                && pl.PlayerName.Contains(targetName, StringComparison.OrdinalIgnoreCase));
+        if (target == null) { p.PrintToChat(" \x07Игрок не найден."); return; }
+        _duelArena.Invite(p, target);
+    }
+
+    private void CmdClaim(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        if (info.ArgCount < 2 || !int.TryParse(info.GetArg(1), out int idx))
+        { p.PrintToChat(" \x07Формат: !claim <1-3>"); return; }
+        _contracts.Claim(p, idx - 1);
     }
 
     private void CmdReset(CCSPlayerController? p, CommandInfo info)
