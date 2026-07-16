@@ -113,7 +113,7 @@ public class AetherSigils
             const float TH=12f; // порог распознавания жеста
             Gesture? g=null;
             if(MathF.Abs(dYaw)>MathF.Abs(dPitch)){
-                if(dYaw>TH) g=Gesture.Left; else if(dYaw<-TH) g=Gesture.Right;
+                if(dYaw>TH) g=Gesture.Right; else if(dYaw<-TH) g=Gesture.Left;
             } else {
                 if(dPitch>TH) g=Gesture.Down; else if(dPitch<-TH) g=Gesture.Up;
             }

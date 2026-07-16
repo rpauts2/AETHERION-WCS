@@ -14,6 +14,8 @@ using WcsInfinity.Plugins;
 using WcsInfinity.Core;
 using WcsInfinity.Database;
 using WcsInfinity.UI;
+using CS2MenuManager.API.Menu;
+using CS2MenuManager.API.Enum;
 
 namespace WcsInfinity.Core;
 
@@ -27,6 +29,8 @@ public class AetherionPlugin : BasePlugin
     public override string ModuleName => "AETHERION WCS";
     public override string ModuleVersion => "0.4.0";
     public override string ModuleAuthor => "AETHERION Team";
+
+    public static AetherionPlugin? Instance { get; private set; }
 
     public static ILocalizationReader Loc { get; private set; } = null!;
 
@@ -48,6 +52,11 @@ public class AetherionPlugin : BasePlugin
     private CombatEffects _combat = null!;
     private VipMenu _vipMenu = null!;
     private BossSystem _boss = null!;
+    private AchievementSystem _achievements = null!;
+    private NameplateManager _nameplates = null!;
+    private WispCompanionV2 _wispCompanion = null!;
+    private RaceWeaponSystem _raceWeapons = null!;
+    private CustomWeaponSystem _customWeapons = null!;
     private IEngineApi _engine = null!;
     private IPlayerStore _store = null!;
 
@@ -60,11 +69,12 @@ public class AetherionPlugin : BasePlugin
     private readonly HashSet<ulong> _boundOnce = new();
     private readonly Dictionary<ulong, int> _roundKills = new();
     private readonly Dictionary<ulong, float> _lastKillTime = new();
+    private bool _firstBlood;
 
     public PlayerData Data(ulong steamId)
     {
         if (_online.TryGetValue(steamId, out var d)) return d;
-        d = _store.Load(steamId);
+        d = _store.Load(steamId) ?? new PlayerData { SteamId = steamId, Name = "" };
         _online[steamId] = d;
         return d;
     }
@@ -82,6 +92,7 @@ public class AetherionPlugin : BasePlugin
     // ═══════════════════════════════════════════════════════════════════════
     public override void Load(bool hotReload)
     {
+        Instance = this;
         Loc = new LocalizationService(new JsonLocalizationProvider(ModuleDirectory), "ru");
         L10n.Init(Loc);
 
@@ -108,7 +119,39 @@ public class AetherionPlugin : BasePlugin
         _resonance = new SigilResonance(_engine);
         _sigils.OnCast = (p, name) => _resonance.OnSigilCast(p, name);
         _vipMenu = new VipMenu();
-        _boss = new BossSystem(this, null, _engine);
+        _boss = new BossSystem(this, _engine, sid => Data(sid), pd => SaveData(pd));
+        _boss.OnBossSpawn = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossAwaken(pl); };
+        _boss.OnBossAttack = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossEnrage(pl); };
+        _boss.OnBossDeath = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossDeath(pl); };
+        _boss.OnVoteStart = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossVoteStart(pl); };
+
+        // Ачивки
+        _achievements = new AchievementSystem();
+        _achievements.RegisterRaceAchievements(_races.Races.Keys);
+
+        // Неймплейты над головой
+        _nameplates = new NameplateManager();
+
+        // Дух-компаньон V2 (3D-модель + аура по тиру связи)
+        _wispCompanion = new WispCompanionV2(this);
+        _wispCompanion.Initialize();
+        _wispCompanion.OnEvolve = (player, newTier) =>
+        {
+            _audio.PlayWispEvolve(player);
+            player.PrintToCenter($"<font color='#7CFFA0'>✦ Дух эволюционировал: {newTier}! ✦</font>");
+        };
+
+        // Гильдии: крафт-рецепты + турнир
+        GuildCraftSystem.InitDefaults();
+
+        // Кастомное оружие по расе/архетипу
+        _raceWeapons = new RaceWeaponSystem(this);
+        _raceWeapons.Initialize();
+
+        // Кастомное оружие с уникальной механикой (ФАЗА 6)
+        _customWeapons = new CustomWeaponSystem(this, _engine);
+        _customWeapons.Initialize();
+        RegisterCustomWeapons();
 
         // Хуки событий
         RegisterEventHandler<EventPlayerDeath>(OnDeath);
@@ -118,6 +161,9 @@ public class AetherionPlugin : BasePlugin
         RegisterEventHandler<EventPlayerSpawn>(OnSpawn);
         RegisterEventHandler<EventRoundStart>(OnRoundStart);
         RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
+
+        // Слушатели
+        RegisterListener<Listeners.OnClientDisconnect>(OnClientDisconnect);
 
         // Команды
         AddCommand("css_wcs", "Меню AETHERION", (p, _) => { if (p != null) OpenMainMenu(p); });
@@ -135,8 +181,11 @@ public class AetherionPlugin : BasePlugin
         AddCommand("css_bind", "Меню биндов клавиш", (p, _) => { if (p != null) OpenBindMenu(p); });
         AddCommand("css_shop", "Магазин", (p, _) => { if (p != null) OpenShopMenu(p); });
         AddCommand("css_daily", "Ежедневная награда", (p, _) => { if (p != null) TryClaimDaily(p); });
-        AddCommand("css_yes", "Да (голосование)", (p, _) => { if (p != null) _boss.StartVote(p); });
+        AddCommand("css_yes", "Да (голосование)", (p, _) => { if (p != null) _boss.VoteYes(p); });
+        AddCommand("css_no", "Нет (голосование)", (p, _) => { if (p != null) _boss.VoteNo(p); });
         AddCommand("css_top", "Топ игроков", CmdTop);
+        AddCommand("css_ach", "Ачивки и дейлики", (p, _) => { if (p != null) OpenAchievementsMenu(p); });
+        AddCommand("css_wisp", "Дух-компаньон (статус)", (p, _) => { if (p != null) OpenWispMenu(p); });
 
         // Тики
         AddTimer(0.5f, RiftTick, TimerFlags.REPEAT);
@@ -166,6 +215,20 @@ public class AetherionPlugin : BasePlugin
 
     private bool VipMult(PlayerData d) => DateTimeOffset.FromUnixTimeSeconds(d.VipExpiresUnix) > DateTimeOffset.UtcNow;
 
+    // Построить и повесить/обновить неймплейт над игроком (ФАЗА 2b).
+    private void RefreshNameplate(CCSPlayerController p, PlayerData d, RaceProgress rp, RaceDefinition? def)
+    {
+        try
+        {
+            if (def == null) return;
+            var html = AetherHud.NameplateHtml(
+                p.PlayerName, def.Name, rp.Level, rp.ParagonLevel,
+                d.Division, rp.WispBond, VipMult(d), def.Tier);
+            _nameplates.Attach(p, html);
+        }
+        catch { }
+    }
+
     private void ApplyPassivesOnSpawn(CCSPlayerController p, PlayerData d, RaceProgress rp)
     {
         var def = _races.Get(d.CurrentRaceId);
@@ -191,11 +254,26 @@ public class AetherionPlugin : BasePlugin
             _models.ApplyModel(p, d.CurrentRaceId);
             _models.ApplyTint(_engine, p.Slot, d.CurrentRaceId);
             _auras.Attach(p, d.Division);
+
+            // Звук спавна
+            _audio.PlaySpawn(p, d.CurrentRaceId);
+
+            // Кастомное оружие (скин по расе/архетипу)
+            _raceWeapons.EquipOnSpawn(p, def);
             ApplyPassivesOnSpawn(p, d, rp);
 
             // Стартовый эфир
             _ether[p.SteamID] = Math.Min(EtherMax, 50);
             _ultCooldown.Remove(p.SteamID);
+
+            // Дейлики (обновление при новом дне)
+            _achievements.RefreshDailies(d);
+
+            // Неймплейт над головой
+            RefreshNameplate(p, d, rp, def);
+
+            // Дух-компаньон V2 — спавн тела над головой
+            try { _wispCompanion.NotifyKill(p, false); } catch { } // форсирует спавн/апдейт тира
 
             // Welcome-биндинг (один раз)
             if (!_boundOnce.Contains(p.SteamID))
@@ -230,6 +308,23 @@ public class AetherionPlugin : BasePlugin
             long xp = LevelSystem.XpKill + (hs ? LevelSystem.XpHeadshot : 0);
             long gold = EconomySystem.GoldKill + (hs ? EconomySystem.GoldHeadshot : 0);
             if (VipMult(d)) { xp = (long)(xp * 1.25); gold = (long)(gold * 1.15); }
+
+            // — Гильдейские бонусы —
+            var guild = _guilds.Of(attacker.SteamID);
+            if (guild != null)
+            {
+                var onlineMembers = _guilds.OnlineMembers(guild, Utilities.GetPlayers());
+                var raceMult = _guilds.GuildRaceMultiplier(guild, onlineMembers);
+                xp = (long)(xp * (1f + guild.XpBonus));
+                gold = (long)(gold * (1f + guild.GoldBonus));
+                _guilds.AddBannerXp(guild, xp / 10); // 10% XP идёт в знамя
+                GuildMenu.OnFrag(attacker.SteamID);
+
+                // Турнирный фраг
+                var tourney = GuildTournamentSystem.ActiveTournament;
+                tourney?.OnFrag(attacker);
+            }
+
             EconomySystem.AddGold(d, gold);
             int up = LevelSystem.AddXp(d, rp, def?.TierEnum ?? RaceTier.T1_Spark, xp);
 
@@ -242,10 +337,31 @@ public class AetherionPlugin : BasePlugin
             // Дух Wisp: рост связи
             rp.WispBond += hs ? 6 : 4;
             _wisp.OnKill(attacker, hs);
+            _wispCompanion.NotifyKill(attacker, hs);
+
+            // Жертва: гасим духа до респавна
+            if (victim != null && victim.IsValid && !victim.IsBot)
+                _wispCompanion.NotifyDeath(victim);
 
             // Стрик
             _roundKills[attacker.SteamID] = _roundKills.GetValueOrDefault(attacker.SteamID, 0) + 1;
             _lastKillTime[attacker.SteamID] = Server.CurrentTime;
+            int streak = _roundKills[attacker.SteamID];
+
+            // Звуки стрика/первой крови
+            if (!_firstBlood)
+            {
+                _firstBlood = true;
+                _audio.PlayFirstBlood(attacker);
+            }
+            if (streak == 5) _audio.PlayMilestoneAce(attacker);
+
+            // Партикл-эффект при хедшоте
+            if (hs)
+            {
+                var vpos = _engine.GetPosition(victim.Slot);
+                _engine.SpawnParticle("particles/aether_explosion.vpcf", vpos.x, vpos.y, vpos.z + 40);
+            }
 
             // Ачивки (заглушки — будет расширено в AchievementSystem)
             TrackAchievements(d, attacker, victim, hs);
@@ -254,6 +370,7 @@ public class AetherionPlugin : BasePlugin
             {
                 attacker.PrintToCenter($"⬆ {def?.Name} — уровень {rp.Level}!");
                 _audio.PlayLevelUp(attacker, d.CurrentRaceId);
+                RefreshNameplate(attacker, d, rp, def);
             }
             attacker.PrintToChat($" \x04[+{xp} XP, +{gold}з]\x01 {def?.Name} ур.{rp.Level} | Эфир: {_ether.GetValueOrDefault(attacker.SteamID)}");
         }
@@ -310,11 +427,15 @@ public class AetherionPlugin : BasePlugin
     {
         _roundKills.Clear();
         _lastKillTime.Clear();
+        _firstBlood = false;
         return HookResult.Continue;
     }
 
     private HookResult OnRoundEnd(EventRoundEnd ev, GameEventInfo info)
     {
+        // Турнирный тик
+        GuildTournamentSystem.OnRoundEnd();
+
         // Награда всем онлайн-игрокам
         foreach (var kv in _online)
         {
@@ -332,6 +453,26 @@ public class AetherionPlugin : BasePlugin
             catch { }
         }
         return HookResult.Continue;
+    }
+
+    private void OnClientDisconnect(int slot)
+    {
+        try { _nameplates.Remove(slot); } catch { }
+        try { _wispCompanion.CleanupSlot(slot); } catch { }
+        try { _customWeapons.CleanupSlot(slot); } catch { }
+        // Clean up SteamID-keyed caches
+        var player = Utilities.GetPlayerFromSlot(slot);
+        if (player != null && player.IsValid)
+        {
+            ulong sid = player.SteamID;
+            _online.Remove(sid);
+            _ether.Remove(sid);
+            _ultCooldown.Remove(sid);
+            _activeCd.Remove(sid);
+            _boundOnce.Remove(sid);
+            _roundKills.Remove(sid);
+            _lastKillTime.Remove(sid);
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -364,7 +505,7 @@ public class AetherionPlugin : BasePlugin
 
     private void HudTick()
     {
-        // Лёгкий HUD: раса/уровень/эфир — PrintToCenterFreq ограничен, делаем раз в ~1.5с
+        try { _nameplates.Tick(); } catch { }
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -408,7 +549,11 @@ public class AetherionPlugin : BasePlugin
             var ab = def.Abilities.FirstOrDefault(a => a.Type == "Ultimate");
             if (ab == null) { p.PrintToChat(" \x07[AETHERION] У этой расы нет ульты."); return; }
             int lvl = rp.SkillLevels.GetValueOrDefault(ab.Index, 0);
-            if (lvl <= 0) { p.PrintToChat(" \x07[AETHERION] Ульта не прокачана."); return; }
+            if (lvl <= 0)
+            {
+                p.PrintToChat(" \x07[AETHERION] Ульта не прокачана.");
+                return;
+            }
             float now = Server.CurrentTime;
             if (_ultCooldown.TryGetValue(p.SteamID, out var cd) && now < cd)
             { p.PrintToChat($" \x07[AETHERION] Ульта перезаряжается: {(int)(cd - now)}с."); return; }
@@ -421,6 +566,13 @@ public class AetherionPlugin : BasePlugin
             {
                 _ultCooldown[p.SteamID] = now + Math.Max(8f, ab.Cooldown);
                 _audio.PlayCastUltimate(p, d.CurrentRaceId);
+                _achievements.OnUltCast(d, p);
+                _boss.OnUltCast(p);
+
+                // Кастомное оружие: ракетница запускает ракету при ульте
+                if (_customWeapons.GetWeaponType(d.CurrentRaceId) == CustomWeaponType.RocketLauncher)
+                    _customWeapons.FireRocket(p);
+
                 p.PrintToCenterHtml($"<font color='#7c5cff'>✦ УЛЬТА: {ab.Name} ✦</font>");
             }
         }
@@ -435,23 +587,148 @@ public class AetherionPlugin : BasePlugin
         var d = Data(p.SteamID);
         var def = _races.Get(d.CurrentRaceId);
         var rp = d.GetRace(d.CurrentRaceId);
-        p.PrintToChat(" \x0B═══ ✦ AETHERION WCS ✦ ═══");
-        p.PrintToChat($" \x01Раса: \x04{def?.Name ?? "—"}\x01 ур.\x06{rp.Level} \x01| Дивизион \x0B{d.Division}");
-        p.PrintToChat($" \x01Золото: \x06{d.Gold}\x01 | Эфир: \x06{_ether.GetValueOrDefault(p.SteamID)}\x01 | Сезон: \x06{d.SeasonRank}");
-        p.PrintToChat(" \x01Меню: \x04!races !rank !ult !cast !shop !spin !daily");
-        p.PrintToChat(" \x01Соц: \x04!guild !boss !top \x01| Премиум: \x04!nexus !sigil");
-        if (def != null)
+        var menu = new WasdMenu("✦ AETHERION WCS ✦", this);
+        menu.MenuTime = 30;
+        menu.ExitButton = true;
+
+        // Статусная строка
+        menu.AddItem($"⚡ {def?.Name ?? "—"} ур.{rp.Level} | D{d.Division} | {d.Gold}з | {_ether.GetValueOrDefault(p.SteamID)}⚡", null);
+
+        // Кастомное оружие (если есть у расы)
+        var cwType = _customWeapons.GetWeaponType(d.CurrentRaceId);
+        if (cwType != CustomWeaponType.None)
+            menu.AddItem($"🎒 {_customWeapons.WeaponTypeName(cwType)}", null);
+
+        menu.AddItem("⚔ Расы и навыки", (pl, _) => OpenRaceMenu(pl));
+        menu.AddItem("📊 Профиль и ранг", (pl, _) => OpenProfileMenu(pl));
+        menu.AddItem("🛒 Магазин Эфира", (pl, _) => OpenShopMenu(pl));
+        menu.AddItem("🎰 Рулетка", (pl, _) => CmdSpin(pl, null));
+        menu.AddItem("🏆 Ачивки и дейлики", (pl, _) => OpenAchievementsMenu(pl));
+        menu.AddItem("🛡 Гильдия", (pl, _) => OpenGuildMenu(pl));
+        menu.AddItem("👹 Босс-рейд", (pl, _) => OpenBossMenu(pl));
+        menu.AddItem("✨ Дух-компаньон", (pl, _) => OpenWispMenu(pl));
+        menu.AddItem("🎁 Ежедневная награда", (pl, _) => TryClaimDaily(pl));
+        menu.AddItem("🎯 Ультимейт", (pl, _) => TryCastUltimate(pl));
+        menu.AddItem("💥 Активная способность", (pl, _) => TryCastActive(pl));
+        menu.AddItem("🎲 Печати Эфира", (pl, _) => { if (pl != null) _sigils.BeginDraw(pl); });
+        menu.AddItem("🔖 Бинды клавиш", (pl, _) => OpenBindMenu(pl));
+        menu.AddItem("🌐 Nexus 3D", (pl, _) => _nexus.Open(pl, NexusSector.Hub));
+        menu.AddItem("📋 Рейтинг", (pl, _) => CmdTop(pl, null));
+
+        menu.Display(p, 30);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  ПОДМЕНЮ: РАСЫ И НАВЫКИ
+    // ═══════════════════════════════════════════════════════════════════
+    private void OpenRaceMenu(CCSPlayerController p)
+    {
+        var d = Data(p.SteamID);
+        var list = _races.RacesForDivision(d.Division).Take(9).ToList();
+        var menu = new WasdMenu("⚔ Расы и навыки", this);
+        menu.MenuTime = 30;
+        menu.PrevMenu = new WasdMenu("✦ AETHERION WCS ✦", this);
+        menu.AddItem($"Дивизион {d.Division} — {list.Count} рас", null);
+        foreach (var r in list)
         {
-            p.PrintToChat($" \x0BЛор:\x01 {def.Lore}");
-            foreach (var ab in def.Abilities)
+            int rid = r.Id;
+            bool isCurrent = r.Id == d.CurrentRaceId;
+            string mark = isCurrent ? "▶" : "  ";
+            string tier = new string('★', Math.Min(r.Tier, 5));
+            menu.AddItem($"{mark} {tier} {r.Name} [{r.Archetype}] T{r.Tier}", (pl, _) =>
             {
-                int lvl = rp.SkillLevels.GetValueOrDefault(ab.Index, 0);
-                string t = ab.Type == "Ultimate" ? "\x10[ULT]\x01" : ab.Type == "Active" ? "\x05[ACT]\x01" : "\x08[PAS]\x01";
-                p.PrintToChat($"  {t} {ab.Name} — ур.{lvl}/{ab.MaxLevel}. {ab.Description}");
+                if (!UnlockSystem.IsUnlocked(Data(pl.SteamID), _races.Get(rid)!, list.ToList()))
+                { pl.PrintToChat(" \x07Раса заблокирована."); return; }
+                Data(pl.SteamID).CurrentRaceId = rid;
+                SaveData(Data(pl.SteamID));
+                pl.PrintToChat($" \x04[AETHERION]\x01 Раса: {r.Name}");
+                RefreshNameplate(pl, Data(pl.SteamID), Data(pl.SteamID).GetRace(rid), r);
+            });
+        }
+        menu.AddItem("── Навыки ──", null);
+        if (d.CurrentRaceId > 0)
+        {
+            var rp = d.GetRace(d.CurrentRaceId);
+            var def = _races.Get(d.CurrentRaceId);
+            if (def != null)
+            {
+                foreach (var ab in def.Abilities)
+                {
+                    int lvl = rp.SkillLevels.GetValueOrDefault(ab.Index, 0);
+                    string t = ab.Type switch { "Ultimate" => "[ULT]", "Active" => "[ACT]", _ => "[PAS]" };
+                    menu.AddItem($"  {t} {ab.Name} {lvl}/{ab.MaxLevel} — {ab.Description}", null);
+                }
             }
         }
-        // Открыть Nexus как 3D-меню
-        _nexus.Open(p, NexusSector.Hub);
+        menu.Display(p, 30);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  ПОДМЕНЮ: ПРОФИЛЬ
+    // ═══════════════════════════════════════════════════════════════════
+    private void OpenProfileMenu(CCSPlayerController p)
+    {
+        var d = Data(p.SteamID);
+        var rp = d.GetRace(d.CurrentRaceId);
+        var def = _races.Get(d.CurrentRaceId);
+        var menu = new WasdMenu("📊 Профиль", this);
+        menu.MenuTime = 20;
+        menu.AddItem($"Раса: {def?.Name ?? "—"} ур.{rp.Level}", null);
+        menu.AddItem($"Paragon: ★{rp.ParagonLevel} | Очки: {rp.UnspentPoints}", null);
+        menu.AddItem($"Дивизион: D{d.Division} | Золото: {d.Gold}з", null);
+        menu.AddItem($"Сезон: ранг {d.SeasonRank} | XP {d.SeasonXp}", null);
+        menu.AddItem($"Банк уровней: {d.LevelBank}", null);
+        menu.AddItem($"VIP: {(VipMult(d) ? "✓ активен" : "✗ нет")}", null);
+        menu.AddItem($"Связь духа: {rp.WispBond}", null);
+        menu.AddItem($"", null);
+        menu.AddItem("!reset — сбросить очки навыков", (pl, _) => CmdReset(pl, null));
+        menu.Display(p, 20);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  ПОДМЕНЮ: ГИЛЬДИЯ (через WasdMenu)
+    // ═══════════════════════════════════════════════════════════════════
+    private void OpenGuildMenu(CCSPlayerController p)
+    {
+        var g = _guilds.Of(p.SteamID);
+        var menu = new WasdMenu("🛡 Гильдия", this);
+        menu.MenuTime = 20;
+        if (g == null)
+        {
+            menu.AddItem("Ты не в гильдии", null);
+            menu.AddItem("Создать гильдию (!guild create <имя> <тег>)", null);
+            menu.AddItem("Список гильдий (!guild list)", null);
+            menu.AddItem("Вступить (!guild join <id>)", null);
+            menu.AddItem("Рейтинг (!guild top)", null);
+        }
+        else
+        {
+            menu.AddItem($"[{g.Tag}] {g.Name} ур.{g.BannerLevel}", null);
+            menu.AddItem($"Казна: {g.Treasury}з | Члены: {g.Members.Count}/{g.MaxMembers}", null);
+            menu.AddItem($"Бонусы: +{(int)(g.GoldBonus*100)}% золото, +{(int)(g.XpBonus*100)}% XP", null);
+            menu.AddItem($"Внести золото (!guild donate <сумма>)", null);
+            menu.AddItem($"Крафт гильдии (!guild craft <id>)", null);
+            menu.AddItem($"Повысить офицера (!guild promote <slot>)", null);
+            menu.AddItem("Покинуть гильдию (!guild leave)", (pl, _) => GuildLeave(pl));
+        }
+        menu.Display(p, 20);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  ПОДМЕНЮ: БОСС-РЕЙД
+    // ═══════════════════════════════════════════════════════════════════
+    private void OpenBossMenu(CCSPlayerController p)
+    {
+        var menu = new WasdMenu("👹 Босс-рейд", this);
+        menu.MenuTime = 20;
+        if (_boss.IsBossActive)
+            menu.AddItem("⚔ БОСС АКТИВЕН! Используй !ult для урона!", null);
+        else
+            menu.AddItem("Вызвать босса (!boss → !yes/!no)", (pl, _) => _boss.StartVote(pl));
+        menu.AddItem("Нужно минимум 2 голоса за 20 секунд", null);
+        menu.AddItem("Боссы: Скиталец / Ледяной Титан / Штормовой Лорд", null);
+        menu.AddItem("Повелитель Чумы / Ифрит Разрушения", null);
+        menu.Display(p, 20);
     }
 
     private void CmdRaces(CCSPlayerController? p, CommandInfo info)
@@ -473,6 +750,7 @@ public class AetherionPlugin : BasePlugin
             d.CurrentRaceId = rid;
             SaveData(d);
             p.PrintToChat($" \x04[AETHERION]\x01 Выбрана раса: {r.Name}");
+            RefreshNameplate(p, d, d.GetRace(rid), r);
         }
     }
 
@@ -503,9 +781,174 @@ public class AetherionPlugin : BasePlugin
     private void CmdGuild(CCSPlayerController? p, CommandInfo info)
     {
         if (p == null) return;
+        if (info.ArgCount < 2)
+        {
+            GuildInfo(p);
+            return;
+        }
+        var sub = info.GetArg(1).ToLowerInvariant();
+        switch (sub)
+        {
+            case "create": GuildCreate(p, info); break;
+            case "join": GuildJoin(p, info); break;
+            case "leave": GuildLeave(p); break;
+            case "donate": GuildDonate(p, info); break;
+            case "info": GuildInfo(p); break;
+            case "list": GuildList(p); break;
+            case "craft": GuildCraft(p, info); break;
+            case "promote": GuildPromote(p, info); break;
+            case "top": GuildTop(p); break;
+            default: GuildInfo(p); break;
+        }
+    }
+
+    private void GuildInfo(CCSPlayerController? p)
+    {
+        if (p == null) return;
         var g = _guilds.Of(p.SteamID);
-        if (g == null) { p.PrintToChat(" \x07Ты не в гильдии. Создай: !guild create <имя>"); return; }
-        p.PrintToChat($" \x0B[{g.Tag}] {g.Name}\x01 | Знамя ур.{g.BannerLevel} | Казна:{g.Treasury}з");
+        if (g == null)
+        {
+            p.PrintToChat(" \x0B═══ ГИЛЬДИЯ ═══");
+            p.PrintToChat(" \x07Ты не в гильдии.");
+            p.PrintToChat(" \x04!guild create <имя> <тег>\x01 — создать");
+            p.PrintToChat(" \x04!guild list\x01 — список гильдий");
+            p.PrintToChat(" \x04!guild join <id>\x01 — вступить");
+            p.PrintToChat(" \x04!guild top\x01 — рейтинг");
+            return;
+        }
+        p.PrintToChat($" \x0B═══ [{g.Tag}] {g.Name} ═══");
+        p.PrintToChat($" \x01Знамя: \x06ур.{g.BannerLevel}\x01 | XP: {g.BannerXp}/{g.BannerXpNeeded}");
+        p.PrintToChat($" \x01Казна: \x06{g.Treasury}з\x01 | Члены: {g.Members.Count}/{g.MaxMembers}");
+        p.PrintToChat($" \x01Бонусы: \x04+{(int)(g.GoldBonus * 100)}% золото\x01, \x04+{(int)(g.XpBonus * 100)}% XP\x01");
+        p.PrintToChat(" \x01Действия: \x04!guild donate <сумма> · craft · promote · leave");
+    }
+
+    private void GuildCreate(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        if (_guilds.Of(p.SteamID) != null) { p.PrintToChat(" \x07Ты уже в гильдии. Сначала покинь: !guild leave"); return; }
+        if (info.ArgCount < 4) { p.PrintToChat(" \x07Формат: !guild create <имя> <тег>. Пример: !guild create Эфир ЭФ"); return; }
+        var name = info.GetArg(2);
+        var tag = info.GetArg(3).ToUpperInvariant();
+        if (name.Length > 24 || tag.Length > 5) { p.PrintToChat(" \x07Имя до 24 символов, тег до 5."); return; }
+        var g = _guilds.Create(p, name, tag);
+        if (g == null) { p.PrintToChat(" \x07Не удалось создать (имя/тег занят?)."); return; }
+        var d = Data(p.SteamID);
+        d.GuildId = g.Id;
+        SaveData(d);
+        p.PrintToChat($" \x04[AETHERION]\x01 Гильдия [{g.Tag}] {g.Name} создана! Ты — лидер.");
+        _audio.PlayGuildJoin(p);
+        Server.PrintToChatAll($" \x0B[AETHERION]\x01 {p.PlayerName} создал гильдию \x04[{g.Tag}] {g.Name}\x01!");
+    }
+
+    private void GuildJoin(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        if (_guilds.Of(p.SteamID) != null) { p.PrintToChat(" \x07Ты уже в гильдии."); return; }
+        if (info.ArgCount < 3 || !int.TryParse(info.GetArg(2), out var gid))
+        { p.PrintToChat(" \x07Формат: !guild join <id>. Смотри ID в !guild list"); return; }
+        if (_guilds.Join(p, gid))
+        {
+            var g = _guilds.Of(p.SteamID)!;
+            var d = Data(p.SteamID);
+            d.GuildId = g.Id;
+            SaveData(d);
+            p.PrintToChat($" \x04[AETHERION]\x01 Ты вступил в [{g.Tag}] {g.Name}!");
+            _audio.PlayGuildJoin(p);
+        }
+        else p.PrintToChat(" \x07Не удалось вступить (гильдия полная или не существует).");
+    }
+
+    private void GuildLeave(CCSPlayerController? p)
+    {
+        if (p == null) return;
+        if (_guilds.Of(p.SteamID) == null) { p.PrintToChat(" \x07Ты не в гильдии."); return; }
+        _guilds.Leave(p);
+        var d = Data(p.SteamID);
+        d.GuildId = 0;
+        SaveData(d);
+        p.PrintToChat(" \x04[AETHERION]\x01 Ты покинул гильдию.");
+    }
+
+    private void GuildDonate(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        var g = _guilds.Of(p.SteamID);
+        if (g == null) { p.PrintToChat(" \x07Ты не в гильдии."); return; }
+        if (info.ArgCount < 3 || !long.TryParse(info.GetArg(2), out var amount) || amount <= 0)
+        { p.PrintToChat($" \x07Формат: !guild donate <сумма>. Казна: {g.Treasury}з"); return; }
+        var d = Data(p.SteamID);
+        if (d.Gold < amount) { p.PrintToChat($" \x07Недостаточно золота ({d.Gold}/{amount})."); return; }
+        d.Gold -= amount;
+        g.Treasury += amount;
+        SaveData(d);
+        p.PrintToChat($" \x04[AETHERION]\x01 Внесено {amount}з в казну. Всего: {g.Treasury}з");
+        _audio.PlayGoldSpend(p);
+    }
+
+    private void GuildList(CCSPlayerController? p)
+    {
+        if (p == null) return;
+        var all = _guilds.All.Values.ToList();
+        if (all.Count == 0) { p.PrintToChat(" \x08Нет созданных гильдий."); return; }
+        p.PrintToChat(" \x0B═══ СПИСОК ГИЛЬДИЙ ═══");
+        foreach (var g in all)
+            p.PrintToChat($"  \x06#{g.Id}\x01 [{g.Tag}] {g.Name} — ур.{g.BannerLevel} ({g.Members.Count} чел.)");
+    }
+
+    private void GuildCraft(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        var g = _guilds.Of(p.SteamID);
+        if (g == null) { p.PrintToChat(" \x07Ты не в гильдии."); return; }
+        var tier = (GuildTier)Math.Min(5, g.BannerLevel - 1);
+        var recipes = GuildCraftSystem.ForTier(tier).ToList();
+        if (info.ArgCount < 3 || !int.TryParse(info.GetArg(2), out var rid))
+        {
+            p.PrintToChat(" \x0B═══ КРАФТ ГИЛЬДИИ ═══");
+            foreach (var r in recipes)
+                p.PrintToChat($"  \x06#{r.Id}\x01 {r.Name} [{r.Tier}] — {r.GoldCost}з → +{r.BannerXpReward} XP знамени");
+            p.PrintToChat(" \x01Крафт: \x04!guild craft <id>");
+            return;
+        }
+        if (GuildCraftSystem.TryCraft(g, rid))
+        {
+            p.PrintToChat($" \x04[AETHERION]\x01 Предмет создан! Знамя +XP.");
+            _audio.PlayGuildBanner(p);
+        }
+        else p.PrintToChat(" \x07Не хватает золота в казне или рецепт не найден.");
+    }
+
+    private void GuildPromote(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        var g = _guilds.Of(p.SteamID);
+        if (g == null) { p.PrintToChat(" \x07Ты не в гильдии."); return; }
+        if (g.LeaderSteamId != p.SteamID) { p.PrintToChat(" \x07Только лидер может повышать."); return; }
+        if (info.ArgCount < 3)
+        { p.PrintToChat(" \x07Формат: !guild promote <#slot>. Пример: !guild promote 3"); return; }
+        if (!int.TryParse(info.GetArg(2), out var targetSlot)) { p.PrintToChat(" \x07Неверный слот."); return; }
+        var target = Utilities.GetPlayerFromSlot(targetSlot);
+        if (target == null || !target.IsValid) { p.PrintToChat(" \x07Игрок не найден."); return; }
+        if (!g.Members.Contains(target.SteamID)) { p.PrintToChat(" \x07Этот игрок не в твоей гильдии."); return; }
+        if (!g.Officers.Contains(target.SteamID))
+        {
+            g.Officers.Add(target.SteamID);
+            p.PrintToChat($" \x04[AETHERION]\x01 {target.PlayerName} повышен до офицера.");
+            target.PrintToChat($" \x04[AETHERION]\x01 Лидер повысил тебя до офицера [{g.Tag}]!");
+        }
+        else p.PrintToChat(" \x07Этот игрок уже офицер.");
+    }
+
+    private void GuildTop(CCSPlayerController? p)
+    {
+        if (p == null) return;
+        var list = _guilds.TopByBanner(10).ToList();
+        if (list.Count == 0) { p.PrintToChat(" \x08Нет гильдий."); return; }
+        p.PrintToChat(" \x0B═══ РЕЙТИНГ ГИЛЬДИЙ ═══");
+        int i = 1;
+        foreach (var g in list)
+            p.PrintToChat($"  \x06{i++}.\x01 [{g.Tag}] {g.Name} — ур.{g.BannerLevel} XP:{g.BannerXp} Казна:{g.Treasury}з");
     }
 
     private void CmdReset(CCSPlayerController? p, CommandInfo info)
@@ -545,10 +988,16 @@ public class AetherionPlugin : BasePlugin
         d.FreeSpins += reward.FreeSpins;
         SaveData(d);
         p.PrintToChat($" \x06[ЕЖЕДНЕВКА] День {reward.Day}: +{reward.Gold}з, +{reward.FreeSpins} спинов!");
+        _audio.PlayDailyReward(p);
     }
 
     private void OpenAdminMenu(CCSPlayerController p)
     {
+        if (p.IsBot)
+        {
+            p.PrintToChat(" \x07Боты не могут использовать админ-меню.");
+            return;
+        }
         p.PrintToChat(" \x0B═══ АДМИН-МЕНЮ ═══");
         p.PrintToChat(" \x04!admin gold <игрок> <сумма> — выдать золото");
         p.PrintToChat(" \x04!admin vip <игрок> <дни> — выдать VIP");
@@ -573,12 +1022,80 @@ public class AetherionPlugin : BasePlugin
     {
         try
         {
-            // «Первая кровь» — первый килл вообще
-            if (!d.Achievements.Contains("first_blood"))
-            { d.Achievements.Add("first_blood"); killer.PrintToChat(" \x10★ АЧИВКА: Первая кровь!"); }
+            _achievements.OnKill(d, killer, victim, hs, "");
+            // Стрик
+            int streak = _roundKills.GetValueOrDefault(killer.SteamID, 0);
+            _achievements.OnRoundStreak(d, killer, streak);
         }
         catch { }
     }
 
+    private void OpenWispMenu(CCSPlayerController p)
+    {
+        var d = Data(p.SteamID);
+        var rp = d.GetRace(d.CurrentRaceId);
+        var preview = _wispCompanion.BuildPreview(p);
+        p.PrintToChat(" \x0B═══ ✦ ДУХ-КОМПАНЬОН ✦ ═══");
+        p.PrintToChat($" \x01{preview}");
+        p.PrintToChat($" \x01Связь: \x06{rp.WispBond}\x01 | Тир растёт: 200→Rare, 600→Epic, 1200→Legendary");
+        p.PrintToChat(" \x08Дух парит над головой и эволюционирует с твоими килами.");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  КАСТОМНОЕ ОРУЖИЕ — привязка к расам (ФАЗА 6)
+    // ═══════════════════════════════════════════════════════════════════
+    private void RegisterCustomWeapons()
+    {
+        // Пудж (2000) — КРЮК ПУДЖА
+        _customWeapons.RegisterRaceWeapon(2000, CustomWeaponType.PudgeHook);
+        // Бесконечный USP для бесплотного лучника (2012) — снайпер с 1 патроном
+        _customWeapons.RegisterRaceWeapon(2012, CustomWeaponType.InfiniteUsp);
+        // Меч-удар для Пламя-самурая (2020)
+        _customWeapons.RegisterRaceWeapon(2020, CustomWeaponType.SwordStrike);
+        // Ракетница для Плазменного синдиката (2010)
+        _customWeapons.RegisterRaceWeapon(2010, CustomWeaponType.RocketLauncher);
+        // Yoru (2038) — тоже бесконечный USP (ассасин с пистолетом)
+        _customWeapons.RegisterRaceWeapon(2038, CustomWeaponType.InfiniteUsp);
+        // Deadpool (2037) — меч-удар
+        _customWeapons.RegisterRaceWeapon(2037, CustomWeaponType.SwordStrike);
+        // Master Chief (2036) — ракетница
+        _customWeapons.RegisterRaceWeapon(2036, CustomWeaponType.RocketLauncher);
+    }
+
     public void SaveData(PlayerData data) => _store.Save(data);
+
+    private void OpenAchievementsMenu(CCSPlayerController p)
+    {
+        var d = Data(p.SteamID);
+        var (unlocked, total) = _achievements.GetProgress(d);
+        var dailies = _achievements.GetCurrentDailies(d);
+
+        p.PrintToChat(" \x0B═══ ✦ АЧИВКИ И ДЕЙЛИКИ ✦ ═══");
+        p.PrintToChat($" \x01Прогресс: \x06{unlocked}/{total}\x01 ачивок разблокировано");
+
+        // Дейлики
+        p.PrintToChat(" \x10── ДЕЙЛИКИ ДНЯ ──");
+        if (dailies.Count == 0)
+            p.PrintToChat(" \x08 Нет активных дейликов");
+        foreach (var ch in dailies)
+        {
+            int prog = d.DailyChallenges.GetValueOrDefault(ch.Id, 0);
+            int progReal = d.QuestCounters.GetValueOrDefault(ch.Counter, 0);
+            bool done = d.ClaimedAchievements.Contains("daily_" + ch.Id);
+            string status = done ? "\x04✓" : progReal >= ch.Target ? "\x06⚡" : $"\x01{progReal}/{ch.Target}";
+            p.PrintToChat($"  {status} \x01{ch.Name}: {ch.Description} → +{ch.GoldReward}з +{ch.XpReward}XP");
+        }
+
+        // Последние ачивки
+        var recent = _achievements.Achievements
+            .Where(a => d.Achievements.Contains(a.Id))
+            .OrderByDescending(a => a.Tier)
+            .Take(5);
+        p.PrintToChat(" \x10── ПОСЛЕДНИЕ АЧИВКИ ──");
+        foreach (var a in recent)
+        {
+            string tierColor = a.Tier switch { 2 => "\x06", 3 => "\x0E", 4 => "\x0B", _ => "\x01" };
+            p.PrintToChat($"  {tierColor}★ [{a.Tier}★] {a.Name}: {a.Description}");
+        }
+    }
 }

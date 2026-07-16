@@ -45,6 +45,11 @@ public class PlayerData
 
     // Бусты, ачивки
     public HashSet<string> Achievements { get; set; } = new();
+    public Dictionary<string, int> AchievementProgress { get; set; } = new();
+    public HashSet<string> ClaimedAchievements { get; set; } = new();
+    public Dictionary<string, int> DailyChallenges { get; set; } = new();
+    public long LastDailyRefreshUnix { get; set; } = 0;
+    public Dictionary<string, int> QuestCounters { get; set; } = new(); // kills, headshots, boss_kills, ult_casts, etc.
     public double XpBoostMultiplier { get; set; } = 1.0;
     public long XpBoostExpiresUnix { get; set; } = 0;
 

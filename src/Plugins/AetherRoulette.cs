@@ -126,11 +126,17 @@ public class AetherRoulette
 
     public static List<Prize> GoldPool() => new()
     {
-        new Prize{ Name="50 золота", Color="#b0b0b0", Weight=400, Rarity="Обычный" },
-        new Prize{ Name="150 золота", Color="#b0b0b0", Weight=250, Rarity="Обычный" },
-        new Prize{ Name="400 золота", Color="#3da9fc", Weight=150, Rarity="Редкий" },
-        new Prize{ Name="1000 золота", Color="#a855f7", Weight=70, Rarity="Эпик" },
-        new Prize{ Name="Сундук", Color="#f59e0b", Weight=25, Rarity="Легендарный" },
-        new Prize{ Name="ДЖЕКПОТ 5000", Color="#ff3b6b", Weight=5, Rarity="Мифик" },
+        new Prize{ Name="50 золота", Color="#b0b0b0", Weight=400, Rarity="Обычный",
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.Gold+=50; } } },
+        new Prize{ Name="150 золота", Color="#b0b0b0", Weight=250, Rarity="Обычный",
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.Gold+=150; } } },
+        new Prize{ Name="400 золота", Color="#3da9fc", Weight=150, Rarity="Редкий",
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.Gold+=400; } } },
+        new Prize{ Name="1000 золота", Color="#a855f7", Weight=70, Rarity="Эпик",
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.Gold+=1000; } } },
+        new Prize{ Name="Сундук", Color="#f59e0b", Weight=25, Rarity="Легендарный",
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.Gold+=2500; d.LevelBank+=5; } } },
+        new Prize{ Name="ДЖЕКПОТ 5000", Color="#ff3b6b", Weight=5, Rarity="Мифик",
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.Gold+=5000; d.LevelBank+=15; } } },
     };
 }

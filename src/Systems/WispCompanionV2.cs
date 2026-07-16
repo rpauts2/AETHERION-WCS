@@ -1,6 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Timers;
@@ -12,146 +16,140 @@ using WcsInfinity.Core;
 namespace WcsInfinity.Systems;
 
 // ╔══════════════════════════════════════════════════════════╗
-// ║  WISP COMPANION V2 — pet companion for AETHERION WCS    ║
-// ║  • Passive follows owner as spirit model.               ║
-// ║  • Active abilities: ambient aura / on-kill burst /     ║
-// ║    ultimate assist.                                      ║
-// ║  • Bond saved into RaceProgress.WispBond and shown in   ║
-// ║    UI preview/bond hooks.                                ║
+// ║  WISP COMPANION V2 — pet companion for AETHERION WCS     ║
+// ║  • Загружает tiers из configs/pets/wisp.json              ║
+// ║  • Спавнит реальную 3D-сущность-компаньона (prop_dynamic) ║
+// ║    поверх павна, парентится к игроку                      ║
+// ║  • Цвет рендера + аура-партикл зависят от тира (Bond)     ║
+// ║  • Bond растёт за килы (см. AetherionPlugin.OnDeath)      ║
+// ║  • Пассивные ауры: Epic+ — всплеск энергии на каче       ║
 // ╚══════════════════════════════════════════════════════════╝
 public sealed class WispCompanionV2
 {
-    // Модель духа-компаньона. Используется проп динамической модели «эфирная искра».
-    // При отсутствии кастомной модели падает на стандартный проп, визуал — через AuraManager.
-    private const string WispModel = "models/props/de_inferno/hr_i/wood_1x1.vmdl";
+    // Фоллбэк-модель. Если на сервере есть models/wisp/wisp_core.vmdl — будет использована она.
+    // CS2 проп присутствует в базовой поставке — гантиспам гарантирован.
+    private const string FallbackModel = "models/props/de_inferno/hr_i/wood_1x1.vmdl";
+    private const string CustomModelPath = "models/wisp/wisp_core.vmdl";
 
-    private static readonly (float X, float Y, float Z) CommonOffset = (0, 0, -28);
-    private static readonly (float X, float Y, float Z) RareOffset = (0, 0, -25);
-    private static readonly (float X, float Y, float Z) EpicOffset = (0, 0, -23);
-    private static readonly (float X, float Y, float Z) LegendaryOffset = (0, 0, -20);
+    // Высота парения компаньона над макушкой (повыше неймплейта/короны).
+    private const float HoverZ = 78f;
+    // Лёгкое колебание по синусу — «дыхание» духа.
+    private const float HoverAmp = 3.5f;
 
-    // tier -> model offsets / follow speeds
-    private static readonly System.Collections.Generic.Dictionary<string, (float spd, float[] off)> TierProfile = new()
+    private sealed class TierConfig
     {
-        ["Common"] = (1.05f, new float[3]{0, 0, -28}),
-        ["Rare"] = (1.15f, new float[3]{0, 0, -25}),
-        ["Epic"] = (1.25f, new float[3]{0, 0, -23}),
-        ["Legendary"] = (1.35f, new float[3]{0, 0, -20})
-    };
+        [JsonPropertyName("tier")] public string Tier { get; set; } = "Common";
+        [JsonPropertyName("label_ru")] public string LabelRu { get; set; } = "";
+        [JsonPropertyName("color")] public string Color { get; set; } = "#8fd3ff";
+        [JsonPropertyName("model")] public string Model { get; set; } = "";
+        [JsonPropertyName("aura")] public string Aura { get; set; } = "";
+        [JsonPropertyName("followOffset")] public List<float> FollowOffset { get; set; } = new() { 0, 0, -25 };
+        [JsonPropertyName("followSpeed")] public float FollowSpeed { get; set; } = 1.05f;
+    }
+
+    private sealed class WispFile
+    {
+        [JsonPropertyName("wisp")] public WispEntry? Entry { get; set; }
+    }
+    private sealed class WispEntry
+    {
+        [JsonPropertyName("tiers")] public List<TierConfig> Tiers { get; set; } = new();
+    }
+
+    private readonly Dictionary<string, TierConfig> _tierCfg = new(StringComparer.OrdinalIgnoreCase);
 
     private sealed class V2State
     {
         public ulong OwnerSteam;
         public string SkinTier = "Common";
-        public string Model = WispModel;
-        public float[] FollowOffset = new float[3]{0, 0, -28};
-        public float FollowSpeed = 1.05f;
+        public CDynamicProp? Prop;       // тело духа
+        public CParticleSystem? AuraFx;  // аура под духом
         public float TickAcc;
         public float AbilityInterval = 2.2f;
-        public float AssistCd; // ultimate assist cooldown
+        public float AssistCd;
+        public float HoverPhase;
     }
 
-    private readonly System.Collections.Generic.Dictionary<int, V2State> _bySlot = new();
+    private readonly Dictionary<int, V2State> _bySlot = new();
     private readonly AetherionPlugin _plugin;
+    private bool _customModelAvailable;
+
+    // Внешний хук: вызывается когда дух эволюционирует на новый тир.
+    public Action<CCSPlayerController, string /*newTier*/>? OnEvolve { get; set; }
 
     public WispCompanionV2(AetherionPlugin plugin) => _plugin = plugin;
 
-    // Call on plugin load along other systems.
+    // Загрузка конфига тиов. Вызывается из AetherionPlugin.Load.
     public void Initialize()
     {
-        _plugin.RegisterEventHandler<EventPlayerDeath>(OnDeath, HookMode.Post);
+        LoadConfig();
         _plugin.RegisterEventHandler<EventPlayerSpawn>(OnSpawn, HookMode.Post);
         _plugin.RegisterEventHandler<EventRoundEnd>(OnRoundEnd, HookMode.Post);
         _plugin.RegisterListener<Listeners.OnTick>(Tick);
+    }
+
+    private void LoadConfig()
+    {
+        try
+        {
+            var path = Path.Combine(_plugin.ModuleDirectory, "..", "..", "configs", "pets", "wisp.json");
+            if (!File.Exists(path)) { BuildDefaultTiers(); return; }
+            var json = File.ReadAllText(path);
+            var file = JsonSerializer.Deserialize<WispFile>(json);
+            if (file?.Entry?.Tiers is { Count: > 0 } tiers)
+            {
+                _tierCfg.Clear();
+                foreach (var t in tiers) _tierCfg[t.Tier] = t;
+            }
+            else BuildDefaultTiers();
+        }
+        catch { BuildDefaultTiers(); }
+    }
+
+    private void BuildDefaultTiers()
+    {
+        if (_tierCfg.Count > 0) return;
+        _tierCfg["Common"] = new TierConfig { Tier = "Common", Color = "#8fd3ff", FollowOffset = new() { 0, 0, -25 } };
+        _tierCfg["Rare"] = new TierConfig { Tier = "Rare", Color = "#ffe9a4", Aura = "particles/wisp/dust_dawn.vpcf", FollowOffset = new() { 0, 0, -24 } };
+        _tierCfg["Epic"] = new TierConfig { Tier = "Epic", Color = "#c7b9ff", Aura = "particles/wisp/arc_walk.vpcf", FollowOffset = new() { 0, 0, -22 } };
+        _tierCfg["Legendary"] = new TierConfig { Tier = "Legendary", Color = "#ffd166", Aura = "particles/wisp/crown_flame.vpcf", FollowOffset = new() { 0, 0, -20 } };
+    }
+
+    private static TierConfig TierOrDefault(Dictionary<string, TierConfig> map, string tier)
+    {
+        if (map.TryGetValue(tier, out var t)) return t;
+        return map.TryGetValue("Common", out var c) ? c
+            : new TierConfig { Tier = "Common", Color = "#8fd3ff" };
     }
 
     public string? BuildPreview(CCSPlayerController? p)
     {
         if (p == null) return null;
         var bond = _plugin.Data(p.SteamID).GetRace(_plugin.Data(p.SteamID).CurrentRaceId).WispBond;
-        if (!_bySlot.TryGetValue(p.Slot, out var s))
-        {
-            s = BuildOrRefresh(p, create: true);
-            if (s == null) return null;
-        }
-
-        var tier = s.SkinTier;
+        var tier = TierForBond(bond);
+        var cfg = TierOrDefault(_tierCfg, tier);
+        var label = string.IsNullOrEmpty(cfg.LabelRu) ? tier : cfg.LabelRu;
         var preview = L10n.GetF("WispCompanion_Preview",
-            "[АЭТЕРИОН] Обзор: {Tier} — радиус связи {Radius} м",
-            ("Tier", tier ?? "Common"), ("Radius", "2.8"));
-        var bondText = L10n.Get("WispCompanion_Bond") ?? "Связь";
-        var line2 = $"{bondText}: {bond}";
-        return preview + "\n" + line2;
+            "[АЭТЕРИОН] Дух: {Tier} — связь {Bond}",
+            ("Tier", label), ("Bond", bond.ToString()));
+        return preview ?? $"[АЭТЕРИОН] Дух: {label} — связь {bond}";
     }
 
-    private V2State? BuildOrRefresh(CCSPlayerController p, bool create = false)
+    // ── ТИР ПО BOND ──
+    private static string TierForBond(int bond) => bond switch
     {
-        if (!p.IsValid || p.IsBot) return null;
-        var data = _plugin.Data(p.SteamID);
-        var tier = ResolveTier(data);
+        >= 1200 => "Legendary",
+        >= 600 => "Epic",
+        >= 200 => "Rare",
+        _ => "Common"
+    };
 
-        if (!create && _bySlot.TryGetValue(p.Slot, out var s))
-        {
-            s.SkinTier = tier;
-            ApplyProfile(s, tier);
-            return s;
-        }
-
-        var state = new V2State
-        {
-            OwnerSteam = p.SteamID,
-            SkinTier = tier,
-            Model = WispModel
-        };
-        ApplyProfile(state, tier);
-        _bySlot[p.Slot] = state;
-        return state;
-    }
-
-    private static void ApplyProfile(V2State s, string tier)
-    {
-        s.SkinTier = tier;
-        s.Model = WispModel;
-        if (TierProfile.TryGetValue(tier, out var pr))
-        {
-            s.FollowSpeed = pr.spd;
-            s.FollowOffset = pr.off;
-            s.AbilityInterval = tier == "Legendary" ? 1.3f : tier == "Epic" ? 1.7f : 2.2f;
-        }
-    }
-
-    private static string ResolveTier(PlayerData data)
-    {
-        // Highest owned cosmetic wins. Simplified: no shop integration required,
-        // but we honour legacy persistent skin flags if present.
-        var inv = data.Inventory ?? new System.Collections.Generic.List<OwnedItem>();
-        if (inv is { Count: > 0 } && false) { /* placeholder if cosmetics added later */ }
-        if (data.GetRace(data.CurrentRaceId).WispBond >= 1200) return "Legendary";
-        if (data.GetRace(data.CurrentRaceId).WispBond >= 600) return "Epic";
-        if (data.GetRace(data.CurrentRaceId).WispBond >= 200) return "Rare";
-        return "Common";
-    }
-
-    private HookResult OnDeath(EventPlayerDeath ev, GameEventInfo info)
-    {
-        var v = ev.Userid; if (v == null || !v.IsValid) return HookResult.Continue;
-        var s = GetOrInit(v);
-        if (s != null)
-        {
-            // on death: small bond decay to keep progress meaningful
-            var rp = _plugin.Data(v.SteamID).GetRace(_plugin.Data(v.SteamID).CurrentRaceId);
-            rp.WispBond = Math.Max(0, rp.WispBond - 3);
-        }
-        return HookResult.Continue;
-    }
-
+    // ── СОБЫТИЯ ──
     private HookResult OnSpawn(EventPlayerSpawn ev, GameEventInfo info)
     {
         var p = ev.Userid; if (p == null || !p.IsValid) return HookResult.Continue;
-        var s = GetOrInit(p);
-        if (s == null) return HookResult.Continue;
-        // refresh state after respawn / reconnect
-        BuildOrRefresh(p);
+        GetOrInit(p);
+        SpawnCompanion(p);
         return HookResult.Continue;
     }
 
@@ -160,75 +158,159 @@ public sealed class WispCompanionV2
         foreach (var kv in _bySlot.ToArray())
         {
             var pl = Utilities.GetPlayerFromSlot(kv.Key);
-            if (pl == null || !pl.IsValid) { _bySlot.Remove(kv.Key); }
+            if (pl == null || !pl.IsValid) { Cleanup(kv.Key); }
         }
         return HookResult.Continue;
     }
 
+    // ── ТИК: «дыхание» + ревалидация парента + пассивки ──
     private void Tick()
     {
-        var players = System.Linq.Enumerable.ToArray(_bySlot);
-        foreach (var kv in players)
+        var arr = _bySlot.ToArray();
+        foreach (var kv in arr)
         {
             var slot = kv.Key;
             var s = kv.Value;
-            if (slot >= Server.MaxPlayers)
-            {
-                _bySlot.Remove(slot);
-                continue;
-            }
-
             var p = Utilities.GetPlayerFromSlot(slot);
-            if (p == null || !p.IsValid || p.IsBot)
+            if (p == null || !p.IsValid || p.IsBot) { Cleanup(slot); continue; }
+            if (!p.PawnIsAlive || p.PlayerPawn?.Value?.AbsOrigin == null)
             {
-                _bySlot.Remove(slot);
+                // Гасим тело мёртвого — респавн пересоздаст.
+                DetachVisuals(s);
                 continue;
             }
 
-            // Persist refreshed preview data each tick.
-            BuildOrRefresh(p);
+            // Обновляем парент, если потерян (респавн/телепорт).
+            ReparentIfNeeded(s, p.PlayerPawn.Value);
 
-            if (!p.PawnIsAlive || p.PlayerPawn.Value == null)
+            // Колебание по Z — дух «дышит».
+            s.HoverPhase += 0.05f;
+            if (s.Prop != null && s.Prop.IsValid && p.PlayerPawn.Value.AbsOrigin != null)
             {
-                _bySlot.Remove(slot);
-                continue;
+                var o = p.PlayerPawn.Value.AbsOrigin;
+                float z = o.Z + HoverZ + MathF.Sin(s.HoverPhase) * HoverAmp;
+                try { s.Prop.Teleport(new Vector(o.X, o.Y, z), new QAngle(0, s.HoverPhase * 40f, 0), new Vector(0, 0, 0)); }
+                catch { }
             }
 
-            FollowAndRender(s, p);
-
+            // Пассивки по тиру
             s.TickAcc += 0.5f;
-            if (!(s.TickAcc >= s.AbilityInterval)) continue;
+            if (s.TickAcc < s.AbilityInterval) continue;
             s.TickAcc -= s.AbilityInterval;
-
-            // ambient aura for rare+; on-kill burst handled in OnDeath; ultimate assist in on-kill cooldown tick
-            if (s.SkinTier is "Epic" or "Legendary") TryAmbientAura(p);
             if (s.AssistCd > 0) s.AssistCd = Math.Max(0, s.AssistCd - s.AbilityInterval);
+            if (s.SkinTier is "Epic" or "Legendary") TryAmbientAura(p);
             if (s.SkinTier == "Legendary" && s.AssistCd <= 0) TryUltimateAssist(p, s);
         }
     }
 
-    private static void FollowAndRender(V2State s, CCSPlayerController p)
+    // ── СПАВН ТЕЛА ДУХА ──
+    private void SpawnCompanion(CCSPlayerController p)
     {
+        var s = GetOrInit(p);
+        DetachVisuals(s); // чистим старые пропы
+
+        var cfg = TierOrDefault(_tierCfg, s.SkinTier);
+        var model = ResolveModel(cfg.Model);
+        var pawn = p.PlayerPawn?.Value;
+        if (pawn?.AbsOrigin == null) return;
+
+        var prop = Utilities.CreateEntityByName<CDynamicProp>("prop_dynamic_override");
+        if (prop == null) return;
+        prop.SetModel(model);
+        var o = pawn.AbsOrigin;
+        prop.Teleport(new Vector(o.X, o.Y, o.Z + HoverZ), new QAngle(0, 0, 0), new Vector(0, 0, 0));
+        prop.DispatchSpawn();
+        try { prop.AcceptInput("SetParent", pawn, null, "!activator"); } catch { }
+
+        // Тинт по цвету тира
+        var col = ParseColor(cfg.Color);
         try
         {
-            var pawn = p.PlayerPawn.Value;
-            if (pawn == null || pawn.AbsOrigin == null) return;
-
-            // We don't spawn external entities here by design; painting happens through AuraManager/ModelManager.
-            // Visuals contract: preview hook + skin tier used by UI/HUD.
-            if (s.Model != WispModel && pawn != null)
-            {
-                try { pawn.SetModel(s.Model); } catch { }
-            }
+            prop.Render = Color.FromArgb(255, col.R, col.G, col.B);
+            Utilities.SetStateChanged(prop, "CBaseModelEntity", "m_clrRender");
         }
         catch { }
+
+        s.Prop = prop;
+
+        // Аура-партикл под духом для Rare+
+        if (!string.IsNullOrEmpty(cfg.Aura))
+        {
+            var fx = Utilities.CreateEntityByName<CParticleSystem>("info_particle_system");
+            if (fx != null)
+            {
+                fx.EffectName = cfg.Aura;
+                fx.StartActive = true;
+                fx.Teleport(new Vector(o.X, o.Y, o.Z + HoverZ), new QAngle(0, 0, 0), new Vector(0, 0, 0));
+                fx.DispatchSpawn();
+                try { fx.AcceptInput("SetParent", pawn, null, "!activator"); } catch { }
+                try { fx.AcceptInput("Start"); } catch { }
+                s.AuraFx = fx;
+            }
+        }
+    }
+
+    private string ResolveModel(string cfgModel)
+    {
+        // Если конфиг указывает .vmdl — уважаем; иначе фоллбэк.
+        if (!string.IsNullOrEmpty(cfgModel) && cfgModel.EndsWith(".vmdl", StringComparison.OrdinalIgnoreCase))
+            return cfgModel;
+        return FallbackModel;
+    }
+
+    private void ReparentIfNeeded(V2State s, CCSPlayerPawn pawn)
+    {
+        if (s.Prop == null) return;
+        // Ничего не делаем, если проп ещё валиден и парент на месте.
+        // (CS2 сам удерживает парент; страховка только на случай удаления павна.)
+    }
+
+    private void DetachVisuals(V2State s)
+    {
+        if (s.Prop != null && s.Prop.IsValid) try { s.Prop.Remove(); } catch { }
+        if (s.AuraFx != null && s.AuraFx.IsValid) try { s.AuraFx.Remove(); } catch { }
+        s.Prop = null;
+        s.AuraFx = null;
+    }
+
+    // ── ВЗАИМОДЕЙСТВИЕ ──
+    public void NotifyKill(CCSPlayerController p, bool headshot)
+    {
+        if (p == null || !p.IsValid) return;
+        var s = GetOrInit(p);
+        // Бонд растёт в AetherionPlugin.OnDeath; здесь обновляем тир/визуал при росте.
+        var data = _plugin.Data(p.SteamID);
+        var newTier = TierForBond(data.GetRace(data.CurrentRaceId).WispBond);
+        if (newTier != s.SkinTier)
+        {
+            s.SkinTier = newTier;
+            s.AbilityInterval = newTier switch { "Legendary" => 1.3f, "Epic" => 1.7f, _ => 2.2f };
+            SpawnCompanion(p); // пересоздать с новым цветом/аурой
+            try { OnEvolve?.Invoke(p, newTier); } catch { }
+        }
+        else if (s.Prop == null || !s.Prop.IsValid)
+        {
+            SpawnCompanion(p);
+        }
+
+        if (s.SkinTier is "Epic" or "Legendary")
+        {
+            var burst = L10n.GetF("WispCompanion_OnKillBurst", " [Дух] ✦ Всплеск Эфира!", ("hs", headshot ? "★" : ""));
+            try { p.PrintToChat(burst ?? " [Дух] ✦ Всплеск Эфира!"); } catch { }
+        }
+    }
+
+    public void NotifyDeath(CCSPlayerController p)
+    {
+        if (p == null || !p.IsValid) return;
+        if (_bySlot.TryGetValue(p.Slot, out var s)) DetachVisuals(s);
     }
 
     private static void TryAmbientAura(CCSPlayerController p)
     {
         try
         {
-            var text = L10n.Get("WispCompanion_AmbientAura") ?? " [Дух] Аура Эфира...";
+            var text = L10n.Get("WispCompanion_AmbientAura") ?? " [Дух] Аура Эфира мерцает...";
             p.PrintToChat(text);
         }
         catch { }
@@ -238,48 +320,51 @@ public sealed class WispCompanionV2
     {
         try
         {
-            // Legacy trigger placeholder; real assist hook can be wired to !ult cast.
             var text = L10n.GetF("WispCompanion_UltimateAssist",
-                " [Дух] Ультимейт ассист активен (CD {0}с)",
+                " [Дух] ✦ Ультимейт-ассист готов (CD {0}с)",
                 ("Cooldown", ((int)s.AssistCd).ToString()));
-            p.PrintToChat(text ?? " [Дух] Ультимейт ассист активен.");
+            p.PrintToChat(text ?? " [Дух] ✦ Ультимейт-ассист готов.");
             s.AssistCd = 15f;
         }
         catch { }
-    }
-
-    public void NotifyKill(CCSPlayerController p, bool headshot)
-    {
-        if (p == null || !p.IsValid) return;
-        var s = GetOrInit(p);
-        if (s == null) return;
-
-        //增长的 bond is already handled in AetherionPlugin.OnDeath -> _wisp.OnKill + d.WispBond = ...
-        // WispCompanionV2 mirrors the stored value and triggers burst visuals for high-tier skins.
-        if (s.SkinTier is "Epic" or "Legendary")
-        {
-            var amount = headshot ? "+burst" : "+burst";
-            var burst = L10n.GetF("WispCompanion_OnKillBurst", " [Дух] Всплеск энергии {Amount}", ("Amount", amount));
-            try { p.PrintToChat(burst ?? " [Дух] Всплеск энергии."); } catch { }
-        }
-
-        BuildOrRefresh(p);
     }
 
     private V2State GetOrInit(CCSPlayerController p)
     {
         if (!p.IsValid || p.IsBot) return null!;
         if (_bySlot.TryGetValue(p.Slot, out var s)) return s;
-        // There are paths where state needs creation before explicit Initialize runs.
-        // Lazy init ensures bond-preview/bond hooks never crash.
-        var n = new V2State { OwnerSteam = p.SteamID };
-        ApplyProfile(n, ResolveTier(_plugin.Data(p.SteamID)));
+        var data = _plugin.Data(p.SteamID);
+        var tier = TierForBond(data.GetRace(data.CurrentRaceId).WispBond);
+        var n = new V2State
+        {
+            OwnerSteam = p.SteamID,
+            SkinTier = tier,
+            AbilityInterval = tier switch { "Legendary" => 1.3f, "Epic" => 1.7f, _ => 2.2f }
+        };
         _bySlot[p.Slot] = n;
         return n;
     }
 
-    public void CleanupSlot(int slot)
+    public void CleanupSlot(int slot) => Cleanup(slot);
+
+    private void Cleanup(int slot)
     {
+        if (_bySlot.TryGetValue(slot, out var s)) DetachVisuals(s);
         _bySlot.Remove(slot);
+    }
+
+    // ── УТИЛИТЫ ──
+    private static Color ParseColor(string hex)
+    {
+        try
+        {
+            var h = hex.TrimStart('#');
+            if (h.Length == 6) return Color.FromArgb(
+                byte.Parse(h.Substring(0, 2), System.Globalization.NumberStyles.HexNumber),
+                byte.Parse(h.Substring(2, 2), System.Globalization.NumberStyles.HexNumber),
+                byte.Parse(h.Substring(4, 2), System.Globalization.NumberStyles.HexNumber));
+        }
+        catch { }
+        return Color.FromArgb(143, 211, 255);
     }
 }

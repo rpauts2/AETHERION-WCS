@@ -15,7 +15,9 @@ public enum EffectTag {
     Invisible, SpeedBuff, Slow,    // мобильность/видимость
     Freeze, Stun, Root, Fear,      // контроль (CC)
     Shield, Berserk, Lifesteal, LifestealPassive, // защита/усиление + вампиризм пассивный
-    Reflect, Evasion, CritChance, ManaShield, CooldownReduction // D1/D2 + индикатор CDR
+    Reflect, Evasion, CritChance, ManaShield, CooldownReduction, // D1/D2 + индикатор CDR
+    Pull, Push, Execute, Disarm, Mark, SlowAura, // расширение для новых рас
+    ArmorBreak, Silence, Blind, Haste, TimeDilation // D3+ эффекты
 }
 
 public class ActiveEffect
@@ -208,8 +210,8 @@ public class CombatEffects
         finalDamage = baseDamage;
         if (!HasEffect(attackerSlot, EffectTag.CritChance)) return false;
         float chance = EffectValue(attackerSlot, EffectTag.CritChance); // 0..1
-        if (new Random().NextDouble() >= chance) return false;
-        float mult = 1.5f + (float)new Random().NextDouble() * 1.0f; // 1.5x..2.5x
+        if (Random.Shared.NextDouble() >= chance) return false;
+        float mult = 1.5f + (float)Random.Shared.NextDouble() * 1.0f; // 1.5x..2.5x
         finalDamage = (int)(baseDamage * mult);
         return true;
     }
@@ -218,7 +220,7 @@ public class CombatEffects
     {
         if (!HasEffect(targetSlot, EffectTag.Evasion)) return false;
         float chance = EffectValue(targetSlot, EffectTag.Evasion);
-        return new Random().NextDouble() < chance;
+        return Random.Shared.NextDouble() < chance;
     }
 
     public int TryManaShield(int targetSlot, int damage)

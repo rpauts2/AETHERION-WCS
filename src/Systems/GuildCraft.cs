@@ -47,7 +47,7 @@ public class GuildCraftSystem
 
     public static void InitDefaults()
     {
-        Register("ÆРУДНАЯ СВИТКА", GuildTier.Wood, 100, 25, "gold_bonus");
+        Register("РУДНАЯ СВИТКА", GuildTier.Wood, 100, 25, "gold_bonus");
         Register("ЖЕЗЛ КОМАНДИРА", GuildTier.Iron, 300, 50, "xp_bonus");
         Register("ХРАНИТЕЛЬ ЗНАМЕНИ", GuildTier.Bronze, 700, 80, "member_slot_+1");
         Register("БАННЕР ЭФИРА", GuildTier.Silver, 1500, 120, "all_bonuses");

@@ -1,0 +1,47 @@
+[
+  { "raceId": 2000, "weapon": "weapon_ak47",        "paintkit": 12,   "comment": "Пудж — Crimson Web" },
+  { "raceId": 2001, "weapon": "weapon_usp_silencer","paintkit": 962,  "comment": "Флеш-рейдер — Printstream USP-S" },
+  { "raceId": 2002, "weapon": "weapon_awp",         "paintkit": 359,  "comment": "Кибер-снайпер — Asiimov AWP" },
+  { "raceId": 2003, "weapon": "weapon_m4a1",        "paintkit": 309,  "comment": "Дух-апостол — Howl M4A4" },
+  { "raceId": 2004, "weapon": "weapon_ssg08",       "paintkit": 653,  "comment": "Арктик-охотник — Neo-Noir SSG" },
+  { "raceId": 2025, "weapon": "weapon_ak47",        "paintkit": 279,  "comment": "Искровой маг — Asiimov AK" },
+  { "raceId": 2026, "weapon": "weapon_mp9",         "paintkit": 475,  "comment": "Скороход — Hyper Beast MP9" },
+
+  { "raceId": 2005, "weapon": "weapon_ak47",        "paintkit": 180,  "comment": "Вулкан-рейнджер — Fire Serpent" },
+  { "raceId": 2006, "weapon": "weapon_m4a1_silencer","paintkit": 475, "comment": "Грави-страж — Hyper Beast M4A1-S" },
+  { "raceId": 2007, "weapon": "weapon_awp",         "paintkit": 522,  "comment": "Сайлон-рейнджер — Fade AWP" },
+  { "raceId": 2008, "weapon": "weapon_deagle",      "paintkit": 984,  "comment": "Акустик-призрак — Printstream Deagle" },
+  { "raceId": 2009, "weapon": "weapon_m4a1",        "paintkit": 597,  "comment": "Сердечник — Bloodsport M4A4" },
+  { "raceId": 2027, "weapon": "weapon_usp_silencer","paintkit": 962,  "comment": "Теневик — Printstream USP-S" },
+  { "raceId": 2028, "weapon": "weapon_ak47",        "paintkit": 597,  "comment": "Берсерк-новобранец — Bloodsport AK" },
+
+  { "raceId": 2010, "weapon": "weapon_awp",         "paintkit": 653,  "comment": "Плазменный синдикат — Neo-Noir AWP" },
+  { "raceId": 2011, "weapon": "weapon_ak47",        "paintkit": 279,  "comment": "Капкан-охотник — Asiimov AK" },
+  { "raceId": 2012, "weapon": "weapon_ssg08",       "paintkit": 522,  "comment": "Бесплотный лучник — Fade SSG" },
+  { "raceId": 2013, "weapon": "weapon_deagle",      "paintkit": 446,  "comment": "Кровяной паладин — Medusa Deagle" },
+  { "raceId": 2014, "weapon": "weapon_awp",         "paintkit": 446,  "comment": "Морозный жнец — Medusa AWP" },
+  { "raceId": 2029, "weapon": "weapon_ak47",        "paintkit": 180,  "comment": "Штормовый призыватель — Fire Serpent" },
+  { "raceId": 2030, "weapon": "weapon_m4a1",        "paintkit": 12,   "comment": "Ядовитый плёг — Crimson Web M4A4" },
+
+  { "raceId": 2015, "weapon": "weapon_deagle",      "paintkit": 984,  "comment": "Ткач-дуэлянт — Printstream Deagle" },
+  { "raceId": 2016, "weapon": "weapon_ak47",        "paintkit": 653,  "comment": "Мираж-шаман — Neo-Noir AK" },
+  { "raceId": 2017, "weapon": "weapon_m4a1_silencer","paintkit": 309, "comment": "Бастион — Howl M4A1-S" },
+  { "raceId": 2018, "weapon": "weapon_awp",         "paintkit": 909,  "comment": "Тайфун-рейнджер — Gungnir AWP ★" },
+  { "raceId": 2019, "weapon": "weapon_usp_silencer","paintkit": 962,  "comment": "Коде-рейнджер — Printstream USP-S" },
+  { "raceId": 2031, "weapon": "weapon_awp",         "paintkit": 344,  "comment": "Хрономант — Dragon Lore AWP ★" },
+  { "raceId": 2032, "weapon": "weapon_ak47",        "paintkit": 597,  "comment": "Жнец Эфира — Bloodsport AK" },
+
+  { "raceId": 2020, "weapon": "weapon_ak47",        "paintkit": 180,  "comment": "Пламя-самурай — Fire Serpent ★" },
+  { "raceId": 2021, "weapon": "weapon_m4a1_silencer","paintkit": 475, "comment": "Сферо-страж — Hyper Beast ★" },
+  { "raceId": 2022, "weapon": "weapon_deagle",      "paintkit": 446,  "comment": "Фантом-берсерк — Medusa ★" },
+  { "raceId": 2023, "weapon": "weapon_awp",         "paintkit": 344,  "comment": "Небесный арбитр — Dragon Lore ★" },
+  { "raceId": 2024, "weapon": "weapon_usp_silencer","paintkit": 962,  "comment": "Зеро-фантом — Printstream ★" },
+  { "raceId": 2033, "weapon": "weapon_ak47",        "paintkit": 597,  "comment": "Драконорождённый — Bloodsport ★" },
+  { "raceId": 2034, "weapon": "weapon_awp",         "paintkit": 909,  "comment": "Архимаг Эфира — Gungnir AWP ★" },
+
+  { "raceId": 2035, "weapon": "weapon_awp",         "paintkit": 344,  "comment": "★★★ Yidhari (ZZZ) — Dragon Lore" },
+  { "raceId": 2036, "weapon": "weapon_m4a1_silencer","paintkit": 475, "comment": "★★★ Master Chief — Hyper Beast" },
+  { "raceId": 2037, "weapon": "weapon_deagle",      "paintkit": 984,  "comment": "★★★ Deadpool — Printstream" },
+  { "raceId": 2038, "weapon": "weapon_ak47",        "paintkit": 279,  "comment": "★★★ Yoru (Valorant) — Asiimov" },
+  { "raceId": 2039, "weapon": "weapon_awp",         "paintkit": 446,  "comment": "★★★ Metrocop (HL:A) — Medusa" }
+]

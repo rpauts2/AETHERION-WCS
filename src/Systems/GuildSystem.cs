@@ -99,7 +99,7 @@ public class GuildManager
 
 public static class GuildMenu
 {
-    public static void OpenMain(CCSPlayerController p, BasePlugin plugin)
+    public static void OpenMain(CCSPlayerController p, BasePlugin plugin, Database.IPlayerStore? store = null)
     {
         var g = GuildManager.Instance.Of(p.SteamID);
         var menu = new WasdMenu("Гильдия AETHERION", plugin);
@@ -115,7 +115,7 @@ public static class GuildMenu
             menu.AddItem($"Казна: {g.Treasury}", null);
             menu.AddItem($"Члены: {g.Members.Count}/{g.MaxMembers}", null);
             menu.AddItem("Внести золото", (pl, _) => OpenDonate(pl, plugin, g));
-            menu.AddItem("Усилить знамя (XP)", (pl, _) => BannerUp(pl, plugin, g));
+            menu.AddItem("Усилить знамя (XP)", (pl, _) => BannerUp(pl, plugin, g, store));
             menu.AddItem("Покинуть гильдию", (pl, _) => Leave(pl, plugin, g));
             menu.AddItem("Рейтинг знамён", (pl, _) => OpenRating(pl, plugin));
         }
@@ -138,9 +138,9 @@ public static class GuildMenu
         p.PrintToChat($" Внести золото: !guild donate <сумма>. Например: !guild donate 500. Казна: {g.Treasury}");
     }
 
-    private static void BannerUp(CCSPlayerController p, BasePlugin plugin, Guild g)
+    private static void BannerUp(CCSPlayerController p, BasePlugin plugin, Guild g, Database.IPlayerStore? store = null)
     {
-        var store = new Database.SqlitePlayerStore(System.IO.Path.Combine(plugin.ModuleDirectory, "aetherion.db"));
+        if (store == null) { p.PrintToChat(" Ошибка: хранилище данных недоступно."); return; }
         var d = store.Load(p.SteamID) ?? new Models.PlayerData { SteamId = p.SteamID, Name = p.PlayerName };
         long cost = 200;
         if (d.Gold < cost) { p.PrintToChat($" Нужно {cost} золота для укрепления знамени."); return; }

@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using CounterStrikeSharp.API;
 
 namespace WcsInfinity.Systems;
 
 public class ChatSystem
 {
-    private Timer? _timer;
     private int _idx;
     private static readonly string[] _default =
     {
@@ -22,20 +20,7 @@ public class ChatSystem
         " [AETHERION] Ежедневный вход: !daily — фри-спины и бонусы."
     };
 
-    public void Start()
-    {
-        var rnd = new Random();
-        double intervalSec = rnd.Next(300, 600);
-        _timer = new Timer(Tick, null, (int)(intervalSec * 1000), (int)(intervalSec * 1000));
-    }
-
-    public void Stop()
-    {
-        _timer?.Dispose();
-        _timer = null;
-    }
-
-    private void Tick(object? _)
+    public void Tick()
     {
         try
         {

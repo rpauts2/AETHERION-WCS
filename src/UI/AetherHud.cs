@@ -18,6 +18,37 @@ public static class AetherHud
             ("Tier", tier), ("Bond", bond.ToString()));
         return tierText ?? $"[АЭТЕРИОН] Дух {tier} — связь {bond}";
     }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  NAMEPLATE — компактная надпись над головой игрока (point_worldtext).
+    //  Формат: ▌ Имя ▌ Раса ур.N ✦ Парагон · Круг D · Дух: bond
+    //  Без переносов (worldtext на одну строку читается стабильнее).
+    // ═══════════════════════════════════════════════════════════════════
+    public static string NameplateHtml(string playerName, string raceName, int level,
+        long paragon, int division, int wispBond, bool vip, int tier)
+    {
+        const string CName = "#FFFFFF";
+        var cRace = tier switch { 5 => "#FF4D6D", 4 => "#C77DFF", 3 => "#7C5CFF", 2 => "#46E0FF", _ => "#9AA0A6" };
+        const string CDiv = "#FFD200";
+        const string CWisp = "#7CFFA0";
+        const string CVip = "#FFB347";
+
+        var sb = new StringBuilder();
+        sb.Append($"<font color='{CName}'>{Truncate(playerName, 16)}</font>");
+        sb.Append($" <font color='{cRace}'> {Truncate(raceName, 14)} ур.{level}</font>");
+        if (paragon > 0) sb.Append($" <font color='{CDiv}'>★{paragon}</font>");
+        sb.Append($" <font color='{CDiv}'>D{division}</font>");
+        if (wispBond > 0) sb.Append($" <font color='{CWisp}'>◈{wispBond}</font>");
+        if (vip) sb.Append($" <font color='{CVip}'>VIP</font>");
+        return sb.ToString();
+    }
+
+    private static string Truncate(string s, int max)
+    {
+        if (string.IsNullOrEmpty(s)) return "";
+        return s.Length <= max ? s : s.Substring(0, max);
+    }
+
     // Цвета HTML, поддерживаемые center-html в CS2
     private const string Gold = "#FFD200";
     private const string Cyan = "#46E0FF";
