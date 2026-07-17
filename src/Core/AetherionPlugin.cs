@@ -174,7 +174,9 @@ public class AetherionPlugin : BasePlugin
         // Новые системы: PvE, Арена, Порталы, Контракты, Мутации
         _stormWave = new StormWaveSystem(_engine, sid => Data(sid), pd => SaveData(pd));
         _duelArena = new DuelArenaSystem(_engine, sid => Data(sid), pd => SaveData(pd));
-        _etherPortal = new EtherPortalSystem(_engine, sid => Data(sid), pd => SaveData(pd));
+        _etherPortal = new EtherPortalSystem(_engine, sid => Data(sid), pd => SaveData(pd), (sid, amount) => {
+            _ether[sid] = Math.Min(EtherMax, _ether.GetValueOrDefault(sid, 0) + amount);
+        });
         _contracts = new ContractSystem(sid => Data(sid), pd => SaveData(pd));
         _mutation = new RaceMutationSystem(_engine, _combat);
 
@@ -337,7 +339,7 @@ public class AetherionPlugin : BasePlugin
             RefreshNameplate(p, d, rp, def);
 
             // Дух-компаньон V2 — спавн тела над головой
-            try { _wispCompanion.NotifyKill(p, false); } catch (Exception ex) { Console.WriteLine($"[AETHERION] wisp notify err: {ex.Message}"); }
+            try { _wispCompanion.EnsureSpawned(p); } catch (Exception ex) { Console.WriteLine($"[AETHERION] wisp spawn err: {ex.Message}"); }
 
             // Welcome-биндинг (один раз)
             if (!_boundOnce.Contains(p.SteamID))
@@ -618,6 +620,7 @@ public class AetherionPlugin : BasePlugin
 
     private void GameTick()
     {
+        try { Cs2EngineApi.FlushPendingBeams(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] beam cleanup err: {ex.Message}"); }
         try { _stormWave.Tick(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] storm tick err: {ex.Message}"); }
         try { _duelArena.Tick(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] duel tick err: {ex.Message}"); }
         try { _etherPortal.Tick(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] portal tick err: {ex.Message}"); }

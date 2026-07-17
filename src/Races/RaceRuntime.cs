@@ -519,7 +519,7 @@ public static class EffectLibrary
             ctx.Engine.AddHealth(ctx.Slot, (int)(v + 2*ctx.SkillLevel), 200),
 
         ["kill_heal_aura"] = v => ctx =>
-            ctx.Engine.AddHealth(ctx.Slot, (int)(v + 2*ctx.SkillLevel), 200),
+            ctx.Engine.ForAlliesInRadius(ctx.Slot, 120f, s => ctx.Engine.AddHealth(s, (int)(v*ctx.SkillLevel), 200)),
 
         ["slow"] = v => ctx =>
         {
@@ -708,9 +708,6 @@ public static class EffectLibrary
                 ctx.Combat.Apply(EffectTag.Burn, ctx.VictimSlot.Value, 3+ctx.SkillLevel, 8f, 1f, ctx.Slot);
             }
         },
-
-        ["kill_heal_aura"] = v => ctx =>
-            ctx.Engine.ForAlliesInRadius(ctx.Slot, 120f, s => ctx.Engine.AddHealth(s, (int)(v*ctx.SkillLevel), 200)),
 
         ["dash_slash_ult"] = v => ctx =>
         {

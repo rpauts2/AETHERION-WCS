@@ -103,7 +103,7 @@ public sealed class NameplateManager
     // Тиковая страховка: если парент потерян (респавн), поднимаем текст обратно над головой.
     public void Tick()
     {
-        foreach (var kv in _plates)
+        foreach (var kv in _plates.ToArray())
         {
             var slot = kv.Key;
             var plate = kv.Value;

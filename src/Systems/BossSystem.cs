@@ -302,7 +302,9 @@ public sealed class BossSystem
             float dist = MathF.Sqrt(d.X * d.X + d.Y * d.Y + d.Z * d.Z);
             if (dist <= BOSS_ATTACK_RANGE)
             {
-                // Периодическое ослепление/замедление вместо прямого урона (игроки не получают урон от пропа)
+                // Apply damage + blind/slow
+                int newHp = Math.Max(1, _engine.GetHealth(p.Slot) - BOSS_ATTACK_DMG);
+                _engine.SetHealth(p.Slot, newHp);
                 _engine.Blind(p.Slot, 0.3f, 0.2f);
                 _engine.SetSpeed(p.Slot, 0.7f);
                 // Восстановить скорость через 2 секунды

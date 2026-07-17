@@ -394,7 +394,8 @@ public sealed class WispCompanionV2
         var s = GetOrInit(p);
         var data = _plugin.Data(p.SteamID);
         var rp = data.GetRace(data.CurrentRaceId);
-        var evolved = WispEvolution.CheckEvolve(rp.WispBond - (headshot ? 6 : 4), rp.WispBond);
+        int oldBond = Math.Max(0, rp.WispBond - (headshot ? 6 : 4));
+        var evolved = WispEvolution.CheckEvolve(oldBond, rp.WispBond);
         if (evolved != null)
         {
             s.Stage = evolved.Stage;
@@ -407,6 +408,14 @@ public sealed class WispCompanionV2
         {
             SpawnCompanion(p);
         }
+    }
+
+    public void EnsureSpawned(CCSPlayerController p)
+    {
+        if (p == null || !p.IsValid || p.IsBot) return;
+        var s = GetOrInit(p);
+        if (s.Prop == null || !s.Prop.IsValid)
+            SpawnCompanion(p);
     }
 
     public void NotifyDeath(CCSPlayerController p)

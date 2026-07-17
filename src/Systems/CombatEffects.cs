@@ -165,12 +165,12 @@ public class CombatEffects
 
     public void AoeDamage(float x, float y, float z, float radius, int damage, int attackerTeam, int? sourceSlot = null)
     {
+        float multiplier = GetDamageCapMultiplier(sourceSlot, this);
+        int scaledDamage = (int)(damage * multiplier);
         foreach (var slot in EnemiesInRadius(x, y, z, radius, attackerTeam))
         {
             int victimHealth = Math.Max(1, _engine.GetHealth(slot));
-            float multiplier = GetDamageCapMultiplier(sourceSlot, this);
-            int capped = Math.Min(damage, victimHealth);
-            int finalDamage = Math.Min(capped, victimHealth);
+            int finalDamage = Math.Min(scaledDamage, victimHealth);
             _engine.SetHealth(slot, Math.Max(0, victimHealth - finalDamage));
         }
     }

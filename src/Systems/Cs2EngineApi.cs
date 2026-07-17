@@ -131,8 +131,10 @@ public class Cs2EngineApi : IEngineApi
         ent.Teleport(new Vector(x,y,z), new QAngle(0,0,0), new Vector(0,0,0));
         ent.DispatchSpawn();
         ent.AcceptInput("Start");
-        // авто-очистка через 5 сек
-        Server.NextFrame(() => { });
+        Server.NextFrame(() =>
+        {
+            try { if (ent.IsValid) ent.Remove(); } catch { }
+        });
     }
 
     public void Beam(float x1,float y1,float z1,float x2,float y2,float z2,int r,int g,int b,float life)
@@ -144,6 +146,21 @@ public class Cs2EngineApi : IEngineApi
         beam.Teleport(new Vector(x1,y1,z1), new QAngle(0,0,0), new Vector(0,0,0));
         beam.EndPos.X = x2; beam.EndPos.Y = y2; beam.EndPos.Z = z2;
         beam.DispatchSpawn();
+        // Beam is a static visual — remove next frame after it renders once
+        _pendingBeamRemovals.Add(beam);
+    }
+
+    private static readonly List<CEnvBeam> _pendingBeamRemovals = new();
+    private static bool _cleanupRegistered;
+
+    internal static void FlushPendingBeams()
+    {
+        for (int i = _pendingBeamRemovals.Count - 1; i >= 0; i--)
+        {
+            var b = _pendingBeamRemovals[i];
+            _pendingBeamRemovals.RemoveAt(i);
+            try { if (b != null && b.IsValid) b.Remove(); } catch { }
+        }
     }
 
     public void PlaySound(int slot, string sound)

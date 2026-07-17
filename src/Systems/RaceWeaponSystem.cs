@@ -137,33 +137,28 @@ public sealed class RaceWeaponSystem
 
     // Выдать кастомное оружие при спавне (вместо стандартного).
     // Вызывается из AetherionPlugin.OnSpawn после ApplyModel.
-    public void EquipOnSpawn(CCSPlayerController p, Races.RaceDefinition def)
+    public void EquipOnSpawn(CCSPlayerController p, Races.RaceDefinition? def)
     {
         if (p == null || !p.IsValid || p.IsBot || !p.PawnIsAlive) return;
         if (p.PlayerPawn?.Value == null) return;
+        if (def == null) return;
 
         var weaponName = GetWeaponForRace(def);
         int paintKit = GetPaintKitForRace(def);
 
-        // Убираем текущее оружие (для чистоты выдачи)
         try
         {
-            // GiveNamedItem работает через сервер — не требует менеджера предметов
-            var pawn = p.PlayerPawn.Value;
+            // Give weapon via CSS API
+            p.GiveNamedItem(weaponName);
 
-            // Применяем paintkit на павне. В CS2 m_nFallbackPaintKit
-            // контролирует вид скина оружия которое держит игрок.
+            // Apply paintkit via reflection
             if (paintKit > 0)
             {
                 try
                 {
-                    // PaintKit через сетевое свойство павна. CSS API может не экспортировать его напрямую,
-                    // поэтому используем try/catch — на некоторых версиях не сработает, это нормально.
-                    var controller = p;
-                    var prop = controller?.PlayerPawn?.Value;
+                    var prop = p.PlayerPawn?.Value;
                     if (prop != null)
                     {
-                        // Пытаемся установить через reflection (совместимо с любыми версиями CSS API)
                         var propInfo = prop.GetType().GetProperty("FallbackPaintKit");
                         if (propInfo != null)
                         {
@@ -174,7 +169,6 @@ public sealed class RaceWeaponSystem
                 }
                 catch (Exception ex)
                 {
-                    // Некритично — paintkit косметический
                     Console.WriteLine($"[AETHERION] paintkit fail race {def.Id}: {ex.Message}");
                 }
             }

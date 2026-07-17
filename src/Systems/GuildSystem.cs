@@ -21,6 +21,7 @@ public class Guild
     public long BannerXp;
     public DateTime CreatedUtc = DateTime.UtcNow;
     public int WeeklyFrags;
+    public HashSet<int> CraftedIds = new();
     public int Level => BannerLevel;
     public long Bank => Treasury;
     public long BannerXpNeeded => 5000L * BannerLevel * BannerLevel;

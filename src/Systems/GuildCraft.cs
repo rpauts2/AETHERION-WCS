@@ -39,21 +39,13 @@ public static class GuildCraftSystem
     {
         if (!_recipes.TryGetValue(recipeId, out var r)) return false;
         if (g.Treasury < r.GoldCost) return false;
+        if (g.CraftedIds.Contains(recipeId)) return false;
         g.Treasury -= r.GoldCost;
+        g.CraftedIds.Add(recipeId);
         GuildManager.Instance.AddBannerXp(g, r.BannerXpReward);
 
-        // Apply effect to guild
-        switch (r.Effect)
-        {
-            case "gold_bonus": break; // passive: GoldBonus is computed from BannerLevel
-            case "xp_bonus": break; // passive: XpBonus is computed from BannerLevel
-            case "member_slot": break; // handled by MaxMembers property
-            case "heal_aura": break; // passive, checked elsewhere
-            case "banner_xp_boost": break; // passive
-            case "all_bonuses": break; // passive
-            case "all_bonuses_big": break; // passive
-            case "guild_heart": break; // passive
-        }
+        // Effects are passive — computed from BannerLevel
+        // GoldBonus, XpBonus, MaxMembers are properties on Guild that scale with BannerLevel
 
         return true;
     }

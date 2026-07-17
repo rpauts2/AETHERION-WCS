@@ -176,9 +176,8 @@ public class DuelArenaSystem
     {
         int elo = GetElo(p.SteamID);
         int streak = _winStreak.GetValueOrDefault(p.SteamID);
-        int wins = streak;
         p.PrintToChat(" \x0B═══ АРЕНА 1v1 ═══");
-        p.PrintToChat($"  ELO: {elo} | Серия побед: {wins}");
+        p.PrintToChat($"  ELO: {elo} | Серия побед: {streak}");
         if (_currentDuel != null && _currentDuel.Active)
         {
             int timeLeft = (int)_duelTimeout;

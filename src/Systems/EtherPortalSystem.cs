@@ -21,6 +21,7 @@ public class EtherPortalSystem
     private readonly IEngineApi _engine;
     private readonly Func<ulong, Models.PlayerData> _dataFn;
     private readonly Action<Models.PlayerData> _saveFn;
+    private readonly Action<ulong, int> _addEther;
     private readonly Dictionary<ulong, int> _portalsLooted = new();
     private readonly List<EtherPortal> _portals = new();
     private readonly Random _rng = new();
@@ -31,11 +32,12 @@ public class EtherPortalSystem
 
     public int ActivePortals => _portals.Count(p => !p.Looted && DateTime.UtcNow < p.ExpiresUtc);
 
-    public EtherPortalSystem(IEngineApi engine, Func<ulong, Models.PlayerData> dataFn, Action<Models.PlayerData> saveFn)
+    public EtherPortalSystem(IEngineApi engine, Func<ulong, Models.PlayerData> dataFn, Action<Models.PlayerData> saveFn, Action<ulong, int> addEther)
     {
         _engine = engine;
         _dataFn = dataFn;
         _saveFn = saveFn;
+        _addEther = addEther;
         _spawnInterval = 180f + _rng.Next(0, 120);
         _spawnTimer = 60f;
     }
@@ -134,6 +136,7 @@ public class EtherPortalSystem
             int ether = portal.Quality switch { 2 => 30, 1 => 15, _ => 8 };
             EconomySystem.AddGold(d, gold);
             LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), Races.RaceTier.T1_Spark, xp);
+            _addEther(p.SteamID, ether);
             _saveFn(d);
             p.PrintToChat($" \x06[AETHERION] 🌀 Отбил мини-босса! +{gold}з +{xp}XP +{ether}⚡");
         }
@@ -146,6 +149,7 @@ public class EtherPortalSystem
 
             EconomySystem.AddGold(d, gold);
             LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), Races.RaceTier.T1_Spark, xp);
+            _addEther(p.SteamID, ether);
             _saveFn(d);
 
             string qualityTag = portal.Quality switch { 2 => "⭐ ЛЕГЕНДАРНЫЙ", 1 => "✨ РЕДКИЙ", _ => "Сундук" };
