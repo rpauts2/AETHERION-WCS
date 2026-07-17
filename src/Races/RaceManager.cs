@@ -14,10 +14,17 @@ public class RaceManager
 
     public void LoadFromFile(string path)
     {
-        if (!File.Exists(path)) return;
-        var json = File.ReadAllText(path);
-        var list = JsonSerializer.Deserialize<List<RaceDefinition>>(json) ?? new();
-        foreach (var r in list) { r.IndexAbilities(); _races[r.Id] = r; }
+        try
+        {
+            if (!File.Exists(path)) return;
+            var json = File.ReadAllText(path);
+            var list = JsonSerializer.Deserialize<List<RaceDefinition>>(json) ?? new();
+            foreach (var r in list) { r.IndexAbilities(); _races[r.Id] = r; }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AETHERION] Ошибка загрузки рас из {path}: {ex.Message}");
+        }
     }
 
     public void LoadFromMultiple(string[] paths)

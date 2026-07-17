@@ -145,6 +145,7 @@ public class AetherionPlugin : BasePlugin
 
         // Ачивки
         _achievements = new AchievementSystem();
+        _achievements.SetRaceManager(_races);
         _achievements.RegisterRaceAchievements(_races.Races.Keys);
 
         // Неймплейты над головой
@@ -315,6 +316,9 @@ public class AetherionPlugin : BasePlugin
             // Кастомное оружие (скин по расе/архетипу)
             _raceWeapons.EquipOnSpawn(p, def);
             ApplyPassivesOnSpawn(p, d, rp);
+
+            // Очистка боевых эффектов от прошлой жизни
+            _combat.ClearPlayer(p.Slot);
 
             // Бонус HP от духа
             var wispBon = _wispCompanion.GetOwnerBonuses(p);
@@ -656,6 +660,7 @@ public class AetherionPlugin : BasePlugin
     {
         try
         {
+            if (p == null || !p.IsValid || !p.PawnIsAlive) return;
             var d = Data(p.SteamID);
             var rp = d.GetRace(d.CurrentRaceId);
             var def = _races.Get(d.CurrentRaceId);
@@ -666,7 +671,7 @@ public class AetherionPlugin : BasePlugin
             int lvl = rp.SkillLevels.GetValueOrDefault(ab.Index, 0);
             if (lvl <= 0) { p.PrintToChat(" \x07[AETHERION] Сначала прокачай способность."); return; }
             float now = Server.CurrentTime;
-            if (_activeCd.TryGetValue(p.SteamID, out var cd) && now < cd)
+            if (!_mutation.IsNoCooldowns() && _activeCd.TryGetValue(p.SteamID, out var cd) && now < cd)
             { p.PrintToChat($" \x07[AETHERION] Перезарядка: {(int)(cd - now)}с."); return; }
             var ctx = BuildCtx(p, d, rp, p.Slot);
             if (_runtime.Activate(ctx, def, rp, ab.Index))
@@ -683,6 +688,7 @@ public class AetherionPlugin : BasePlugin
     {
         try
         {
+            if (p == null || !p.IsValid || !p.PawnIsAlive) return;
             var d = Data(p.SteamID);
             var rp = d.GetRace(d.CurrentRaceId);
             var def = _races.Get(d.CurrentRaceId);
@@ -696,7 +702,7 @@ public class AetherionPlugin : BasePlugin
                 return;
             }
             float now = Server.CurrentTime;
-            if (_ultCooldown.TryGetValue(p.SteamID, out var cd) && now < cd)
+            if (!_mutation.IsNoCooldowns() && _ultCooldown.TryGetValue(p.SteamID, out var cd) && now < cd)
             { p.PrintToChat($" \x07[AETHERION] Ульта перезаряжается: {(int)(cd - now)}с."); return; }
             int etherNeed = ab.EtherCost > 0 ? ab.EtherCost : 50;
             if (_ether.GetValueOrDefault(p.SteamID, 0) < etherNeed)

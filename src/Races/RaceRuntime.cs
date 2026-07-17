@@ -57,7 +57,7 @@ public static class EffectLibrary
         },
 
         ["invisibility"] = v => ctx =>
-            ctx.Engine.SetInvisible(ctx.Slot, true),
+            ctx.Combat.Apply(EffectTag.Invisible, ctx.Slot, 1, Math.Max(1f, v)),
 
         ["lightning_strike"] = v => ctx =>
         {
@@ -70,12 +70,20 @@ public static class EffectLibrary
         {
             var pos = ctx.Engine.GetPosition(ctx.Slot);
             ctx.Engine.SpawnParticle("particles/aether_explosion.vpcf", pos.x, pos.y, pos.z);
+            var pawn = ctx.Player.PlayerPawn?.Value;
+            if (pawn != null)
+                ctx.Combat.AoeDamage(pos.x, pos.y, pos.z, 250f, (int)(v * ctx.SkillLevel), ctx.Player.TeamNum, ctx.Slot);
         },
 
         ["teleport_spawn"] = v => ctx =>
         {
-            var pos = ctx.Engine.GetPosition(ctx.Slot);
-            ctx.Engine.SpawnParticle("particles/aether_recall.vpcf", pos.x, pos.y, pos.z);
+            var pawn = ctx.Player.PlayerPawn?.Value;
+            if (pawn?.AbsOrigin != null)
+            {
+                var pos = ctx.Engine.GetPosition(ctx.Slot);
+                ctx.Engine.SpawnParticle("particles/aether_recall.vpcf", pos.x, pos.y, pos.z);
+                ctx.Engine.Teleport(ctx.Slot, 0, 0, 0);
+            }
         },
 
         ["lifesteal"] = v => ctx =>
@@ -420,8 +428,7 @@ public static class EffectLibrary
 
         ["mark"] = v => ctx =>
         {
-            if(ctx.VictimSlot.HasValue)
-                ctx.Combat.Apply(EffectTag.CritChance, ctx.VictimSlot.Value, v, 5f);
+            ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, v, 5f);
         },
 
         ["ally_shield"] = v => ctx =>
@@ -787,7 +794,7 @@ public static class EffectLibrary
         ["invisibility_combo"] = v => ctx =>
         {
             ctx.Engine.SetInvisible(ctx.Slot, true);
-            ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, v-1, 4f);
+            ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, Math.Abs(v), 4f);
         },
 
         ["disarm_damage"] = v => ctx =>
@@ -830,7 +837,11 @@ public static class EffectLibrary
         ["blinded_bonus"] = v => ctx =>
             ctx.Engine.SetSpeed(ctx.Slot, 1f + v*0.005f),
 
-        ["summon_wisp"] = v => ctx => { /* wisp spawn */ },
+        ["summon_wisp"] = v => ctx =>
+        {
+            ctx.Engine.AddHealth(ctx.Slot, (int)v, 250);
+            ctx.Combat.Apply(EffectTag.Shield, ctx.Slot, v * 2, 8f);
+        },
     };
 
     public static AbilityEffect? Resolve(string effect, float value) =>

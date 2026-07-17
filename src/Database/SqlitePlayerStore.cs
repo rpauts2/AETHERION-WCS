@@ -166,8 +166,8 @@ public class SqlitePlayerStore : IPlayerStore
         using var con = new SqliteConnection(_connStr);
         con.Open();
         using var tx = con.BeginTransaction();
-        using (var del = con.CreateCommand()) { del.CommandText = "DELETE FROM guilds"; del.ExecuteNonQuery(); }
-        using (var del2 = con.CreateCommand()) { del2.CommandText = "DELETE FROM guild_members"; del2.ExecuteNonQuery(); }
+        using (var del = con.CreateCommand()) { del.CommandText = "DELETE FROM guilds"; del.Transaction = tx; del.ExecuteNonQuery(); }
+        using (var del2 = con.CreateCommand()) { del2.CommandText = "DELETE FROM guild_members"; del2.Transaction = tx; del2.ExecuteNonQuery(); }
         foreach (var g in guilds)
         {
             using var cmd = con.CreateCommand();

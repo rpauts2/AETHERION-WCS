@@ -4,6 +4,7 @@ using System.Linq;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using WcsInfinity.Models;
+using WcsInfinity.Races;
 
 namespace WcsInfinity.Systems;
 
@@ -43,6 +44,7 @@ public sealed class AchievementSystem
     private readonly List<AchievementDef> _achievements = new();
     private readonly List<DailyChallengeDef> _dailyPool = new();
     private readonly Random _rng = new();
+    private RaceManager? _raceManager;
 
     // Счётчики прогресса (стримятся в PlayerData.QuestCounters)
     private const string C_KILLS = "kills";
@@ -68,6 +70,8 @@ public sealed class AchievementSystem
         RegisterAchievements();
         RegisterDailyPool();
     }
+
+    public void SetRaceManager(RaceManager rm) => _raceManager = rm;
 
     // ═══════════════════════════════════════════════════════════
     //  РЕГИСТРАЦИЯ АЧИВОК
@@ -285,6 +289,9 @@ public sealed class AchievementSystem
             {
                 d.ClaimedAchievements.Add("daily_" + def.Id);
                 EconomySystem.AddGold(d, def.GoldReward);
+                var rp = d.GetRace(d.CurrentRaceId);
+                var raceDef = _raceManager?.Get(d.CurrentRaceId);
+                LevelSystem.AddXp(d, rp, raceDef?.TierEnum ?? RaceTier.T1_Spark, def.XpReward);
                 p.PrintToChat($" \x06★ ДЕЙЛИК: {def.Name} выполнен! +{def.GoldReward}з +{def.XpReward}XP");
             }
         }
@@ -306,7 +313,10 @@ public sealed class AchievementSystem
 
         d.ClaimedAchievements.Add(claimKey);
         EconomySystem.AddGold(d, def.GoldReward);
-        p.PrintToChat($" \x06★ ДЕЙЛИК ЗАКРЫТ: {def.Name} → +{def.GoldReward}з");
+        var rp = d.GetRace(d.CurrentRaceId);
+        var raceDef = _raceManager?.Get(d.CurrentRaceId);
+        LevelSystem.AddXp(d, rp, raceDef?.TierEnum ?? RaceTier.T1_Spark, def.XpReward);
+        p.PrintToChat($" \x06★ ДЕЙЛИК ЗАКРЫТ: {def.Name} → +{def.GoldReward}з +{def.XpReward}XP");
         return true;
     }
 
@@ -328,6 +338,9 @@ public sealed class AchievementSystem
             // Ачивка выполнена!
             d.Achievements.Add(ach.Id);
             EconomySystem.AddGold(d, ach.GoldReward);
+            var rp = d.GetRace(d.CurrentRaceId);
+            var raceDef = _raceManager?.Get(d.CurrentRaceId);
+            LevelSystem.AddXp(d, rp, raceDef?.TierEnum ?? RaceTier.T1_Spark, ach.XpReward);
             string tierColor = ach.Tier switch
             {
                 1 => "\x01",   // белый (обычная)

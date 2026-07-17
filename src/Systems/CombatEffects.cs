@@ -113,14 +113,14 @@ public class CombatEffects
                     case EffectTag.Burn:
                     {
                         var pos = _engine.GetPosition(e.Slot);
-                        _engine.SetHealth(e.Slot, Math.Max(1, _engine.GetHealth(e.Slot) - (int)e.Value));
+                        _engine.SetHealth(e.Slot, Math.Max(0, _engine.GetHealth(e.Slot) - (int)e.Value));
                         _engine.SpawnParticle("particles/burning_fx/env_fire_small.vpcf", pos.x, pos.y, pos.z);
                         break;
                     }
                     case EffectTag.Poison:
                     {
                         var pos = _engine.GetPosition(e.Slot);
-                        _engine.SetHealth(e.Slot, Math.Max(1, _engine.GetHealth(e.Slot) - (int)e.Value));
+                        _engine.SetHealth(e.Slot, Math.Max(0, _engine.GetHealth(e.Slot) - (int)e.Value));
                         _engine.SpawnParticle("particles/explosions_fx/explosion_smoke_grenade.vpcf", pos.x, pos.y, pos.z);
                         break;
                     }

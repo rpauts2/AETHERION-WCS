@@ -51,6 +51,7 @@ public class RaceMutationSystem
             if (_mutationTimer <= 0)
             {
                 Server.PrintToChatAll($" \x06[AETHERION] Мутация «{_activeMutation.Name}» закончилась!");
+                RemoveMutationFromAll();
                 _activeMutation = null;
             }
         }
@@ -105,6 +106,24 @@ public class RaceMutationSystem
     public float GetDamageMultiplier()
     {
         return _activeMutation?.Type == MutationType.DoubleUltDamage ? 2f : 1f;
+    }
+
+    private void RemoveMutationFromAll()
+    {
+        if (_activeMutation == null) return;
+        foreach (var p in Utilities.GetPlayers())
+        {
+            if (p == null || !p.IsValid || p.IsBot) continue;
+            switch (_activeMutation.Type)
+            {
+                case MutationType.SpeedBoost:
+                    _engine.SetSpeed(p.Slot, 1.0f);
+                    break;
+                case MutationType.LifestealAura:
+                    _combat.ClearPlayer(p.Slot);
+                    break;
+            }
+        }
     }
 
     public bool IsNoCooldowns() => _activeMutation?.Type == MutationType.NoCooldowns;

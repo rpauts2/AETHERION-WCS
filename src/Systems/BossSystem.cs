@@ -327,8 +327,7 @@ public sealed class BossSystem
     public void OnPlayerHurt(CCSPlayerController? victim, CCSPlayerController? attacker, int damage)
     {
         if (!_bossActive || attacker == null || !attacker.IsValid || attacker.IsBot || damage <= 0) return;
-        // Урон от ультов/способностей: пропорция от дамага идёт боссу
-        int bossDmg = Math.Max(1, damage / 3);
+        int bossDmg = Math.Max(1, damage / 5);
         _damageTable.TryGetValue(attacker.Slot, out var cur);
         _damageTable[attacker.Slot] = cur + bossDmg;
         _bossHp = Math.Max(0, _bossHp - bossDmg);
