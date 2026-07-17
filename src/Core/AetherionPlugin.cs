@@ -46,7 +46,6 @@ public class AetherionPlugin : BasePlugin
     private readonly RaceRuntime _runtime = new();
     private AetherNexus _nexus = null!;
     private AetherRoulette _aetherRoulette = null!;
-    private AetherWisp _wisp = null!;
     private AetherSigils _sigils = null!;
     private SigilResonance _resonance = null!;
     private CombatEffects _combat = null!;
@@ -130,7 +129,6 @@ public class AetherionPlugin : BasePlugin
         // UI / премиальные системы
         _nexus = new AetherNexus(this);
         _aetherRoulette = new AetherRoulette(this);
-        _wisp = new AetherWisp(this);
         _sigils = new AetherSigils(this, _engine, sid => _ether.GetValueOrDefault(sid, 0), SpendEther);
         _resonance = new SigilResonance(_engine);
         _sigils.OnCast = (p, name) => _resonance.OnSigilCast(p, name);
@@ -150,10 +148,10 @@ public class AetherionPlugin : BasePlugin
         // Дух-компаньон V2 (3D-модель + аура по тиру связи)
         _wispCompanion = new WispCompanionV2(this);
         _wispCompanion.Initialize();
-        _wispCompanion.OnEvolve = (player, newTier) =>
+        _wispCompanion.OnEvolve = (player, title, stage) =>
         {
             _audio.PlayWispEvolve(player);
-            player.PrintToCenter($"<font color='#7CFFA0'>✦ Дух эволюционировал: {newTier}! ✦</font>");
+            player.PrintToCenter($"<font color='#7CFFA0'>✦ Дух эволюционировал: {title}! ✦</font>");
         };
 
         // Гильдии: крафт-рецепты + турнир
@@ -311,6 +309,18 @@ public class AetherionPlugin : BasePlugin
             _raceWeapons.EquipOnSpawn(p, def);
             ApplyPassivesOnSpawn(p, d, rp);
 
+            // Бонус HP от духа
+            var wispBon = _wispCompanion.GetOwnerBonuses(p);
+            float bonusHp = wispBon.GetValueOrDefault("bonus_hp", 0f);
+            if (bonusHp > 0 && p.PlayerPawn?.Value != null)
+            {
+                var pawn = p.PlayerPawn.Value;
+                pawn.MaxHealth = (int)(pawn.MaxHealth + bonusHp);
+                pawn.Health = pawn.MaxHealth;
+                Utilities.SetStateChanged(pawn, "CBaseEntity", "m_iHealth");
+                Utilities.SetStateChanged(pawn, "CBaseEntity", "m_iMaxHealth");
+            }
+
             // Стартовый эфир
             _ether[p.SteamID] = Math.Min(EtherMax, 50);
             _ultCooldown.Remove(p.SteamID);
@@ -381,12 +391,14 @@ public class AetherionPlugin : BasePlugin
             d.SeasonXp += xp;
             SyncBattlePass(d);
 
-            // Эфир за килл
-            _ether[attacker.SteamID] = Math.Min(EtherMax, _ether.GetValueOrDefault(attacker.SteamID, 0) + (hs ? 18 : 12));
+            // Эфир за килл + бонус духа
+            var wispBonuses = _wispCompanion.GetOwnerBonuses(attacker);
+            float etherMult = 1f + wispBonuses.GetValueOrDefault("ether_gain", 0f);
+            int baseEther = hs ? 18 : 12;
+            _ether[attacker.SteamID] = Math.Min(EtherMax, _ether.GetValueOrDefault(attacker.SteamID, 0) + (int)(baseEther * etherMult));
 
             // Дух Wisp: рост связи
             rp.WispBond += hs ? 6 : 4;
-            _wisp.OnKill(attacker, hs);
             _wispCompanion.NotifyKill(attacker, hs);
 
             // Жертва: гасим духа до респавна
@@ -445,6 +457,20 @@ public class AetherionPlugin : BasePlugin
         try
         {
             _boss.OnPlayerHurt(victim, attacker, ev.DmgHealth);
+
+            // Death Save от духа: если HP < урон — оставляем 1 HP (раз/раунд)
+            if (victim != null && victim.IsValid && !victim.IsBot && victim.PawnIsAlive
+                && _wispCompanion.HasDeathSave(victim) && victim.PlayerPawn?.Value != null)
+            {
+                var vPawn = victim.PlayerPawn.Value;
+                if (ev.DmgHealth >= vPawn.Health && vPawn.Health > 1)
+                {
+                    vPawn.Health = 1;
+                    Utilities.SetStateChanged(vPawn, "CBaseEntity", "m_iHealth");
+                    victim.PrintToChat($" \x0B✦ [Дух] Купол спасения! Ты выжил с 1 HP!");
+                }
+            }
+
             if (attacker == null || !attacker.IsValid || attacker.IsBot) return HookResult.Continue;
             if (victim == null || !victim.IsValid) return HookResult.Continue;
 
@@ -766,7 +792,7 @@ public class AetherionPlugin : BasePlugin
         menu.AddItem($"Сезон: ранг {d.SeasonRank} | XP {d.SeasonXp}", null);
         menu.AddItem($"Банк уровней: {d.LevelBank}", null);
         menu.AddItem($"VIP: {(VipMult(d) ? "✓ активен" : "✗ нет")}", null);
-        menu.AddItem($"Связь духа: {rp.WispBond}", null);
+        menu.AddItem($"Связь духа: {rp.WispBond} ({WispEvolution.StageFor(rp.WispBond).Title})", null);
         menu.AddItem($"", null);
         menu.AddItem("!reset — сбросить очки навыков", (pl, _) => CmdReset(pl, null));
         menu.Display(p, 20);
@@ -1342,11 +1368,42 @@ public class AetherionPlugin : BasePlugin
     {
         var d = Data(p.SteamID);
         var rp = d.GetRace(d.CurrentRaceId);
-        var preview = _wispCompanion.BuildPreview(p);
+        var stage = WispEvolution.StageFor(rp.WispBond);
+        var (progress, remaining, next) = WispEvolution.Progress(rp.WispBond);
+        var bonuses = _wispCompanion.GetOwnerBonuses(p);
+
         p.PrintToChat(" \x0B═══ ✦ ДУХ-КОМПАНЬОН ✦ ═══");
-        p.PrintToChat($" \x01{preview}");
-        p.PrintToChat($" \x01Связь: \x06{rp.WispBond}\x01 | Тир растёт: 200→Rare, 600→Epic, 1200→Legendary");
-        p.PrintToChat(" \x08Дух парит над головой и эволюционирует с твоими килами.");
+
+        // Текущая ступень + прогресс
+        string preview = _wispCompanion.BuildPreview(p);
+        p.PrintToChat($" \x04{preview}");
+
+        // Пассивные бонусы
+        p.PrintToChat(" \x10── БОНУСЫ ДУХА ──");
+        if (bonuses.Count == 0)
+            p.PrintToChat(" \x08 Пассивные бонусы появятся на ступени 2+");
+        else
+        {
+            if (bonuses.TryGetValue("ether_gain", out var eg) && eg > 0) p.PrintToChat($"  \x04+{(int)(eg * 100)}% эфира за киллы");
+            if (bonuses.TryGetValue("bonus_hp", out var bh) && bh > 0) p.PrintToChat($"  \x04+{(int)bh} HP при спавне");
+            if (bonuses.TryGetValue("sigil_cdr", out var sc) && sc > 0) p.PrintToChat($"  \x04-{(int)(sc * 100)}% КД печатей");
+            if (bonuses.TryGetValue("death_save", out var ds) && ds > 0) p.PrintToChat($"  \x04Купол спасения: 1 HP при смертельном уроне (1/раунд)");
+        }
+
+        // Активные способности
+        p.PrintToChat(" \x10── СПОСОБНОСТИ ──");
+        p.PrintToChat($"  \x01Ст.3 (\x06200 Bond\x01): предупреждение о враге за спиной");
+        p.PrintToChat($"  \x01Ст.4 (\x06600 Bond\x01): аура лечения союзников (3 HP, 200м)");
+        p.PrintToChat($"  \x01Ст.5 (\x061500 Bond\x01): ультимейт-ассист (x1.5 к ульте)");
+
+        // Все 5 ступеней
+        p.PrintToChat(" \x10── СТУПНИ ЭВОЛЮЦИИ ──");
+        foreach (var s in WispEvolution.Stages)
+        {
+            string marker = s.Stage <= stage.Stage ? "\x04★" : "\x08☆";
+            string bond = s.BondRequired > 0 ? $" ({s.BondRequired})" : "";
+            p.PrintToChat($"  {marker} \x01{bond} {s.Title}: {s.PassivePerk}");
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════

@@ -5,43 +5,53 @@
     "tiers": [
       {
         "tier": "Common",
-        "label_en": "Lesser Wispling",
-        "label_ru": "Младший Искорка",
-        "color": "#8fd3ff",
-        "model": "models/wisp_evolution_concept.png",
+        "label_en": "Spark",
+        "label_ru": "Искорка",
+        "color": "#7C5CFF",
+        "model": "",
         "aura": "",
         "followOffset": [ 0, 0, -25 ],
         "followSpeed": 1.05
       },
       {
         "tier": "Rare",
-        "label_en": "Dawn Wisp",
-        "label_ru": "Заряной Искр",
-        "color": "#ffe9a4",
-        "model": "models/wisp_evolution_concept.png",
+        "label_en": "Glowfly",
+        "label_ru": "Светлячок",
+        "color": "#46E0FF",
+        "model": "",
         "aura": "particles/wisp/dust_dawn.vpcf",
         "followOffset": [ 0, 0, -24 ],
         "followSpeed": 1.15
       },
       {
         "tier": "Epic",
-        "label_en": "Arc Warden",
-        "label_ru": "Архизащитник",
-        "color": "#c7b9ff",
-        "model": "models/wisp_evolution_concept.png",
+        "label_en": "Warden Spirit",
+        "label_ru": "Дух-Хранитель",
+        "color": "#7CFFA0",
+        "model": "",
         "aura": "particles/wisp/arc_walk.vpcf",
         "followOffset": [ 0, 0, -22 ],
         "followSpeed": 1.25
       },
       {
         "tier": "Legendary",
-        "label_en": "Aether King",
-        "label_ru": "Эфирный Царь",
-        "color": "#ffd166",
-        "model": "models/wisp_evolution_concept.png",
+        "label_en": "Aether Phoenix",
+        "label_ru": "Эфирный Феникс",
+        "color": "#FFD24D",
+        "model": "",
         "aura": "particles/wisp/crown_flame.vpcf",
         "followOffset": [ 0, 0, -20 ],
         "followSpeed": 1.35
+      },
+      {
+        "tier": "Mythic",
+        "label_en": "Storm Avatar",
+        "label_ru": "Аватар Бури",
+        "color": "#FF3B6B",
+        "model": "",
+        "aura": "particles/wisp/crown_flame.vpcf",
+        "followOffset": [ 0, 0, -18 ],
+        "followSpeed": 1.45
       }
     ],
     "ui": {

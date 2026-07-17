@@ -7,33 +7,16 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
-using WcsInfinity.Models;
-using WcsInfinity.Systems;
+using WcsInfinity.Plugins;
 using WcsInfinity.Core;
 
 namespace WcsInfinity.Systems;
 
-// ╔══════════════════════════════════════════════════════════╗
-// ║  WISP COMPANION V2 — pet companion for AETHERION WCS     ║
-// ║  • Загружает tiers из configs/pets/wisp.json              ║
-// ║  • Спавнит реальную 3D-сущность-компаньона (prop_dynamic) ║
-// ║    поверх павна, парентится к игроку                      ║
-// ║  • Цвет рендера + аура-партикл зависят от тира (Bond)     ║
-// ║  • Bond растёт за килы (см. AetherionPlugin.OnDeath)      ║
-// ║  • Пассивные ауры: Epic+ — всплеск энергии на каче       ║
-// ╚══════════════════════════════════════════════════════════╝
 public sealed class WispCompanionV2
 {
-    // Фоллбэк-модель. Если на сервере есть models/wisp/wisp_core.vmdl — будет использована она.
-    // CS2 проп присутствует в базовой поставке — гантиспам гарантирован.
     private const string FallbackModel = "models/props/de_inferno/hr_i/wood_1x1.vmdl";
-    private const string CustomModelPath = "models/wisp/wisp_core.vmdl";
-
-    // Высота парения компаньона над макушкой (повыше неймплейта/короны).
     private const float HoverZ = 78f;
-    // Лёгкое колебание по синусу — «дыхание» духа.
     private const float HoverAmp = 3.5f;
 
     private sealed class TierConfig
@@ -61,25 +44,28 @@ public sealed class WispCompanionV2
     private sealed class V2State
     {
         public ulong OwnerSteam;
-        public string SkinTier = "Common";
-        public CDynamicProp? Prop;       // тело духа
-        public CParticleSystem? AuraFx;  // аура под духом
+        public string SkinTier = "Искорка";
+        public int Stage = 1;
+        public CDynamicProp? Prop;
+        public CParticleSystem? AuraFx;
         public float TickAcc;
-        public float AbilityInterval = 2.2f;
-        public float AssistCd;
+        public float AbilityInterval = 2.5f;
         public float HoverPhase;
+        public float BackstabCd;
+        public float AssistCd;
+        public float AuraCd;
+        public bool UltAssistReady;
+        public float UltBuffTimer;
     }
 
     private readonly Dictionary<int, V2State> _bySlot = new();
     private readonly AetherionPlugin _plugin;
     private bool _customModelAvailable;
 
-    // Внешний хук: вызывается когда дух эволюционирует на новый тир.
-    public Action<CCSPlayerController, string /*newTier*/>? OnEvolve { get; set; }
+    public Action<CCSPlayerController, string, int>? OnEvolve { get; set; }
 
     public WispCompanionV2(AetherionPlugin plugin) => _plugin = plugin;
 
-    // Загрузка конфига тиов. Вызывается из AetherionPlugin.Load.
     public void Initialize()
     {
         LoadConfig();
@@ -109,10 +95,10 @@ public sealed class WispCompanionV2
     private void BuildDefaultTiers()
     {
         if (_tierCfg.Count > 0) return;
-        _tierCfg["Common"] = new TierConfig { Tier = "Common", Color = "#8fd3ff", FollowOffset = new() { 0, 0, -25 } };
-        _tierCfg["Rare"] = new TierConfig { Tier = "Rare", Color = "#ffe9a4", Aura = "particles/wisp/dust_dawn.vpcf", FollowOffset = new() { 0, 0, -24 } };
-        _tierCfg["Epic"] = new TierConfig { Tier = "Epic", Color = "#c7b9ff", Aura = "particles/wisp/arc_walk.vpcf", FollowOffset = new() { 0, 0, -22 } };
-        _tierCfg["Legendary"] = new TierConfig { Tier = "Legendary", Color = "#ffd166", Aura = "particles/wisp/crown_flame.vpcf", FollowOffset = new() { 0, 0, -20 } };
+        _tierCfg["Common"] = new TierConfig { Tier = "Common", Color = "#8fd3ff" };
+        _tierCfg["Rare"] = new TierConfig { Tier = "Rare", Color = "#ffe9a4", Aura = "particles/wisp/dust_dawn.vpcf" };
+        _tierCfg["Epic"] = new TierConfig { Tier = "Epic", Color = "#c7b9ff", Aura = "particles/wisp/arc_walk.vpcf" };
+        _tierCfg["Legendary"] = new TierConfig { Tier = "Legendary", Color = "#ffd166", Aura = "particles/wisp/crown_flame.vpcf" };
     }
 
     private static TierConfig TierOrDefault(Dictionary<string, TierConfig> map, string tier)
@@ -122,32 +108,67 @@ public sealed class WispCompanionV2
             : new TierConfig { Tier = "Common", Color = "#8fd3ff" };
     }
 
-    public string? BuildPreview(CCSPlayerController? p)
+    private static string TierConfigKey(int stage) => stage switch
     {
-        if (p == null) return null;
-        var bond = _plugin.Data(p.SteamID).GetRace(_plugin.Data(p.SteamID).CurrentRaceId).WispBond;
-        var tier = TierForBond(bond);
-        var cfg = TierOrDefault(_tierCfg, tier);
-        var label = string.IsNullOrEmpty(cfg.LabelRu) ? tier : cfg.LabelRu;
-        var preview = L10n.GetF("WispCompanion_Preview",
-            "[АЭТЕРИОН] Дух: {Tier} — связь {Bond}",
-            ("Tier", label), ("Bond", bond.ToString()));
-        return preview ?? $"[АЭТЕРИОН] Дух: {label} — связь {bond}";
-    }
-
-    // ── ТИР ПО BOND ──
-    private static string TierForBond(int bond) => bond switch
-    {
-        >= 1200 => "Legendary",
-        >= 600 => "Epic",
-        >= 200 => "Rare",
+        >= 5 => "Legendary",
+        >= 4 => "Epic",
+        >= 3 => "Rare",
         _ => "Common"
     };
 
-    // ── СОБЫТИЯ ──
+    // ── PUBLIC: OwnerBonuses (used by combat code) ──
+    public Dictionary<string, float> GetOwnerBonuses(CCSPlayerController p)
+    {
+        if (p == null || !p.IsValid || p.IsBot) return new();
+        var d = _plugin.Data(p.SteamID);
+        var rp = d.GetRace(d.CurrentRaceId);
+        return WispEvolution.OwnerBonuses(rp.WispBond);
+    }
+
+    public bool HasUltAssistBuff(CCSPlayerController p)
+    {
+        if (p == null || !_bySlot.TryGetValue(p.Slot, out var s)) return false;
+        return s.UltBuffTimer > 0;
+    }
+
+    public float ConsumeUltAssistBuff(CCSPlayerController p)
+    {
+        if (p == null || !_bySlot.TryGetValue(p.Slot, out var s)) return 1f;
+        if (s.UltBuffTimer > 0)
+        {
+            s.UltBuffTimer = 0;
+            s.UltAssistReady = false;
+            return 1.5f;
+        }
+        return 1f;
+    }
+
+    public bool HasDeathSave(CCSPlayerController p)
+    {
+        var bonuses = GetOwnerBonuses(p);
+        return bonuses.ContainsKey("death_save") && bonuses["death_save"] > 0;
+    }
+
+    public string BuildPreview(CCSPlayerController? p)
+    {
+        if (p == null) return "";
+        var d = _plugin.Data(p.SteamID);
+        var rp = d.GetRace(d.CurrentRaceId);
+        var stage = WispEvolution.StageFor(rp.WispBond);
+        var (progress, remaining, next) = WispEvolution.Progress(rp.WispBond);
+        int barLen = 12;
+        int filled = (int)(progress * barLen);
+        string bar = new string('█', filled) + new string('░', barLen - filled);
+        var nextText = next != null ? $" → {next.Title} ({remaining} Bond)" : " [МАКСИМУМ]";
+        return $"\x04◈ {stage.Title} \x01[ {bar} ]{nextText}\n \x01Связь: \x06{rp.WispBond} | {stage.PassivePerk}";
+    }
+
+    // ── ТИРИЗАЦИЯ ──
+
     private HookResult OnSpawn(EventPlayerSpawn ev, GameEventInfo info)
     {
-        var p = ev.Userid; if (p == null || !p.IsValid) return HookResult.Continue;
+        var p = ev.Userid;
+        if (p == null || !p.IsValid || p.IsBot) return HookResult.Continue;
         GetOrInit(p);
         SpawnCompanion(p);
         return HookResult.Continue;
@@ -158,12 +179,11 @@ public sealed class WispCompanionV2
         foreach (var kv in _bySlot.ToArray())
         {
             var pl = Utilities.GetPlayerFromSlot(kv.Key);
-            if (pl == null || !pl.IsValid) { Cleanup(kv.Key); }
+            if (pl == null || !pl.IsValid) Cleanup(kv.Key);
         }
         return HookResult.Continue;
     }
 
-    // ── ТИК: «дыхание» + ревалидация парента + пассивки ──
     private void Tick()
     {
         var arr = _bySlot.ToArray();
@@ -175,15 +195,13 @@ public sealed class WispCompanionV2
             if (p == null || !p.IsValid || p.IsBot) { Cleanup(slot); continue; }
             if (!p.PawnIsAlive || p.PlayerPawn?.Value?.AbsOrigin == null)
             {
-                // Гасим тело мёртвого — респавн пересоздаст.
                 DetachVisuals(s);
                 continue;
             }
 
-            // Обновляем парент, если потерян (респавн/телепорт).
             ReparentIfNeeded(s, p.PlayerPawn.Value);
 
-            // Колебание по Z — дух «дышит».
+            // Hover animation
             s.HoverPhase += 0.05f;
             if (s.Prop != null && s.Prop.IsValid && p.PlayerPawn.Value.AbsOrigin != null)
             {
@@ -193,23 +211,126 @@ public sealed class WispCompanionV2
                 catch (Exception ex) { Console.WriteLine($"[Wisp] teleport err: {ex.Message}"); }
             }
 
-            // Пассивки по тиру
+            // Ability ticks
             s.TickAcc += 0.5f;
             if (s.TickAcc < s.AbilityInterval) continue;
             s.TickAcc -= s.AbilityInterval;
+
+            if (s.BackstabCd > 0) s.BackstabCd = Math.Max(0, s.BackstabCd - s.AbilityInterval);
             if (s.AssistCd > 0) s.AssistCd = Math.Max(0, s.AssistCd - s.AbilityInterval);
-            if (s.SkinTier is "Epic" or "Legendary") TryAmbientAura(p);
-            if (s.SkinTier == "Legendary" && s.AssistCd <= 0) TryUltimateAssist(p, s);
+            if (s.AuraCd > 0) s.AuraCd = Math.Max(0, s.AuraCd - s.AbilityInterval);
+
+            // Stage 3+: backstab warning
+            if (s.Stage >= 3 && s.BackstabCd <= 0)
+                TryBackstabWarn(p, s);
+
+            // Stage 4+: ambient aura (heal nearby allies)
+            if (s.Stage >= 4 && s.AuraCd <= 0)
+                TryAmbientAura(p, s);
+
+            // Stage 5: ultimate assist buff
+            if (s.Stage >= 5 && s.AssistCd <= 0 && !s.UltAssistReady)
+                TryUltimateAssist(p, s);
+
+            // Tick down ult buff
+            if (s.UltBuffTimer > 0) s.UltBuffTimer -= s.AbilityInterval;
         }
     }
 
-    // ── СПАВН ТЕЛА ДУХА ──
+    // ── ABILITIES ──
+
+    private void TryBackstabWarn(CCSPlayerController p, V2State s)
+    {
+        if (p.PlayerPawn?.Value?.AbsOrigin == null || p.PlayerPawn.Value.EyeAngles == null) return;
+        var myPos = p.PlayerPawn.Value.AbsOrigin;
+        var eyeAng = p.PlayerPawn.Value.EyeAngles;
+        float myYaw = eyeAng.Y;
+
+        bool danger = false;
+        foreach (var pl in Utilities.GetPlayers())
+        {
+            if (pl == null || !pl.IsValid || pl.IsBot || !pl.PawnIsAlive) continue;
+            if (pl.Slot == p.Slot) continue;
+            if (pl.TeamNum == p.TeamNum) continue;
+
+            var theirPawn = pl.PlayerPawn?.Value;
+            if (theirPawn?.AbsOrigin == null) continue;
+            var diff = theirPawn.AbsOrigin - myPos;
+            float dist = diff.Length();
+            if (dist > 300f) continue;
+
+            float theirYaw = MathF.Atan2(diff.Y, diff.X) * (180f / MathF.PI);
+            float delta = MathF.Abs(((theirYaw - myYaw + 540f) % 360f) - 180f);
+            if (delta > 90f && delta < 270f)
+            {
+                danger = true;
+                break;
+            }
+        }
+
+        if (danger)
+        {
+            s.BackstabCd = 8f;
+            try { p.PrintToChat($" \x02⚠ [Дух] Опасность за спиной!"); } catch { }
+        }
+        else
+        {
+            s.BackstabCd = 5f;
+        }
+    }
+
+    private void TryAmbientAura(CCSPlayerController p, V2State s)
+    {
+        s.AuraCd = 4f;
+        if (p.PlayerPawn?.Value?.AbsOrigin == null) return;
+        var myPos = p.PlayerPawn.Value.AbsOrigin;
+        int healed = 0;
+
+        foreach (var pl in Utilities.GetPlayers())
+        {
+            if (pl == null || !pl.IsValid || pl.IsBot || !pl.PawnIsAlive) continue;
+            if (pl.Slot == p.Slot) continue;
+            if (pl.TeamNum != p.TeamNum) continue;
+
+            var theirPawn = pl.PlayerPawn?.Value;
+            if (theirPawn?.AbsOrigin == null || theirPawn.Health <= 0) continue;
+            float dist = (theirPawn.AbsOrigin - myPos).Length();
+            if (dist > 200f) continue;
+
+            int maxHp = theirPawn.MaxHealth;
+            int hp = theirPawn.Health;
+            if (hp >= maxHp) continue;
+
+            int heal = 3;
+            int newHp = Math.Min(maxHp, hp + heal);
+            theirPawn.Health = newHp;
+            Utilities.SetStateChanged(theirPawn, "CBaseEntity", "m_iHealth");
+            healed++;
+        }
+
+        if (healed > 0)
+        {
+            try { p.PrintToChat($" \x04✦ [Дух] Аура: +3 HP × {healed} союзник{(_ruSuffix(healed))}"); } catch { }
+        }
+    }
+
+    private void TryUltimateAssist(CCSPlayerController p, V2State s)
+    {
+        s.AssistCd = 20f;
+        s.UltAssistReady = true;
+        s.UltBuffTimer = 12f;
+        try { p.PrintToChat($" \x0B✦ [Дух] Ультимейт-ассист: x1.5 к следующей ульте (12с)"); } catch { }
+    }
+
+    // ── SPAWN ──
+
     private void SpawnCompanion(CCSPlayerController p)
     {
         var s = GetOrInit(p);
-        DetachVisuals(s); // чистим старые пропы
+        DetachVisuals(s);
 
-        var cfg = TierOrDefault(_tierCfg, s.SkinTier);
+        var cfgKey = TierConfigKey(s.Stage);
+        var cfg = TierOrDefault(_tierCfg, cfgKey);
         var model = ResolveModel(cfg.Model);
         var pawn = p.PlayerPawn?.Value;
         if (pawn?.AbsOrigin == null) return;
@@ -222,7 +343,6 @@ public sealed class WispCompanionV2
         prop.DispatchSpawn();
         try { prop.AcceptInput("SetParent", pawn, null, "!activator"); } catch (Exception ex) { Console.WriteLine($"[Wisp] SetParent err: {ex.Message}"); }
 
-        // Тинт по цвету тира
         var col = ParseColor(cfg.Color);
         try
         {
@@ -233,7 +353,6 @@ public sealed class WispCompanionV2
 
         s.Prop = prop;
 
-        // Аура-партикл под духом для Rare+
         if (!string.IsNullOrEmpty(cfg.Aura))
         {
             var fx = Utilities.CreateEntityByName<CParticleSystem>("info_particle_system");
@@ -252,18 +371,12 @@ public sealed class WispCompanionV2
 
     private string ResolveModel(string cfgModel)
     {
-        // Если конфиг указывает .vmdl — уважаем; иначе фоллбэк.
         if (!string.IsNullOrEmpty(cfgModel) && cfgModel.EndsWith(".vmdl", StringComparison.OrdinalIgnoreCase))
             return cfgModel;
         return FallbackModel;
     }
 
-    private void ReparentIfNeeded(V2State s, CCSPlayerPawn pawn)
-    {
-        if (s.Prop == null) return;
-        // Ничего не делаем, если проп ещё валиден и парент на месте.
-        // (CS2 сам удерживает парент; страховка только на случай удаления павна.)
-    }
+    private void ReparentIfNeeded(V2State s, CCSPlayerPawn pawn) { }
 
     private void DetachVisuals(V2State s)
     {
@@ -273,30 +386,26 @@ public sealed class WispCompanionV2
         s.AuraFx = null;
     }
 
-    // ── ВЗАИМОДЕЙСТВИЕ ──
+    // ── NOTIFICATIONS ──
+
     public void NotifyKill(CCSPlayerController p, bool headshot)
     {
-        if (p == null || !p.IsValid) return;
+        if (p == null || !p.IsValid || p.IsBot) return;
         var s = GetOrInit(p);
-        // Бонд растёт в AetherionPlugin.OnDeath; здесь обновляем тир/визуал при росте.
         var data = _plugin.Data(p.SteamID);
-        var newTier = TierForBond(data.GetRace(data.CurrentRaceId).WispBond);
-        if (newTier != s.SkinTier)
+        var rp = data.GetRace(data.CurrentRaceId);
+        var evolved = WispEvolution.CheckEvolve(rp.WispBond - (headshot ? 6 : 4), rp.WispBond);
+        if (evolved != null)
         {
-            s.SkinTier = newTier;
-            s.AbilityInterval = newTier switch { "Legendary" => 1.3f, "Epic" => 1.7f, _ => 2.2f };
-            SpawnCompanion(p); // пересоздать с новым цветом/аурой
-            try { OnEvolve?.Invoke(p, newTier); } catch (Exception ex) { Console.WriteLine($"[Wisp] OnEvolve err: {ex.Message}"); }
+            s.Stage = evolved.Stage;
+            s.SkinTier = evolved.Title;
+            s.AbilityInterval = evolved.Stage switch { 5 => 1.5f, 4 => 1.8f, 3 => 2.0f, _ => 2.5f };
+            SpawnCompanion(p);
+            try { OnEvolve?.Invoke(p, evolved.Title, evolved.Stage); } catch (Exception ex) { Console.WriteLine($"[Wisp] OnEvolve err: {ex.Message}"); }
         }
         else if (s.Prop == null || !s.Prop.IsValid)
         {
             SpawnCompanion(p);
-        }
-
-        if (s.SkinTier is "Epic" or "Legendary")
-        {
-            var burst = L10n.GetF("WispCompanion_OnKillBurst", " [Дух] ✦ Всплеск Эфира!", ("hs", headshot ? "★" : ""));
-            try { p.PrintToChat(burst ?? " [Дух] ✦ Всплеск Эфира!"); } catch (Exception ex) { Console.WriteLine($"[Wisp] burst chat err: {ex.Message}"); }
         }
     }
 
@@ -306,40 +415,19 @@ public sealed class WispCompanionV2
         if (_bySlot.TryGetValue(p.Slot, out var s)) DetachVisuals(s);
     }
 
-    private static void TryAmbientAura(CCSPlayerController p)
-    {
-        try
-        {
-            var text = L10n.Get("WispCompanion_AmbientAura") ?? " [Дух] Аура Эфира мерцает...";
-            p.PrintToChat(text);
-        }
-        catch (Exception ex) { Console.WriteLine($"[Wisp] ambient aura err: {ex.Message}"); }
-    }
-
-    private static void TryUltimateAssist(CCSPlayerController p, V2State s)
-    {
-        try
-        {
-            var text = L10n.GetF("WispCompanion_UltimateAssist",
-                " [Дух] ✦ Ультимейт-ассист готов (CD {0}с)",
-                ("Cooldown", ((int)s.AssistCd).ToString()));
-            p.PrintToChat(text ?? " [Дух] ✦ Ультимейт-ассист готов.");
-            s.AssistCd = 15f;
-        }
-        catch (Exception ex) { Console.WriteLine($"[Wisp] ult assist err: {ex.Message}"); }
-    }
-
     private V2State GetOrInit(CCSPlayerController p)
     {
         if (!p.IsValid || p.IsBot) return null!;
         if (_bySlot.TryGetValue(p.Slot, out var s)) return s;
         var data = _plugin.Data(p.SteamID);
-        var tier = TierForBond(data.GetRace(data.CurrentRaceId).WispBond);
+        var rp = data.GetRace(data.CurrentRaceId);
+        var stage = WispEvolution.StageFor(rp.WispBond);
         var n = new V2State
         {
             OwnerSteam = p.SteamID,
-            SkinTier = tier,
-            AbilityInterval = tier switch { "Legendary" => 1.3f, "Epic" => 1.7f, _ => 2.2f }
+            SkinTier = stage.Title,
+            Stage = stage.Stage,
+            AbilityInterval = stage.Stage switch { 5 => 1.5f, 4 => 1.8f, 3 => 2.0f, _ => 2.5f }
         };
         _bySlot[p.Slot] = n;
         return n;
@@ -353,7 +441,16 @@ public sealed class WispCompanionV2
         _bySlot.Remove(slot);
     }
 
-    // ── УТИЛИТЫ ──
+    private static string _ruSuffix(int n)
+    {
+        int abs = Math.Abs(n) % 100;
+        int last = abs % 10;
+        if (abs > 10 && abs < 20) return "ов";
+        if (last > 1 && last < 5) return "а";
+        if (last == 1) return "";
+        return "ов";
+    }
+
     private static Color ParseColor(string hex)
     {
         try
