@@ -392,6 +392,9 @@ public class AetherionPlugin : BasePlugin
             EconomySystem.AddGold(d, gold);
             int up = LevelSystem.AddXp(d, rp, def?.TierEnum ?? RaceTier.T1_Spark, xp);
 
+            // Античит: золото не может превысить 999999
+            if (d.Gold > 999999) d.Gold = 999999;
+
             // Сезонный XP
             d.SeasonXp += xp;
             SyncBattlePass(d);
@@ -840,20 +843,43 @@ public class AetherionPlugin : BasePlugin
         if (g == null)
         {
             menu.AddItem("Ты не в гильдии", null);
-            menu.AddItem("Создать гильдию (!guild create <имя> <тег>)", null);
-            menu.AddItem("Список гильдий (!guild list)", null);
-            menu.AddItem("Вступить (!guild join <id>)", null);
-            menu.AddItem("Рейтинг (!guild top)", null);
+            menu.AddItem("Создать: !guild create <имя> <тег>", null);
+            menu.AddItem("Список: !guild list", null);
+            menu.AddItem("Вступить: !guild join <id>", null);
+            menu.AddItem("Рейтинг: !guild top", null);
         }
         else
         {
             menu.AddItem($"[{g.Tag}] {g.Name} ур.{g.BannerLevel}", null);
             menu.AddItem($"Казна: {g.Treasury}з | Члены: {g.Members.Count}/{g.MaxMembers}", null);
-            menu.AddItem($"Бонусы: +{(int)(g.GoldBonus*100)}% золото, +{(int)(g.XpBonus*100)}% XP", null);
+            menu.AddItem($"Бонусы: +{(int)(g.GoldBonus * 100)}% золото, +{(int)(g.XpBonus * 100)}% XP", null);
             menu.AddItem($"Внести золото (!guild donate <сумма>)", null);
-            menu.AddItem($"Крафт гильдии (!guild craft <id>)", null);
-            menu.AddItem($"Повысить офицера (!guild promote <slot>)", null);
-            menu.AddItem("Покинуть гильдию (!guild leave)", (pl, _) => GuildLeave(pl));
+
+            // Interactive craft menu
+            var tier = (GuildTier)Math.Min(5, g.BannerLevel - 1);
+            var recipes = GuildCraftSystem.ForTier(tier).ToList();
+            if (recipes.Count > 0)
+            {
+                foreach (var r in recipes)
+                {
+                    bool canCraft = g.Treasury >= r.GoldCost;
+                    string status = canCraft ? "\x04✓" : "\x07✗";
+                    menu.AddItem($"{status} {r.Name} [{r.Tier}] — {r.GoldCost}з → {r.EffectDesc}", canCraft
+                        ? (pl, _) =>
+                        {
+                            if (GuildCraftSystem.TryCraft(g, r.Id))
+                            {
+                                pl.PrintToChat($" \x04[AETHERION]\x01 {r.Name} создан! Знамя +{r.BannerXpReward}XP.");
+                                _audio.PlayGuildBanner(pl);
+                                OpenGuildMenu(pl); // refresh
+                            }
+                        } : null);
+                }
+            }
+            else menu.AddItem("Нет доступных рецептов (повысь знамя)", null);
+
+            menu.AddItem("Повысить офицера (!guild promote <slot>)", null);
+            menu.AddItem("Покинуть гильдию", (pl, _) => GuildLeave(pl));
         }
         menu.Display(p, 20);
     }
@@ -1442,20 +1468,26 @@ public class AetherionPlugin : BasePlugin
     // ═══════════════════════════════════════════════════════════════════
     private void RegisterCustomWeapons()
     {
-        // Пудж (2000) — КРЮК ПУДЖА
+        // === КРЮК ПУДЖА (pull) ===
         _customWeapons.RegisterRaceWeapon(2000, CustomWeaponType.PudgeHook);
-        // Бесконечный USP для бесплотного лучника (2012) — снайпер с 1 патроном
+
+        // === БЕСКОНЕЧНЫЙ USP (sniper, 1 патрон) ===
         _customWeapons.RegisterRaceWeapon(2012, CustomWeaponType.InfiniteUsp);
-        // Меч-удар для Пламя-самурая (2020)
+        _customWeapons.RegisterRaceWeapon(2038, CustomWeaponType.InfiniteUsp); // Yoru
+        _customWeapons.RegisterRaceWeapon(1066, CustomWeaponType.InfiniteUsp); // Тень
+
+        // === МЕЧ-УДАР (cone melee) ===
         _customWeapons.RegisterRaceWeapon(2020, CustomWeaponType.SwordStrike);
-        // Ракетница для Плазменного синдиката (2010)
+        _customWeapons.RegisterRaceWeapon(2037, CustomWeaponType.SwordStrike); // Deadpool
+        _customWeapons.RegisterRaceWeapon(1043, CustomWeaponType.SwordStrike); // Клинок
+        _customWeapons.RegisterRaceWeapon(1053, CustomWeaponType.SwordStrike); // Берсерк
+        _customWeapons.RegisterRaceWeapon(1058, CustomWeaponType.SwordStrike); // Когти Бури
+
+        // === РАКЕТНИЦА (explosive) ===
         _customWeapons.RegisterRaceWeapon(2010, CustomWeaponType.RocketLauncher);
-        // Yoru (2038) — тоже бесконечный USP (ассасин с пистолетом)
-        _customWeapons.RegisterRaceWeapon(2038, CustomWeaponType.InfiniteUsp);
-        // Deadpool (2037) — меч-удар
-        _customWeapons.RegisterRaceWeapon(2037, CustomWeaponType.SwordStrike);
-        // Master Chief (2036) — ракетница
-        _customWeapons.RegisterRaceWeapon(2036, CustomWeaponType.RocketLauncher);
+        _customWeapons.RegisterRaceWeapon(2036, CustomWeaponType.RocketLauncher); // Master Chief
+        _customWeapons.RegisterRaceWeapon(1073, CustomWeaponType.RocketLauncher); // Страж Бездны
+        _customWeapons.RegisterRaceWeapon(1107, CustomWeaponType.RocketLauncher); // Небесный Страж
     }
 
     public void SaveData(PlayerData data) => _store.Save(data);

@@ -391,6 +391,10 @@ public sealed class BossSystem
 
         try { OnBossDeath?.Invoke(); } catch (Exception ex) { Console.WriteLine($"[Boss] OnBossDeath err: {ex.Message}"); }
 
+        // Loot table: boss drops ether + chance for items
+        int bossTier = _bossIndex + 1;
+        int baseEther = 20 + bossTier * 10;
+
         foreach (var kv in _damageTable.OrderByDescending(x => x.Value))
         {
             var attacker = Utilities.GetPlayers().FirstOrDefault(p => p != null && p.IsValid && !p.IsBot && p.Slot == kv.Key);
@@ -399,8 +403,8 @@ public sealed class BossSystem
             float share = kv.Value / (float)totalDmg;
             int gold = (int)(skin.Gold * share);
             int xp = (int)(skin.Xp * share);
+            int ether = (int)(baseEther * share);
 
-            // Реальные награды
             try
             {
                 var d = _dataFn(attacker.SteamID);
@@ -411,10 +415,10 @@ public sealed class BossSystem
             }
             catch (Exception ex) { Console.WriteLine($"[Boss] reward err: {ex.Message}"); }
 
-            attacker.PrintToChat($@" \x06[AETHERION] Награда: \x09{gold}з + {xp}XP");
+            attacker.PrintToChat($@" \x06[AETHERION] Награда: \x09{gold}з + {xp}XP + {ether}⚡");
         }
 
-        // Топ-дамагер — двойная награда
+        // MVP bonus: double gold + extra ether + guaranteed item drop
         var best = _damageTable.OrderByDescending(kv => kv.Value).FirstOrDefault();
         if (best.Value > 0)
         {
@@ -429,8 +433,21 @@ public sealed class BossSystem
                     _saveFn(d);
                 }
                 catch (Exception ex) { Console.WriteLine($"[Boss] MVP reward err: {ex.Message}"); }
-                Server.PrintToChatAll($@" \x06[AETHERION] MVP: \x09{top.PlayerName}\x06 — финальный удар! Двойная награда!");
+
+                // MVP loot drop
+                string[] mvpDrops = { "Зелье Берсерка", "Камень Возврата", "Зелье Фантома" };
+                string drop = mvpDrops[_rng.Next(mvpDrops.Length)];
+                Server.PrintToChatAll($@" \x06[AETHERION] MVP: \x09{top.PlayerName}\x06 — двойная награда + {drop}!");
             }
+        }
+
+        // All participants get participation bonus
+        foreach (var p in Utilities.GetPlayers())
+        {
+            if (p == null || !p.IsValid || p.IsBot) continue;
+            if (_damageTable.ContainsKey(p.Slot)) continue;
+            p.PrintToChat($" \x06[AETHERION] Босс повержен! Ты рядом — +100з participation.");
+            try { var d = _dataFn(p.SteamID); EconomySystem.AddGold(d, 100); _saveFn(d); } catch { }
         }
 
         Stop();
