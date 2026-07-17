@@ -19,6 +19,7 @@ public class AbilityContext
     public int SkillLevel;
     public int? VictimSlot;
     public float FromX, FromY;
+    public float DamageMultiplier = 1f;
 }
 
 // Делегат эффекта

@@ -73,6 +73,7 @@ public class AetherionPlugin : BasePlugin
     private readonly Dictionary<ulong, int> _roundKills = new();
     private readonly Dictionary<ulong, float> _lastKillTime = new();
     private bool _firstBlood;
+    private int _playTimeTick;
 
     public PlayerData Data(ulong steamId)
     {
@@ -131,7 +132,11 @@ public class AetherionPlugin : BasePlugin
         _aetherRoulette = new AetherRoulette(this);
         _sigils = new AetherSigils(this, _engine, sid => _ether.GetValueOrDefault(sid, 0), SpendEther);
         _resonance = new SigilResonance(_engine);
-        _sigils.OnCast = (p, name) => _resonance.OnSigilCast(p, name);
+        _sigils.OnCast = (p, name) =>
+        {
+            _resonance.OnSigilCast(p, name);
+            _contracts.OnSigilUsed(p.SteamID);
+        };
         _boss = new BossSystem(this, _engine, sid => Data(sid), pd => SaveData(pd));
         _boss.OnBossSpawn = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossAwaken(pl); };
         _boss.OnBossAttack = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossEnrage(pl); };
@@ -611,9 +616,26 @@ public class AetherionPlugin : BasePlugin
     private void GameTick()
     {
         try { _stormWave.Tick(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] storm tick err: {ex.Message}"); }
+        try { _duelArena.Tick(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] duel tick err: {ex.Message}"); }
         try { _etherPortal.Tick(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] portal tick err: {ex.Message}"); }
         try { _mutation.Tick(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] mutation tick err: {ex.Message}"); }
         try { _contracts.DailyReset(); } catch (Exception ex) { Console.WriteLine($"[AETHERION] contract reset err: {ex.Message}"); }
+
+        // Контракты: учёт времени (раз в ~5 секунд чтобы не спамить)
+        _playTimeTick++;
+        if (_playTimeTick >= 5)
+        {
+            _playTimeTick = 0;
+            try
+            {
+                foreach (var p in Utilities.GetPlayers())
+                {
+                    if (p != null && p.IsValid && !p.IsBot && p.PawnIsAlive)
+                        _contracts.OnPlayTime(p.SteamID, 5f);
+                }
+            }
+            catch (Exception ex) { Console.WriteLine($"[AETHERION] playtime contract err: {ex.Message}"); }
+        }
     }
 
     private void HudTick()
@@ -675,18 +697,27 @@ public class AetherionPlugin : BasePlugin
             { p.PrintToChat($" \x07[AETHERION] Мало Эфира ({_ether.GetValueOrDefault(p.SteamID)}/{etherNeed})."); return; }
             SpendEther(p.SteamID, etherNeed);
             var ctx = BuildCtx(p, d, rp, p.Slot);
+
+            // Wisp Ultimate Assist: x1.5 к урону ульты
+            float ultDmgMult = _wispCompanion.ConsumeUltAssistBuff(p);
+            float mutDmgMult = _mutation.GetDamageMultiplier();
+            float totalDmgMult = ultDmgMult * mutDmgMult;
+            if (totalDmgMult > 1f) ctx.DamageMultiplier = totalDmgMult;
+
             if (_runtime.Activate(ctx, def, rp, ab.Index))
             {
                 _ultCooldown[p.SteamID] = now + Math.Max(8f, ab.Cooldown);
                 _audio.PlayCastUltimate(p, d.CurrentRaceId);
                 _achievements.OnUltCast(d, p);
                 _boss.OnUltCast(p);
+                _contracts.OnUltUsed(p.SteamID);
 
                 // Кастомное оружие: ракетница запускает ракету при ульте
                 if (_customWeapons.GetWeaponType(d.CurrentRaceId) == CustomWeaponType.RocketLauncher)
                     _customWeapons.FireRocket(p);
 
-                p.PrintToCenterHtml($"<font color='#7c5cff'>✦ УЛЬТА: {ab.Name} ✦</font>");
+                string ultInfo = totalDmgMult > 1f ? $" (x{totalDmgMult:F1})" : "";
+                p.PrintToCenterHtml($"<font color='#7c5cff'>✦ УЛЬТА: {ab.Name}{ultInfo} ✦</font>");
             }
         }
         catch (Exception ex) { Console.WriteLine($"[AETHERION] CastUlt err: {ex.Message}"); }

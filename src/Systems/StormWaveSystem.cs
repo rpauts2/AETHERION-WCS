@@ -19,8 +19,10 @@ public class StormWaveSystem
     private float _timer;
     private readonly Random _rng = new();
 
-    private readonly int[] _botsPerWave = { 3, 5, 7, 10, 1 };
-    private readonly float[] _hpMultiplier = { 1f, 1.5f, 2f, 2.5f, 10f };
+    private readonly int[] _botsPerWave = { 3, 5, 8, 10, 1 };
+    private readonly float[] _hpMultiplier = { 1f, 1.5f, 2.2f, 3f, 12f };
+    private readonly float[] _waveGoldReward = { 50f, 80f, 120f, 180f, 500f };
+    private readonly float[] _waveXpReward = { 30f, 50f, 80f, 120f, 300f };
     private int _totalKills;
     private int _roundStartPlayerCount;
 
@@ -126,17 +128,25 @@ public class StormWaveSystem
 
     private void GrantWaveRewards()
     {
-        int goldPerPlayer = 100 + _totalKills * 10;
-        int xpPerPlayer = 50 + _totalKills * 5;
-
         foreach (var p in Utilities.GetPlayers())
         {
             if (p == null || !p.IsValid || p.IsBot) continue;
             var d = _dataFn(p.SteamID);
+
+            float totalGold = 0;
+            float totalXp = 0;
+            for (int w = 0; w < Math.Min(_currentWave, _waveGoldReward.Length); w++)
+            {
+                totalGold += _waveGoldReward[w];
+                totalXp += _waveXpReward[w];
+            }
+            int goldPerPlayer = (int)(totalGold + _totalKills * 5);
+            int xpPerPlayer = (int)(totalXp + _totalKills * 3);
+
             EconomySystem.AddGold(d, goldPerPlayer);
             LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), Races.RaceTier.T1_Spark, xpPerPlayer);
             _saveFn(d);
-            p.PrintToChat($" \x06[AETHERION] ⚡ Награда шторма: +{goldPerPlayer}з +{xpPerPlayer}XP");
+            p.PrintToChat($" \x06[AETHERION] ⚡ Награда шторма ({_currentWave} волн): +{goldPerPlayer}з +{xpPerPlayer}XP | Убито: {_totalKills}");
         }
     }
 }
