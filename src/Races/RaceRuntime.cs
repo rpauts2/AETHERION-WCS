@@ -64,6 +64,7 @@ public static class EffectLibrary
             var pos = ctx.Engine.GetPosition(ctx.Slot);
             ctx.Engine.Beam(pos.x, pos.y, pos.z + 300, pos.x, pos.y, pos.z, 255, 225, 77, 0.4f);
             ctx.Engine.SpawnParticle("particles/aether_thunder.vpcf", pos.x, pos.y, pos.z);
+            ctx.Combat.AoeDamage(pos.x, pos.y, pos.z, 200f, (int)(v * ctx.SkillLevel), ctx.Player.TeamNum, ctx.Slot);
         },
 
         ["aoe_explosion"] = v => ctx =>
@@ -82,7 +83,12 @@ public static class EffectLibrary
             {
                 var pos = ctx.Engine.GetPosition(ctx.Slot);
                 ctx.Engine.SpawnParticle("particles/aether_recall.vpcf", pos.x, pos.y, pos.z);
-                ctx.Engine.Teleport(ctx.Slot, 0, 0, 0);
+                // Teleport to the nearest team spawn point instead of map origin (0,0,0)
+                var spawnPos = ctx.Engine.GetNearestSpawn(ctx.Slot, ctx.Player.TeamNum);
+                if (spawnPos.HasValue)
+                    ctx.Engine.Teleport(ctx.Slot, spawnPos.Value.x, spawnPos.Value.y, spawnPos.Value.z);
+                else
+                    ctx.Engine.Teleport(ctx.Slot, pos.x, pos.y, pos.z); // stay in place if no spawn found
             }
         },
 
@@ -127,7 +133,9 @@ public static class EffectLibrary
             if (ctx.VictimSlot.HasValue && v > 0)
             {
                 var hp = ctx.Engine.GetHealth(ctx.VictimSlot.Value);
-                if (hp < v)
+                float pct = hp / 100f;
+                float threshold = Math.Clamp(v / 100f, 0.05f, 0.5f);
+                if (pct <= threshold)
                 {
                     ctx.Engine.SetHealth(ctx.VictimSlot.Value, 0);
                     ctx.Engine.PrintToCenter(ctx.Slot, "☠️ Казнь!");
@@ -167,7 +175,7 @@ public static class EffectLibrary
         },
 
         ["team_speed"] = v => ctx =>
-            ctx.Engine.ForAlliesInRadius(ctx.Slot, 350f, s => ctx.Engine.SetSpeed(s, 1.0f + 0.15f)),
+            ctx.Engine.ForAlliesInRadius(ctx.Slot, 350f, s => ctx.Engine.SetSpeed(s, 1.0f + 0.05f * ctx.SkillLevel + 0.15f)),
 
         ["shield"] = v => ctx =>
         {
@@ -289,6 +297,7 @@ public static class EffectLibrary
             ctx.Engine.AddArmor(ctx.Slot, (int)v, 150);
             var p = ctx.Engine.GetPosition(ctx.Slot);
             ctx.Engine.SpawnParticle("particles/aether_explosion.vpcf", p.x, p.y, p.z);
+            ctx.Combat.AoeDamage(p.x, p.y, p.z, 180f, (int)(v + 5*ctx.SkillLevel), ctx.Player.TeamNum, ctx.Slot);
         },
 
         ["self_freeze_aoe"] = v => ctx =>
@@ -851,6 +860,8 @@ public static class EffectLibrary
     // Если эффект не зарегистрирован явно, выводим эффект по шаблону имени.
     // Это позволяет добавлять расы с новыми эффектами без правки кода —
     // RaceRuntime выведет корректное поведение из имени и полей способности.
+    // NOTE: offensive CC/debuff effects target VictimSlot when available,
+    // to prevent self-harm when using damage abilities.
     private static AbilityEffect? SmartFallback(string effect, float value)
     {
         var e = effect.ToLowerInvariant();
@@ -871,23 +882,37 @@ public static class EffectLibrary
             {
                 var pos = ctx.Engine.GetPosition(ctx.Slot);
                 ctx.Engine.SpawnParticle("particles/aether_fire.vpcf", pos.x, pos.y, pos.z);
-                ctx.Combat.Apply(EffectTag.Burn, ctx.Slot, v, 5f);
+                int target = ctx.VictimSlot ?? ctx.Slot;
+                ctx.Combat.Apply(EffectTag.Burn, target, v, 5f);
             };
         // Заморозка / лёд
         if (e.Contains("freeze") || e.Contains("frost") || e.Contains("ice") || e.Contains("winter") || e.Contains("blizzard"))
             return ctx =>
             {
-                ctx.Combat.Apply(EffectTag.Freeze, ctx.Slot, v, 2f);
+                int target = ctx.VictimSlot ?? ctx.Slot;
+                ctx.Combat.Apply(EffectTag.Freeze, target, v, 2f);
             };
         // Яд
         if (e.Contains("poison") || e.Contains("plague") || e.Contains("epidemic"))
-            return ctx => { ctx.Combat.Apply(EffectTag.Poison, ctx.Slot, v, 6f); };
+            return ctx =>
+            {
+                int target = ctx.VictimSlot ?? ctx.Slot;
+                ctx.Combat.Apply(EffectTag.Poison, target, v, 6f);
+            };
         // Оглушение
         if (e.Contains("stun") || e.Contains("charge_stun") || e.Contains("flash"))
-            return ctx => { ctx.Combat.Apply(EffectTag.Stun, ctx.Slot, v, 2f); };
+            return ctx =>
+            {
+                int target = ctx.VictimSlot ?? ctx.Slot;
+                ctx.Combat.Apply(EffectTag.Stun, target, v, 2f);
+            };
         // Замедление
         if (e.Contains("slow") || e.Contains("dilation") || e.Contains("gravity"))
-            return ctx => { ctx.Combat.Apply(EffectTag.Slow, ctx.Slot, v, 3f); };
+            return ctx =>
+            {
+                int target = ctx.VictimSlot ?? ctx.Slot;
+                ctx.Combat.Apply(EffectTag.Slow, target, v, 3f);
+            };
         // Телепорт / blink / dash
         if (e.Contains("blink") || e.Contains("teleport") || e.Contains("dash") || e.Contains("leap") || e.Contains("charge"))
             return ctx =>
@@ -913,13 +938,18 @@ public static class EffectLibrary
             return ctx => { ctx.Combat.Apply(EffectTag.Lifesteal, ctx.Slot, v, 6f); };
         // Притяжение / чёрная дыра
         if (e.Contains("pull") || e.Contains("black_hole"))
-            return ctx => { ctx.Combat.Apply(EffectTag.Root, ctx.Slot, v, 2f); };
+            return ctx =>
+            {
+                int target = ctx.VictimSlot ?? ctx.Slot;
+                ctx.Combat.Apply(EffectTag.Root, target, v, 2f);
+            };
         // Отталкивание / нокбэк
         if (e.Contains("knockback") || e.Contains("push") || e.Contains("cyclone"))
             return ctx =>
             {
                 var pos = ctx.Engine.GetPosition(ctx.Slot);
-                ctx.Engine.Knockback(ctx.Slot, pos.x, pos.y, v);
+                int target = ctx.VictimSlot ?? ctx.Slot;
+                ctx.Engine.Knockback(target, pos.x, pos.y, v);
             };
         // Молния
         if (e.Contains("lightning") || e.Contains("thunder"))
@@ -940,10 +970,18 @@ public static class EffectLibrary
             return ctx => { ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, v, 5f); };
         // Страх / паника
         if (e.Contains("fear") || e.Contains("horror") || e.Contains("panic"))
-            return ctx => { ctx.Combat.Apply(EffectTag.Fear, ctx.Slot, v, 2f); };
+            return ctx =>
+            {
+                int target = ctx.VictimSlot ?? ctx.Slot;
+                ctx.Combat.Apply(EffectTag.Fear, target, v, 2f);
+            };
         // Безмолвие / disarm → стан слабее
         if (e.Contains("disarm") || e.Contains("silence") || e.Contains("deafen"))
-            return ctx => { ctx.Combat.Apply(EffectTag.Stun, ctx.Slot, v * 0.3f, 3f); };
+            return ctx =>
+            {
+                int target = ctx.VictimSlot ?? ctx.Slot;
+                ctx.Combat.Apply(EffectTag.Stun, target, v * 0.3f, 3f);
+            };
         // Базовый: если не распознали — AoE-урон по умолчанию
         return ctx =>
         {

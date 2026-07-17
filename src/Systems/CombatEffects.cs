@@ -247,4 +247,15 @@ public class CombatEffects
         foreach (var e in _effects.Where(e => e.Slot == slot).ToList()) OnExpire(e);
         _effects.RemoveAll(e => e.Slot == slot);
     }
+
+    /// <summary>
+    /// Remove only a specific effect tag from a player, leaving all other effects intact.
+    /// Used by systems that need to clean up one effect (e.g., mutation removal)
+    /// without destroying the player's entire combat state.
+    /// </summary>
+    public void RemoveEffect(int slot, EffectTag tag)
+    {
+        foreach (var e in _effects.Where(e => e.Slot == slot && e.Tag == tag).ToList()) OnExpire(e);
+        _effects.RemoveAll(e => e.Slot == slot && e.Tag == tag);
+    }
 }

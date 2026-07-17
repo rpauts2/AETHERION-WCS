@@ -8,6 +8,7 @@ using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
 using WcsInfinity.Systems;
+using WcsInfinity.Races;
 
 namespace WcsInfinity.Systems;
 
@@ -25,6 +26,7 @@ public sealed class BossSystem
     private readonly IEngineApi _engine;
     private readonly Func<ulong, WcsInfinity.Models.PlayerData> _dataFn;
     private readonly Action<WcsInfinity.Models.PlayerData> _saveFn;
+    private readonly Func<int, WcsInfinity.Races.RaceDefinition?> _raceDefFn;
 
     // Боссы: имя, RGB цвет модели, награда золота, награда XP, HP множитель
     private static readonly IReadOnlyList<(string Name, int R, int G, int B, int Gold, int Xp, float HpMult, string Ability)> BossData = new List<(string, int, int, int, int, int, float, string)>
@@ -77,12 +79,14 @@ public sealed class BossSystem
 
     public BossSystem(BasePlugin plugin, IEngineApi engine,
         Func<ulong, WcsInfinity.Models.PlayerData> dataFn,
-        Action<WcsInfinity.Models.PlayerData> saveFn)
+        Action<WcsInfinity.Models.PlayerData> saveFn,
+        Func<int, WcsInfinity.Races.RaceDefinition?> raceDefFn)
     {
         _plugin = plugin;
         _engine = engine;
         _dataFn = dataFn;
         _saveFn = saveFn;
+        _raceDefFn = raceDefFn;
     }
 
     public bool IsBossActive => _bossActive;
@@ -303,7 +307,7 @@ public sealed class BossSystem
             if (dist <= BOSS_ATTACK_RANGE)
             {
                 // Apply damage + blind/slow
-                int newHp = Math.Max(1, _engine.GetHealth(p.Slot) - BOSS_ATTACK_DMG);
+                int newHp = Math.Max(0, _engine.GetHealth(p.Slot) - BOSS_ATTACK_DMG);
                 _engine.SetHealth(p.Slot, newHp);
                 _engine.Blind(p.Slot, 0.3f, 0.2f);
                 _engine.SetSpeed(p.Slot, 0.7f);
@@ -410,7 +414,8 @@ public sealed class BossSystem
             {
                 var d = _dataFn(attacker.SteamID);
                 EconomySystem.AddGold(d, gold);
-                LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), Races.RaceTier.T1_Spark, xp);
+                var raceDef = _raceDefFn(d.CurrentRaceId);
+                LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), raceDef?.TierEnum ?? RaceTier.T1_Spark, xp);
                 d.SeasonXp += xp;
                 _saveFn(d);
             }
@@ -430,7 +435,8 @@ public sealed class BossSystem
                 {
                     var d = _dataFn(top.SteamID);
                     EconomySystem.AddGold(d, skin.Gold);
-                    LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), Races.RaceTier.T1_Spark, skin.Xp);
+                    var raceDef = _raceDefFn(d.CurrentRaceId);
+                    LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), raceDef?.TierEnum ?? RaceTier.T1_Spark, skin.Xp);
                     _saveFn(d);
                 }
                 catch (Exception ex) { Console.WriteLine($"[Boss] MVP reward err: {ex.Message}"); }

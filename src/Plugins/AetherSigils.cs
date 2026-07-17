@@ -148,4 +148,6 @@ public class AetherSigils
     private static Vector Fwd(QAngle a){
         float pp=a.X*MathF.PI/180f,yy=a.Y*MathF.PI/180f;
         return new Vector(MathF.Cos(pp)*MathF.Cos(yy),MathF.Cos(pp)*MathF.Sin(yy),-MathF.Sin(pp)); }
+
+    public void CleanupSlot(int slot) => _draw.Remove(slot);
 }

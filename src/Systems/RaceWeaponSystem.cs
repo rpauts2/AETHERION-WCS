@@ -156,14 +156,22 @@ public sealed class RaceWeaponSystem
             {
                 try
                 {
-                    var prop = p.PlayerPawn?.Value;
-                    if (prop != null)
+                    var pawn = p.PlayerPawn?.Value;
+                    if (pawn != null)
                     {
-                        var propInfo = prop.GetType().GetProperty("FallbackPaintKit");
-                        if (propInfo != null)
+                        var weapons = pawn.WeaponServices?.MyWeapons;
+                        if (weapons != null)
                         {
-                            propInfo.SetValue(prop, (uint)paintKit);
-                            Utilities.SetStateChanged(prop, "CCSPlayerPawn", "m_nFallbackPaintKit");
+                            foreach (var w in weapons)
+                            {
+                                var weapon = w.Value;
+                                if (weapon != null && weapon.IsValid && weapon.DesignerName == weaponName)
+                                {
+                                    weapon.FallbackPaintKit = paintKit;
+                                    Utilities.SetStateChanged(weapon, "CAttributeList", "m_Attributes");
+                                    break;
+                                }
+                            }
                         }
                     }
                 }

@@ -82,7 +82,7 @@ public class StormWaveSystem
         if (_currentWave >= _totalWaves)
         {
             Stop();
-            Server.PrintToChatAll(" \x06[AETHERION] 🏆 ВСЕ ВОЛНЫ ПОБЕЖДЕНЫ! Награда发放中...");
+            Server.PrintToChatAll(" \x06[AETHERION] 🏆 ВСЕ ВОЛНЫ ПОБЕЖДЕНЫ! Награда выдаётся...");
             GrantWaveRewards();
             return;
         }
@@ -106,14 +106,17 @@ public class StormWaveSystem
     {
         int count = _botsPerWave[wave];
         float hpMult = _hpMultiplier[wave];
+        var usedSlots = new HashSet<int>();
 
         for (int i = 0; i < count; i++)
         {
+            int idx = i;
             Server.NextFrame(() =>
             {
                 var bot = Utilities.GetPlayers()
-                    .FirstOrDefault(p => p != null && p.IsValid && p.IsBot && p.PawnIsAlive);
+                    .FirstOrDefault(p => p != null && p.IsValid && p.IsBot && p.PawnIsAlive && !usedSlots.Contains(p.Slot));
                 if (bot == null) return;
+                usedSlots.Add(bot.Slot);
 
                 var pawn = bot.PlayerPawn?.Value;
                 if (pawn == null) return;

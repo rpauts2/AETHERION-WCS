@@ -38,6 +38,7 @@ public interface IEngineApi
     int DamageRadius(int slot, float radius, int damage, bool enemiesOnly = true);
     int ForAlliesInRadius(int slot, float radius, System.Action<int> action);
     void SetRenderTint(int slot, int r, int g, int b, int glow = 1);
+    (float x, float y, float z)? GetNearestSpawn(int slot, int team);
 }
 
 public class Cs2EngineApi : IEngineApi
@@ -283,5 +284,41 @@ public class Cs2EngineApi : IEngineApi
             if (MathF.Sqrt(d.X*d.X + d.Y*d.Y + d.Z*d.Z) <= radius) { action(t.Slot); n++; }
         }
         return n;
+    }
+
+    /// <summary>
+    /// Finds the nearest spawn point entity for the given team.
+    /// Searches info_player_terrorist (team 2) and info_player_counterterrorist (team 3).
+    /// Returns null if no spawn points are found or the player position is unavailable.
+    /// </summary>
+    public (float x, float y, float z)? GetNearestSpawn(int slot, int team)
+    {
+        var pawn = Pawn(slot);
+        if (pawn?.AbsOrigin == null) return null;
+        var pos = pawn.AbsOrigin;
+
+        string entityClass = team == 3 ? "info_player_counterterrorist" : "info_player_terrorist";
+
+        float bestDist = float.MaxValue;
+        (float x, float y, float z)? bestSpawn = null;
+
+        foreach (var ent in Utilities.GetAllEntities())
+        {
+            if (ent == null || !ent.IsValid) continue;
+            var className = ent.DesignerName ?? "";
+            if (!className.Contains(entityClass, StringComparison.OrdinalIgnoreCase)) continue;
+            if (ent is not CBaseEntity be || be.AbsOrigin == null) continue;
+            var entPos = be.AbsOrigin;
+            if (entPos == null) continue;
+            float dx = entPos.X - pos.X, dy = entPos.Y - pos.Y, dz = entPos.Z - pos.Z;
+            float dist = MathF.Sqrt(dx * dx + dy * dy + dz * dz);
+            if (dist < bestDist)
+            {
+                bestDist = dist;
+                bestSpawn = (entPos.X, entPos.Y, entPos.Z);
+            }
+        }
+
+        return bestSpawn;
     }
 }

@@ -120,7 +120,7 @@ public class RaceMutationSystem
                     _engine.SetSpeed(p.Slot, 1.0f);
                     break;
                 case MutationType.LifestealAura:
-                    _combat.ClearPlayer(p.Slot);
+                    _combat.RemoveEffect(p.Slot, EffectTag.Lifesteal);
                     break;
             }
         }

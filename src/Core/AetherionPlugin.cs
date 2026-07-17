@@ -137,7 +137,7 @@ public class AetherionPlugin : BasePlugin
             _resonance.OnSigilCast(p, name);
             _contracts.OnSigilUsed(p.SteamID);
         };
-        _boss = new BossSystem(this, _engine, sid => Data(sid), pd => SaveData(pd));
+        _boss = new BossSystem(this, _engine, sid => Data(sid), pd => SaveData(pd), id => _races.Get(id));
         _boss.OnBossSpawn = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossAwaken(pl); };
         _boss.OnBossAttack = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossEnrage(pl); };
         _boss.OnBossDeath = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossDeath(pl); };
@@ -362,12 +362,13 @@ public class AetherionPlugin : BasePlugin
         var attacker = ev.Attacker;
         try
         {
-            // — Босс: фикс урона/смерти —
-            _boss.OnPlayerDeath(victim, attacker, 0);
-
+            // Null checks must come BEFORE any code that uses victim/attacker.
             if (attacker == null || !attacker.IsValid || attacker.IsBot) return HookResult.Continue;
             if (victim == null || !victim.IsValid) return HookResult.Continue;
             if (attacker.Slot == victim.Slot) return HookResult.Continue;
+
+            // — Босс: фикс урона/смерти —
+            _boss.OnPlayerDeath(victim, attacker, 0);
 
             var d = Data(attacker.SteamID);
             var rp = d.GetRace(d.CurrentRaceId);
@@ -470,10 +471,12 @@ public class AetherionPlugin : BasePlugin
         var attacker = ev.Attacker;
         try
         {
+            if (victim == null || !victim.IsValid) return HookResult.Continue;
+
             _boss.OnPlayerHurt(victim, attacker, ev.DmgHealth);
 
             // Death Save от духа: если HP < урон — оставляем 1 HP (раз/раунд)
-            if (victim != null && victim.IsValid && !victim.IsBot && victim.PawnIsAlive
+            if (!victim.IsBot && victim.PawnIsAlive
                 && _wispCompanion.HasDeathSave(victim) && victim.PlayerPawn?.Value != null)
             {
                 var vPawn = victim.PlayerPawn.Value;
@@ -486,7 +489,6 @@ public class AetherionPlugin : BasePlugin
             }
 
             if (attacker == null || !attacker.IsValid || attacker.IsBot) return HookResult.Continue;
-            if (victim == null || !victim.IsValid) return HookResult.Continue;
 
             // Контракты: урон
             _contracts.OnDamage(attacker.SteamID, ev.DmgHealth);
@@ -579,6 +581,9 @@ public class AetherionPlugin : BasePlugin
         try { _nameplates.Remove(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] nameplate remove err: {ex.Message}"); }
         try { _wispCompanion.CleanupSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] wisp cleanup err: {ex.Message}"); }
         try { _customWeapons.CleanupSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] weapon cleanup err: {ex.Message}"); }
+        try { _auras.Remove(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] aura remove err: {ex.Message}"); }
+        try { _auras.RemoveAcc(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] aura acc remove err: {ex.Message}"); }
+        try { _sigils.CleanupSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] sigil cleanup err: {ex.Message}"); }
         // Clean up SteamID-keyed caches
         var player = Utilities.GetPlayerFromSlot(slot);
         if (player != null && player.IsValid)
@@ -591,6 +596,8 @@ public class AetherionPlugin : BasePlugin
             _boundOnce.Remove(sid);
             _roundKills.Remove(sid);
             _lastKillTime.Remove(sid);
+            try { _duelArena.Leave(player); } catch (Exception ex) { Console.WriteLine($"[AETHERION] duel leave err: {ex.Message}"); }
+            try { _nexus.Close(player); } catch (Exception ex) { Console.WriteLine($"[AETHERION] nexus close err: {ex.Message}"); }
         }
     }
 
@@ -607,7 +614,8 @@ public class AetherionPlugin : BasePlugin
                 .Where(p => p != null && p.IsValid && !p.IsBot && p.PawnIsAlive)
                 .Select(p => (team: (int)p.TeamNum, slot: p.Slot))
                 .ToList();
-            _rift.Tick(players, _engine, 0.5f);
+            var riftEvent = _rift.Tick(players, _engine, 0.5f);
+            if (riftEvent != null) Server.PrintToChatAll(riftEvent);
         }
         catch (Exception ex) { Console.WriteLine($"[AETHERION] rift tick err: {ex.Message}"); }
     }
