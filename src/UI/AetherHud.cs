@@ -98,7 +98,8 @@ public static class AetherHud
 
     private static string TierStars(int tier) => new string('★', System.Math.Min(tier,5)) + new string('☆', System.Math.Max(0, 5 - tier));
     private static int LevelMax(int tier) => 1000; // глобальный кап
-    private static long NextLevelXp(RaceProgress rp, RaceDefinition def) => 90 + (long)(rp.Level * 90 * 0.06) * def.Division;
+    private static long NextLevelXp(RaceProgress rp, RaceDefinition def)
+        => LevelSystem.XpForLevel(rp.Level, def.TierEnum, def.Division);
 
     // ASCII прогресс-бар: ▰▰▰▱▱
     private static string Bar(long cur, long max, int width)

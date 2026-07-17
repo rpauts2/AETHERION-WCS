@@ -315,10 +315,10 @@ public class AetherionPlugin : BasePlugin
 
             // Кастомное оружие (скин по расе/архетипу)
             _raceWeapons.EquipOnSpawn(p, def);
-            ApplyPassivesOnSpawn(p, d, rp);
 
-            // Очистка боевых эффектов от прошлой жизни
+            // Очистка боевых эффектов от прошлой жизни (ДО пассивок!)
             _combat.ClearPlayer(p.Slot);
+            ApplyPassivesOnSpawn(p, d, rp);
 
             // Бонус HP от духа
             var wispBon = _wispCompanion.GetOwnerBonuses(p);

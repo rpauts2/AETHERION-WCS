@@ -245,8 +245,8 @@ public static class EffectLibrary
 
         ["berserk"] = v => ctx =>
         {
-            ctx.Combat.Apply(EffectTag.Berserk, ctx.Slot, v, 5f);
-            ctx.Engine.SetSpeed(ctx.Slot, 1.25f);
+            ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, Math.Min(v * 0.01f, 0.5f), 5f);
+            ctx.Engine.SetSpeed(ctx.Slot, 1.1f + Math.Min(v * 0.01f, 0.2f));
         },
 
         ["death_save"] = v => ctx =>
@@ -373,7 +373,7 @@ public static class EffectLibrary
         ["projectile"] = v => ctx =>
         {
             if(ctx.VictimSlot.HasValue)
-                ctx.Engine.SetHealth(ctx.VictimSlot.Value, Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - (int)v));
+                ctx.Engine.SetHealth(ctx.VictimSlot.Value, Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - (int)(v * ctx.SkillLevel)));
         },
 
         ["slow_on_hit"] = v => ctx =>
@@ -424,15 +424,18 @@ public static class EffectLibrary
 
         ["pierce_projectile"] = v => ctx =>
         {
-            if(ctx.VictimSlot.HasValue)
-                ctx.Engine.SetHealth(ctx.VictimSlot.Value, Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - (int)v));
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            var enemies = ctx.Combat.EnemiesInRadius(p.x, p.y, p.z, 500f, ctx.Player.TeamNum).Take(5).ToList();
+            foreach (var s in enemies)
+                ctx.Engine.SetHealth(s, Math.Max(0, ctx.Engine.GetHealth(s) - (int)(v * ctx.SkillLevel)));
         },
 
         ["multishot"] = v => ctx =>
         {
-            for(int i=0;i<3;i++)
-                if(ctx.VictimSlot.HasValue)
-                    ctx.Engine.SetHealth(ctx.VictimSlot.Value, Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - (int)v));
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            var enemies = ctx.Combat.EnemiesInRadius(p.x, p.y, p.z, 600f, ctx.Player.TeamNum).Take(3).ToList();
+            foreach (var s in enemies)
+                ctx.Engine.SetHealth(s, Math.Max(0, ctx.Engine.GetHealth(s) - (int)(v * ctx.SkillLevel)));
         },
 
         ["mark"] = v => ctx =>
@@ -490,9 +493,10 @@ public static class EffectLibrary
 
         ["combo_slash"] = v => ctx =>
         {
-            for(int i=0;i<3;i++)
-                if(ctx.VictimSlot.HasValue)
-                    ctx.Engine.SetHealth(ctx.VictimSlot.Value, Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - (int)v));
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            var enemies = ctx.Combat.EnemiesInRadius(p.x, p.y, p.z, 400f, ctx.Player.TeamNum).Take(3).ToList();
+            foreach (var s in enemies)
+                ctx.Engine.SetHealth(s, Math.Max(0, ctx.Engine.GetHealth(s) - (int)(v * ctx.SkillLevel)));
         },
 
         ["fear_aura"] = v => ctx =>
@@ -615,8 +619,10 @@ public static class EffectLibrary
         ["silent_steps"] = v => ctx =>
         {
             if(ctx.VictimSlot.HasValue)
+            {
                 ctx.Engine.Blind(ctx.VictimSlot.Value, 0.1f, 0.1f);
-            ctx.Engine.SetSpeed(ctx.Slot, 0.75f);
+                ctx.Engine.SetSpeed(ctx.VictimSlot.Value, 0.75f);
+            }
         },
 
         ["clone_ult"] = v => ctx =>
@@ -684,8 +690,19 @@ public static class EffectLibrary
         ["dash_damage"] = v => ctx =>
         {
             var p = ctx.Engine.GetPosition(ctx.Slot);
-            ctx.Engine.Teleport(ctx.Slot, p.x, p.y, p.z+10);
-            ctx.Combat.AoeApply(p.x,p.y,p.z, 170f, ctx.Player.TeamNum, EffectTag.Stun, 1f, 1f, (int)v, ctx.Slot);
+            var pawn = ctx.Player.PlayerPawn?.Value;
+            if (pawn != null)
+            {
+                float yaw = pawn.EyeAngles.Y * MathF.PI / 180f;
+                float dist = 200f;
+                ctx.Engine.Teleport(ctx.Slot, p.x + MathF.Cos(yaw) * dist, p.y + MathF.Sin(yaw) * dist, p.z + 20);
+            }
+            else ctx.Engine.Teleport(ctx.Slot, p.x, p.y, p.z + 200);
+            var np = ctx.Engine.GetPosition(ctx.Slot);
+            ctx.Engine.SpawnParticle("particles/aether_dash.vpcf", np.x, np.y, np.z);
+            ctx.Combat.AoeDamage(np.x, np.y, np.z, 170f, (int)(v * ctx.SkillLevel), ctx.Player.TeamNum, ctx.Slot);
+            foreach(var s in ctx.Combat.EnemiesInRadius(np.x,np.y,np.z,170f, ctx.Player.TeamNum))
+                ctx.Engine.Knockback(s, np.x, np.y, 150f);
         },
 
         ["cyclone"] = v => ctx =>
@@ -728,8 +745,17 @@ public static class EffectLibrary
         ["dash_slash_ult"] = v => ctx =>
         {
             var p = ctx.Engine.GetPosition(ctx.Slot);
-            ctx.Engine.Teleport(ctx.Slot, p.x, p.y, p.z+10);
-            ctx.Engine.DamageRadius(ctx.Slot, 210f, (int)(v + 8*ctx.SkillLevel));
+            var pawn = ctx.Player.PlayerPawn?.Value;
+            if (pawn != null)
+            {
+                float yaw = pawn.EyeAngles.Y * MathF.PI / 180f;
+                ctx.Engine.Teleport(ctx.Slot, p.x + MathF.Cos(yaw) * 300f, p.y + MathF.Sin(yaw) * 300f, p.z + 20);
+            }
+            else ctx.Engine.Teleport(ctx.Slot, p.x, p.y, p.z + 300);
+            var np = ctx.Engine.GetPosition(ctx.Slot);
+            ctx.Engine.SpawnParticle("particles/aether_explosion.vpcf", np.x, np.y, np.z);
+            ctx.Engine.Beam(p.x, p.y, p.z + 30, np.x, np.y, np.z + 30, 255, 100, 100, 0.5f);
+            ctx.Combat.AoeDamage(np.x, np.y, np.z, 210f, (int)(v + 8*ctx.SkillLevel), ctx.Player.TeamNum, ctx.Slot);
         },
 
         ["knockback"] = v => ctx =>
@@ -737,8 +763,7 @@ public static class EffectLibrary
             var p = ctx.Engine.GetPosition(ctx.Slot);
             if(ctx.VictimSlot.HasValue)
             {
-                var vPos = ctx.Engine.GetPosition(ctx.VictimSlot.Value);
-                ctx.Engine.Knockback(ctx.VictimSlot.Value, vPos.x, vPos.y, v);
+                ctx.Engine.Knockback(ctx.VictimSlot.Value, p.x, p.y, v);
             }
             else
             {
@@ -749,8 +774,8 @@ public static class EffectLibrary
 
         ["berserk_self"] = v => ctx =>
         {
-            ctx.Combat.Apply(EffectTag.Berserk, ctx.Slot, v, 6f);
-            ctx.Engine.SetSpeed(ctx.Slot, 1.5f);
+            ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, Math.Min(v * 0.01f, 0.5f), 6f);
+            ctx.Engine.SetSpeed(ctx.Slot, 1.15f + Math.Min(v * 0.01f, 0.25f));
         },
 
         ["hp_cost_aoe"] = v => ctx =>
@@ -830,8 +855,9 @@ public static class EffectLibrary
 
         ["stack_kill"] = v => ctx =>
         {
-            ctx.Combat.Apply(EffectTag.Lifesteal, ctx.Slot, 0.15f, 10f);
-            ctx.Engine.PrintToCenter(ctx.Slot, "💀 Стек убийства! +15% вампиризм");
+            float pct = Math.Clamp(v * 0.01f, 0.05f, 0.5f);
+            ctx.Combat.Apply(EffectTag.Lifesteal, ctx.Slot, pct, 10f);
+            ctx.Engine.PrintToCenter(ctx.Slot, $"💀 Стек убийства! +{(int)(pct*100)}% вампиризм");
         },
 
         ["freeze_chance"] = v => ctx =>
@@ -882,8 +908,9 @@ public static class EffectLibrary
             {
                 var pos = ctx.Engine.GetPosition(ctx.Slot);
                 ctx.Engine.SpawnParticle("particles/aether_fire.vpcf", pos.x, pos.y, pos.z);
+                ctx.Engine.DamageRadius(ctx.Slot, 200, (int)(v * ctx.SkillLevel));
                 int target = ctx.VictimSlot ?? ctx.Slot;
-                ctx.Combat.Apply(EffectTag.Burn, target, v, 5f);
+                ctx.Combat.Apply(EffectTag.Burn, target, v * 0.3f, 5f);
             };
         // Заморозка / лёд
         if (e.Contains("freeze") || e.Contains("frost") || e.Contains("ice") || e.Contains("winter") || e.Contains("blizzard"))
@@ -958,6 +985,7 @@ public static class EffectLibrary
                 var pos = ctx.Engine.GetPosition(ctx.Slot);
                 ctx.Engine.Beam(pos.x, pos.y, pos.z + 300, pos.x, pos.y, pos.z, 255, 225, 77, 0.4f);
                 ctx.Engine.SpawnParticle("particles/aether_thunder.vpcf", pos.x, pos.y, pos.z);
+                ctx.Combat.AoeDamage(pos.x, pos.y, pos.z, 250f, (int)(v * ctx.SkillLevel), ctx.Player.TeamNum, ctx.Slot);
             };
         // Ускорение / haste
         if (e.Contains("speed") || e.Contains("haste") || e.Contains("frenzy"))
@@ -967,7 +995,22 @@ public static class EffectLibrary
             return ctx => { ctx.Combat.Apply(EffectTag.Reflect, ctx.Slot, v, 5f); };
         // Казнь / execute → крит
         if (e.Contains("execute") || e.Contains("reaper"))
-            return ctx => { ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, v, 5f); };
+            return ctx =>
+            {
+                if (ctx.VictimSlot.HasValue)
+                {
+                    var hp = ctx.Engine.GetHealth(ctx.VictimSlot.Value);
+                    if (hp <= 40)
+                    {
+                        ctx.Engine.SetHealth(ctx.VictimSlot.Value, 0);
+                        ctx.Engine.PrintToCenter(ctx.Slot, "☠️ Казнь!");
+                    }
+                    else
+                    {
+                        ctx.Engine.DamageRadius(ctx.Slot, 200, (int)(v * ctx.SkillLevel));
+                    }
+                }
+            };
         // Страх / паника
         if (e.Contains("fear") || e.Contains("horror") || e.Contains("panic"))
             return ctx =>
