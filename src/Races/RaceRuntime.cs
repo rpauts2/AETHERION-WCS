@@ -43,7 +43,7 @@ public static class EffectLibrary
             ctx.Engine.AddHealth(ctx.Slot, (int)(v * ctx.SkillLevel), 150),
 
         ["heal_self"] = v => ctx =>
-            ctx.Engine.AddHealth(ctx.Slot, (int)v, 200),
+            ctx.Engine.AddHealth(ctx.Slot, (int)(v * ctx.SkillLevel), 200),
 
         ["dash_forward"] = v => ctx =>
         {
@@ -96,7 +96,7 @@ public static class EffectLibrary
             ctx.Combat.Apply(EffectTag.Lifesteal, ctx.Slot, v, 6f),
 
         ["soul_collect"] = v => ctx =>
-            ctx.Engine.AddHealth(ctx.Slot, (int)v, 250),
+            ctx.Engine.AddHealth(ctx.Slot, (int)(v * ctx.SkillLevel), 250),
 
         ["leap"] = v => ctx =>
         {
@@ -250,7 +250,7 @@ public static class EffectLibrary
         },
 
         ["death_save"] = v => ctx =>
-            ctx.Combat.Apply(EffectTag.Shield, ctx.Slot, 100, 4f),
+            ctx.Combat.Apply(EffectTag.Shield, ctx.Slot, (int)(v + 10*ctx.SkillLevel), 4f),
 
         ["hook_pull"] = v => ctx =>
         {
@@ -724,8 +724,8 @@ public static class EffectLibrary
             if(ctx.VictimSlot.HasValue && v > 0)
             {
                 var hp = ctx.Engine.GetHealth(ctx.VictimSlot.Value);
-                var maxHp = 100;
-                if(hp < maxHp * v)
+                float threshold = Math.Clamp(v, 1f, 100f);
+                if(hp <= threshold)
                 {
                     ctx.Engine.SetHealth(ctx.VictimSlot.Value, 0);
                     ctx.Engine.PrintToCenter(ctx.Slot, "☠️ Казнь!");
@@ -867,10 +867,10 @@ public static class EffectLibrary
         },
 
         ["backstab"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + v*0.01f),
+            ctx.Engine.SetSpeed(ctx.Slot, 1f + (v*0.01f * ctx.SkillLevel)),
 
         ["blinded_bonus"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + v*0.005f),
+            ctx.Engine.SetSpeed(ctx.Slot, 1f + (v*0.005f * ctx.SkillLevel)),
 
         ["summon_wisp"] = v => ctx =>
         {

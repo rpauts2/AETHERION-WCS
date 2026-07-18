@@ -11,5 +11,15 @@ public static class EconomySystem
     public const long GoldRoundWin = 20;
     public const long GoldBombObjective = 30;
 
-    public static void AddGold(PlayerData p, long amount) => p.Gold += amount;
+    public static void AddGold(PlayerData p, long amount)
+    {
+        p.Gold = Math.Min(999999, p.Gold + Math.Max(0, amount));
+    }
+
+    public static bool SpendGold(PlayerData p, long amount)
+    {
+        if (p.Gold < amount) return false;
+        p.Gold -= amount;
+        return true;
+    }
 }

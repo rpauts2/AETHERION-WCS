@@ -50,6 +50,7 @@ public class PlayerData
     public Dictionary<string, int> DailyChallenges { get; set; } = new();
     public long LastDailyRefreshUnix { get; set; } = 0;
     public Dictionary<string, int> QuestCounters { get; set; } = new(); // kills, headshots, boss_kills, ult_casts, etc.
+    public Dictionary<string, int> DailyCounterSnapshots { get; set; } = new(); // снимок QuestCounters на начало дня
     public double XpBoostMultiplier { get; set; } = 1.0;
     public long XpBoostExpiresUnix { get; set; } = 0;
 

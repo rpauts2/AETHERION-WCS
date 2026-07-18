@@ -221,14 +221,9 @@ public sealed class AchievementSystem
     public void OnRoundStreak(PlayerData d, CCSPlayerController p, int streak)
     {
         if (streak >= 3) Inc(d, C_STREAK_3);
-        if (streak >= 5) { Inc(d, C_STREAK_5); CheckAchievements(p, d); }
-        if (streak >= 10) { Inc(d, C_STREAK_10); CheckAchievements(p, d); }
-        // Эйс = 5 убийств (на сервере 5v5) — упрощённо
-        if (streak >= 5)
-        {
-            Inc(d, C_ACE);
-            CheckAchievements(p, d);
-        }
+        if (streak == 5) { Inc(d, C_STREAK_5); CheckAchievements(p, d); }
+        if (streak == 10) { Inc(d, C_STREAK_10); CheckAchievements(p, d); }
+        if (streak == 5) { Inc(d, C_ACE); CheckAchievements(p, d); }
     }
 
     public void OnJoinGuild(PlayerData d, CCSPlayerController p)
@@ -253,11 +248,14 @@ public sealed class AchievementSystem
         long today = new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero).ToUnixTimeSeconds();
         if (d.LastDailyRefreshUnix < today)
         {
+            // Снимок текущих счётчиков для вычисления дневного прогресса
+            d.DailyCounterSnapshots = new Dictionary<string, int>(d.QuestCounters);
             // Новый день — генерируем 3 случайных дейлика
             d.DailyChallenges.Clear();
             var pool = _dailyPool.OrderBy(_ => _rng.Next()).Take(3).ToList();
             foreach (var ch in pool)
-                d.DailyChallenges[ch.Id] = 0; // прогресс = 0
+                d.DailyChallenges[ch.Id] = 0;
+            d.ClaimedAchievements.RemoveWhere(x => x.StartsWith("daily_"));
             d.LastDailyRefreshUnix = today;
         }
         return GetCurrentDailies(d);
@@ -281,11 +279,12 @@ public sealed class AchievementSystem
             var def = _dailyPool.FirstOrDefault(c => c.Id == kv.Key);
             if (def == null) continue;
 
-            int progress = d.QuestCounters.GetValueOrDefault(def.Counter, 0);
-            d.DailyChallenges[kv.Key] = Math.Min(progress, def.Target);
+            int snapshot = d.DailyCounterSnapshots.GetValueOrDefault(def.Counter, 0);
+            int current = d.QuestCounters.GetValueOrDefault(def.Counter, 0);
+            int dailyProgress = Math.Max(0, current - snapshot);
+            d.DailyChallenges[kv.Key] = Math.Min(dailyProgress, def.Target);
 
-            // Проверяем завершение (каждый N-й прогресс для снижения нагрузки)
-            if (progress > 0 && progress >= def.Target && !d.ClaimedAchievements.Contains("daily_" + def.Id))
+            if (dailyProgress > 0 && dailyProgress >= def.Target && !d.ClaimedAchievements.Contains("daily_" + def.Id))
             {
                 d.ClaimedAchievements.Add("daily_" + def.Id);
                 EconomySystem.AddGold(d, def.GoldReward);

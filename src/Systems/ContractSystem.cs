@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using WcsInfinity.Races;
 
 namespace WcsInfinity.Systems;
 
@@ -33,6 +34,7 @@ public class ContractSystem
     private readonly Dictionary<ulong, List<PlayerContract>> _contracts = new();
     private readonly Random _rng = new();
     private DateTime _lastReset = DateTime.MinValue;
+    private Func<int, RaceDefinition?>? _raceDefFn;
 
     private static readonly ContractDef[] _templates =
     {
@@ -55,6 +57,8 @@ public class ContractSystem
         _dataFn = dataFn;
         _saveFn = saveFn;
     }
+
+    public void SetRaceLookup(Func<int, RaceDefinition?> fn) => _raceDefFn = fn;
 
     public void DailyReset()
     {
@@ -135,7 +139,8 @@ public class ContractSystem
         var d = _dataFn(p.SteamID);
         int totalGold = c.Def.GoldReward + c.Def.BonusGoldOnStreak;
         EconomySystem.AddGold(d, totalGold);
-        LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), Races.RaceTier.T1_Spark, c.Def.XpReward);
+        var raceDef = _raceDefFn?.Invoke(d.CurrentRaceId);
+        LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), raceDef?.TierEnum ?? RaceTier.T1_Spark, c.Def.XpReward);
         _saveFn(d);
         p.PrintToChat($" \x06[AETHERION] 📋 Контракт выполнен: {c.Def.Name}! +{totalGold}з +{c.Def.XpReward}XP");
         return true;

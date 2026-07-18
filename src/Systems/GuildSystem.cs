@@ -61,7 +61,7 @@ public class GuildManager
     {
         ulong sid = leader.SteamID;
         if (_playerGuild.ContainsKey(sid)) return null;
-        if (_guilds.Values.Any(g => g.Name == name || g.Tag == tag)) return null;
+        if (_guilds.Values.Any(g => string.Equals(g.Name, name, StringComparison.OrdinalIgnoreCase) || string.Equals(g.Tag, tag, StringComparison.OrdinalIgnoreCase))) return null;
         var g = new Guild { Id = _nextId++, Name = name, Tag = tag, LeaderSteamId = sid };
         g.Members.Add(sid); g.Officers.Add(sid);
         _guilds[g.Id] = g; _playerGuild[sid] = g.Id;

@@ -18,29 +18,36 @@ public class SqlitePlayerStore : IPlayerStore
     {
         using var con = new SqliteConnection(_connStr);
         con.Open();
-        using var cmd = con.CreateCommand();
-        cmd.CommandText = @"CREATE TABLE IF NOT EXISTS players (
-            steam_id INTEGER PRIMARY KEY,
-            name TEXT,
-            data TEXT NOT NULL
-        );
-        CREATE TABLE IF NOT EXISTS guilds (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            tag TEXT NOT NULL,
-            leader_id INTEGER NOT NULL,
-            members TEXT NOT NULL DEFAULT '[]',
-            officers TEXT NOT NULL DEFAULT '[]',
-            treasury INTEGER NOT NULL DEFAULT 0,
-            banner_level INTEGER NOT NULL DEFAULT 1,
-            banner_xp INTEGER NOT NULL DEFAULT 0,
-            weekly_frags INTEGER NOT NULL DEFAULT 0
-        );
-        CREATE TABLE IF NOT EXISTS guild_members (
-            steam_id INTEGER PRIMARY KEY,
-            guild_id INTEGER NOT NULL
-        );";
-        cmd.ExecuteNonQuery();
+
+        string[] creates = {
+            @"CREATE TABLE IF NOT EXISTS players (
+                steam_id INTEGER PRIMARY KEY,
+                name TEXT,
+                data TEXT NOT NULL
+            );",
+            @"CREATE TABLE IF NOT EXISTS guilds (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                tag TEXT NOT NULL,
+                leader_id INTEGER NOT NULL,
+                members TEXT NOT NULL DEFAULT '[]',
+                officers TEXT NOT NULL DEFAULT '[]',
+                treasury INTEGER NOT NULL DEFAULT 0,
+                banner_level INTEGER NOT NULL DEFAULT 1,
+                banner_xp INTEGER NOT NULL DEFAULT 0,
+                weekly_frags INTEGER NOT NULL DEFAULT 0
+            );",
+            @"CREATE TABLE IF NOT EXISTS guild_members (
+                steam_id INTEGER PRIMARY KEY,
+                guild_id INTEGER NOT NULL
+            );"
+        };
+        foreach (var sql in creates)
+        {
+            using var cmd = con.CreateCommand();
+            cmd.CommandText = sql;
+            cmd.ExecuteNonQuery();
+        }
     }
 
     public PlayerData? Load(ulong steamId)

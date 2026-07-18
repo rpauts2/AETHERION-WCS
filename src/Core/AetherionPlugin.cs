@@ -179,6 +179,7 @@ public class AetherionPlugin : BasePlugin
             _ether[sid] = Math.Min(EtherMax, _ether.GetValueOrDefault(sid, 0) + amount);
         });
         _contracts = new ContractSystem(sid => Data(sid), pd => SaveData(pd));
+        _contracts.SetRaceLookup(id => _races.Get(id));
         _mutation = new RaceMutationSystem(_engine, _combat);
 
         // Хуки событий
@@ -363,12 +364,17 @@ public class AetherionPlugin : BasePlugin
         try
         {
             // Null checks must come BEFORE any code that uses victim/attacker.
-            if (attacker == null || !attacker.IsValid || attacker.IsBot) return HookResult.Continue;
             if (victim == null || !victim.IsValid) return HookResult.Continue;
-            if (attacker.Slot == victim.Slot) return HookResult.Continue;
 
-            // — Босс: фикс урона/смерти —
+            // — Босс: фикс смерти (вызываем до проверки attacker) —
             _boss.OnPlayerDeath(victim, attacker, 0);
+
+            // Жертва: гасим духа до респавна
+            if (!victim.IsBot)
+                _wispCompanion.NotifyDeath(victim);
+
+            if (attacker == null || !attacker.IsValid || attacker.IsBot) return HookResult.Continue;
+            if (attacker.Slot == victim.Slot) return HookResult.Continue;
 
             var d = Data(attacker.SteamID);
             var rp = d.GetRace(d.CurrentRaceId);
@@ -415,10 +421,6 @@ public class AetherionPlugin : BasePlugin
             // Дух Wisp: рост связи
             rp.WispBond += hs ? 6 : 4;
             _wispCompanion.NotifyKill(attacker, hs);
-
-            // Жертва: гасим духа до респавна
-            if (victim != null && victim.IsValid && !victim.IsBot)
-                _wispCompanion.NotifyDeath(victim);
 
             // Стрик
             _roundKills[attacker.SteamID] = _roundKills.GetValueOrDefault(attacker.SteamID, 0) + 1;
