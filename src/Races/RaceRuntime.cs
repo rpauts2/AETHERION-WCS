@@ -906,38 +906,39 @@ public static class EffectLibrary
         if (e.Contains("fire") || e.Contains("burn") || e.Contains("flame") || e.Contains("ignite"))
             return ctx =>
             {
+                int target = ctx.VictimSlot ?? -1;
+                if (target < 0) return;
                 var pos = ctx.Engine.GetPosition(ctx.Slot);
                 ctx.Engine.SpawnParticle("particles/aether_fire.vpcf", pos.x, pos.y, pos.z);
                 ctx.Engine.DamageRadius(ctx.Slot, 200, (int)(v * ctx.SkillLevel));
-                int target = ctx.VictimSlot ?? ctx.Slot;
                 ctx.Combat.Apply(EffectTag.Burn, target, v * 0.3f, 5f);
             };
-        // Заморозка / лёд
         if (e.Contains("freeze") || e.Contains("frost") || e.Contains("ice") || e.Contains("winter") || e.Contains("blizzard"))
             return ctx =>
             {
-                int target = ctx.VictimSlot ?? ctx.Slot;
+                int target = ctx.VictimSlot ?? -1;
+                if (target < 0) return;
                 ctx.Combat.Apply(EffectTag.Freeze, target, v, 2f);
             };
-        // Яд
         if (e.Contains("poison") || e.Contains("plague") || e.Contains("epidemic"))
             return ctx =>
             {
-                int target = ctx.VictimSlot ?? ctx.Slot;
+                int target = ctx.VictimSlot ?? -1;
+                if (target < 0) return;
                 ctx.Combat.Apply(EffectTag.Poison, target, v, 6f);
             };
-        // Оглушение
         if (e.Contains("stun") || e.Contains("charge_stun") || e.Contains("flash"))
             return ctx =>
             {
-                int target = ctx.VictimSlot ?? ctx.Slot;
+                int target = ctx.VictimSlot ?? -1;
+                if (target < 0) return;
                 ctx.Combat.Apply(EffectTag.Stun, target, v, 2f);
             };
-        // Замедление
         if (e.Contains("slow") || e.Contains("dilation") || e.Contains("gravity"))
             return ctx =>
             {
-                int target = ctx.VictimSlot ?? ctx.Slot;
+                int target = ctx.VictimSlot ?? -1;
+                if (target < 0) return;
                 ctx.Combat.Apply(EffectTag.Slow, target, v, 3f);
             };
         // Телепорт / blink / dash

@@ -50,14 +50,21 @@ public class GuildTournament
     {
         State = TournamentState.Finished;
         var winner = ScoreA >= ScoreB ? SideA : SideB;
+        var loser = ScoreA >= ScoreB ? SideB : SideA;
         string winnerName = ScoreA >= ScoreB ? "Команда A" : "Команда B";
         foreach (var g in winner)
-            GuildManager.Instance.AddBannerXp(g, 500L);
-        Server.PrintToChatAll($"\x06[AETHERION] 🏆 Турнир «{Name}» завершён! Победа {winnerName} ({ScoreA}:{ScoreB})");
+        {
+            GuildManager.Instance.AddBannerXp(g, PrizeXp);
+            g.Treasury += PrizeGold;
+        }
+        foreach (var g in loser)
+            GuildManager.Instance.AddBannerXp(g, PrizeXp / 2);
+        Server.PrintToChatAll($"\x06[AETHERION] 🏆 Турнир «{Name}» завершён! Победа {winnerName} ({ScoreA}:{ScoreB}) — +{PrizeGold}з +{PrizeXp}XP гильдиям!");
     }
 
     public void Register(Guild g)
     {
+        if (SideA.Any(x => x.Id == g.Id) || SideB.Any(x => x.Id == g.Id)) return;
         if (SideA.Count <= SideB.Count) SideA.Add(g); else SideB.Add(g);
     }
 

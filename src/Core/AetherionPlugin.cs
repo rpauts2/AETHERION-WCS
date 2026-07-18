@@ -140,7 +140,8 @@ public class AetherionPlugin : BasePlugin
             _resonance.OnSigilCast(p, name);
             _contracts.OnSigilUsed(p.SteamID);
         };
-        _boss = new BossSystem(this, _engine, sid => Data(sid), pd => SaveData(pd), id => _races.Get(id));
+        _boss = new BossSystem(this, _engine, sid => Data(sid), pd => SaveData(pd), id => _races.Get(id),
+            (sid, amount) => { _ether[sid] = Math.Min(EtherMax, _ether.GetValueOrDefault(sid, 0) + amount); });
         _boss.OnBossSpawn = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossAwaken(pl); };
         _boss.OnBossAttack = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossEnrage(pl); };
         _boss.OnBossDeath = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossDeath(pl); };
@@ -407,7 +408,10 @@ public class AetherionPlugin : BasePlugin
 
             // Жертва: гасим духа до респавна
             if (!victim.IsBot)
+            {
                 _wispCompanion.NotifyDeath(victim);
+                _contracts.OnDeath(victim.SteamID);
+            }
 
             if (attacker == null || !attacker.IsValid || attacker.IsBot) return HookResult.Continue;
             if (attacker.Slot == victim.Slot) return HookResult.Continue;
@@ -427,7 +431,6 @@ public class AetherionPlugin : BasePlugin
             if (guild != null)
             {
                 var onlineMembers = _guilds.OnlineMembers(guild, Utilities.GetPlayers());
-                var raceMult = _guilds.GuildRaceMultiplier(guild, onlineMembers);
                 xp = (long)(xp * (1f + guild.XpBonus));
                 gold = (long)(gold * (1f + guild.GoldBonus));
                 _guilds.AddBannerXp(guild, xp / 10); // 10% XP идёт в знамя
@@ -1136,8 +1139,7 @@ public class AetherionPlugin : BasePlugin
         if (info.ArgCount < 3 || !long.TryParse(info.GetArg(2), out var amount) || amount <= 0)
         { p.PrintToChat($" \x07Формат: !guild donate <сумма>. Казна: {g.Treasury}з"); return; }
         var d = Data(p.SteamID);
-        if (d.Gold < amount) { p.PrintToChat($" \x07Недостаточно золота ({d.Gold}/{amount})."); return; }
-        d.Gold -= amount;
+        if (!EconomySystem.SpendGold(d, amount)) { p.PrintToChat($" \x07Недостаточно золота ({d.Gold}/{amount})."); return; }
         g.Treasury += amount;
         SaveData(d);
         p.PrintToChat($" \x04[AETHERION]\x01 Внесено {amount}з в казну. Всего: {g.Treasury}з");

@@ -40,6 +40,8 @@ public class CombatEffects
     public void Apply(EffectTag tag, int slot, float value, float durationSec,
         float tickInterval = 1f, int? source = null)
     {
+        if (durationSec <= 0 || slot < 0) return;
+        tickInterval = Math.Max(0.1f, tickInterval);
         var now = DateTime.UtcNow;
         var ex = _effects.FirstOrDefault(e => e.Tag == tag && e.Slot == slot);
         if (ex != null) { ex.Value = value; ex.ExpiresUtc = now.AddSeconds(durationSec); return; }
@@ -158,8 +160,8 @@ public class CombatEffects
     {
         if (!sourceSlot.HasValue) return DefaultDamageCapMultiplier;
         var slot = sourceSlot.Value;
-        if (combat.HasEffect(slot, EffectTag.LifestealPassive)) return combat.EffectValue(slot, EffectTag.LifestealPassive);
-        if (combat.HasEffect(slot, EffectTag.Lifesteal)) return combat.EffectValue(slot, EffectTag.Lifesteal);
+        if (combat.HasEffect(slot, EffectTag.LifestealPassive)) return DefaultDamageCapMultiplier + combat.EffectValue(slot, EffectTag.LifestealPassive);
+        if (combat.HasEffect(slot, EffectTag.Lifesteal)) return DefaultDamageCapMultiplier + combat.EffectValue(slot, EffectTag.Lifesteal);
         return DefaultDamageCapMultiplier;
     }
 

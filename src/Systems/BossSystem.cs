@@ -27,6 +27,7 @@ public sealed class BossSystem
     private readonly Func<ulong, WcsInfinity.Models.PlayerData> _dataFn;
     private readonly Action<WcsInfinity.Models.PlayerData> _saveFn;
     private readonly Func<int, WcsInfinity.Races.RaceDefinition?> _raceDefFn;
+    private readonly Action<ulong, int> _addEther;
 
     // Боссы: имя, RGB цвет модели, награда золота, награда XP, HP множитель
     private static readonly IReadOnlyList<(string Name, int R, int G, int B, int Gold, int Xp, float HpMult, string Ability)> BossData = new List<(string, int, int, int, int, int, float, string)>
@@ -62,7 +63,7 @@ public sealed class BossSystem
     private float _voteEndTime;
     private float _attackTimer;
     private readonly Dictionary<ulong, bool> _voteChoices = new();
-    private readonly Dictionary<int, int> _damageTable = new();
+    private readonly Dictionary<ulong, int> _damageTable = new();
     private CounterStrikeSharp.API.Modules.Timers.Timer? _voteTimer;
     private CounterStrikeSharp.API.Modules.Timers.Timer? _lifeTimer;
     private readonly Random _rng = new();
@@ -80,13 +81,15 @@ public sealed class BossSystem
     public BossSystem(BasePlugin plugin, IEngineApi engine,
         Func<ulong, WcsInfinity.Models.PlayerData> dataFn,
         Action<WcsInfinity.Models.PlayerData> saveFn,
-        Func<int, WcsInfinity.Races.RaceDefinition?> raceDefFn)
+        Func<int, WcsInfinity.Races.RaceDefinition?> raceDefFn,
+        Action<ulong, int> addEther)
     {
         _plugin = plugin;
         _engine = engine;
         _dataFn = dataFn;
         _saveFn = saveFn;
         _raceDefFn = raceDefFn;
+        _addEther = addEther;
     }
 
     public bool IsBossActive => _bossActive;
@@ -184,7 +187,7 @@ public sealed class BossSystem
         // Очистка старой сущности
         DespawnBossEntity();
 
-        // Берём позицию случайного живого игрока или точки спавна T
+        // Берём позицию случайного живого игрока, со смещением чтобы не зажать
         Vector spawnPos;
         var players = Utilities.GetPlayers().Where(p => p != null && p.IsValid && !p.IsBot && p.PawnIsAlive).ToList();
         if (players.Count > 0)
@@ -192,7 +195,14 @@ public sealed class BossSystem
             var target = players[_rng.Next(players.Count)];
             var pawn = target.PlayerPawn?.Value;
             if (pawn?.AbsOrigin != null)
-                spawnPos = pawn.AbsOrigin;
+            {
+                float offset = _rng.Next(200, 400);
+                float angle = (float)(_rng.NextDouble() * Math.PI * 2);
+                spawnPos = new Vector(
+                    pawn.AbsOrigin.X + MathF.Cos(angle) * offset,
+                    pawn.AbsOrigin.Y + MathF.Sin(angle) * offset,
+                    pawn.AbsOrigin.Z);
+            }
             else
                 spawnPos = new Vector(0, 0, 0);
         }
@@ -266,6 +276,8 @@ public sealed class BossSystem
             Stop();
             return;
         }
+        if (_lifetime <= 10f && _lifetime > 9.5f)
+            Server.PrintToChatAll(@" \x07[AETHERION] ⚠ Босс исчезнет через 10 секунд!");
 
         // Обновляем HP бар
         if (_bossHpBar != null && _bossHpBar.IsValid)
@@ -330,41 +342,17 @@ public sealed class BossSystem
     // ═══════════════════════════════════════════════
     public void OnPlayerHurt(CCSPlayerController? victim, CCSPlayerController? attacker, int damage)
     {
-        if (!_bossActive || attacker == null || !attacker.IsValid || attacker.IsBot || damage <= 0) return;
-        int bossDmg = Math.Max(1, damage / 5);
-        _damageTable.TryGetValue(attacker.Slot, out var cur);
-        _damageTable[attacker.Slot] = cur + bossDmg;
-        _bossHp = Math.Max(0, _bossHp - bossDmg);
-
-        // Флэш при ударе босса
-        if (_bossProp != null && _bossProp.IsValid)
-            try
-            {
-                _bossProp.Render = Color.FromArgb(255, 255, 200, 200);
-                Utilities.SetStateChanged(_bossProp, "CBaseModelEntity", "m_clrRender");
-                // Восстановим цвет в следующем кадре
-                var skin = BossData[_bossIndex];
-                Server.NextFrame(() =>
-                {
-                    if (_bossProp != null && _bossProp.IsValid)
-                        try
-                        {
-                            _bossProp.Render = Color.FromArgb(255, skin.R, skin.G, skin.B);
-                            Utilities.SetStateChanged(_bossProp, "CBaseModelEntity", "m_clrRender");
-                        }
-                        catch (Exception ex) { Console.WriteLine($"[Boss] damage flash err: {ex.Message}"); }
-                });
-            }
-            catch (Exception ex) { Console.WriteLine($"[Boss] NextFrame err: {ex.Message}"); }
-
-        if (_bossHp <= 0) OnBossDefeated();
+        // Boss is a prop_dynamic — it does NOT cause player_hurt events.
+        // Boss damage goes through DealDirectDamage() only.
+        // This handler intentionally does nothing for boss HP tracking.
+        // (PvP damage must not reduce boss HP.)
     }
 
     public void DealDirectDamage(CCSPlayerController attacker, int amount)
     {
         if (!_bossActive || attacker == null || !attacker.IsValid) return;
-        _damageTable.TryGetValue(attacker.Slot, out var cur);
-        _damageTable[attacker.Slot] = cur + amount;
+        _damageTable.TryGetValue(attacker.SteamID, out var cur);
+        _damageTable[attacker.SteamID] = cur + amount;
         _bossHp = Math.Max(0, _bossHp - amount);
         if (_bossHp <= 0) OnBossDefeated();
     }
@@ -402,7 +390,7 @@ public sealed class BossSystem
 
         foreach (var kv in _damageTable.OrderByDescending(x => x.Value))
         {
-            var attacker = Utilities.GetPlayers().FirstOrDefault(p => p != null && p.IsValid && !p.IsBot && p.Slot == kv.Key);
+            var attacker = Utilities.GetPlayers().FirstOrDefault(p => p != null && p.IsValid && !p.IsBot && p.SteamID == kv.Key);
             if (attacker == null) continue;
 
             float share = kv.Value / (float)totalDmg;
@@ -417,6 +405,7 @@ public sealed class BossSystem
                 var raceDef = _raceDefFn(d.CurrentRaceId);
                 LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), raceDef?.TierEnum ?? RaceTier.T1_Spark, xp);
                 d.SeasonXp += xp;
+                _addEther(attacker.SteamID, ether);
                 _saveFn(d);
             }
             catch (Exception ex) { Console.WriteLine($"[Boss] reward err: {ex.Message}"); }
@@ -428,7 +417,7 @@ public sealed class BossSystem
         var best = _damageTable.OrderByDescending(kv => kv.Value).FirstOrDefault();
         if (best.Value > 0)
         {
-            var top = Utilities.GetPlayers().FirstOrDefault(p => p != null && p.IsValid && !p.IsBot && p.Slot == best.Key);
+            var top = Utilities.GetPlayers().FirstOrDefault(p => p != null && p.IsValid && !p.IsBot && p.SteamID == best.Key);
             if (top != null)
             {
                 try
@@ -461,7 +450,7 @@ public sealed class BossSystem
         foreach (var p in Utilities.GetPlayers())
         {
             if (p == null || !p.IsValid || p.IsBot) continue;
-            if (_damageTable.ContainsKey(p.Slot)) continue;
+            if (_damageTable.ContainsKey(p.SteamID)) continue;
             p.PrintToChat($" \x06[AETHERION] Босс повержен! Ты рядом — +100з participation.");
             try { var d = _dataFn(p.SteamID); EconomySystem.AddGold(d, 100); _saveFn(d); } catch { }
         }

@@ -53,6 +53,8 @@ public class ContractSystem
         new() { Type = ContractType.UseSigils, Name = "Использовать 5 печатей", Desc = "Примени печати Эфира 5 раз", Target = 5, GoldReward = 200, XpReward = 100, BonusGoldOnStreak = 40 },
     };
 
+    private readonly Dictionary<ulong, int> _killStreak = new();
+
     public ContractSystem(Func<ulong, Models.PlayerData> dataFn, Action<Models.PlayerData> saveFn)
     {
         _dataFn = dataFn;
@@ -86,9 +88,22 @@ public class ContractSystem
 
     public void OnKill(ulong steamId)
     {
+        _killStreak.TryGetValue(steamId, out int streak);
+        streak++;
+        _killStreak[steamId] = streak;
+
         foreach (var c in GetContracts(steamId))
+        {
             if (c.Def.Type == ContractType.KillEnemies && !c.Claimed)
                 c.Progress = Math.Min(c.Def.Target, c.Progress + 1);
+            if (c.Def.Type == ContractType.GetKillsNoDeath && !c.Claimed)
+                c.Progress = Math.Min(c.Def.Target, streak);
+        }
+    }
+
+    public void OnDeath(ulong steamId)
+    {
+        _killStreak[steamId] = 0;
     }
 
     public void OnRoundWin(ulong steamId)
@@ -142,7 +157,8 @@ public class ContractSystem
 
         c.Claimed = true;
         var d = _dataFn(p.SteamID);
-        int totalGold = c.Def.GoldReward + c.Def.BonusGoldOnStreak;
+        int streak = _killStreak.GetValueOrDefault(p.SteamID);
+        int totalGold = c.Def.GoldReward + (streak >= 3 ? c.Def.BonusGoldOnStreak : 0);
         EconomySystem.AddGold(d, totalGold);
         var raceDef = _raceDefFn?.Invoke(d.CurrentRaceId);
         LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), raceDef?.TierEnum ?? RaceTier.T1_Spark, c.Def.XpReward);

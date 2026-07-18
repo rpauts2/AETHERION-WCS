@@ -24,7 +24,6 @@ public class StormWaveSystem
     private readonly float[] _waveGoldReward = { 50f, 80f, 120f, 180f, 500f };
     private readonly float[] _waveXpReward = { 30f, 50f, 80f, 120f, 300f };
     private int _totalKills;
-    private int _roundStartPlayerCount;
 
     public bool IsActive => _active;
     public int CurrentWave => _currentWave;
@@ -49,7 +48,6 @@ public class StormWaveSystem
         _active = true;
         _currentWave = 0;
         _totalKills = 0;
-        _roundStartPlayerCount = alive;
         _timer = 3f;
         Server.PrintToChatAll(" \x06[AETHERION] ⚡ ШТОРМ НАЧИНАЕТСЯ! 5 волн врагов!");
     }
@@ -107,6 +105,20 @@ public class StormWaveSystem
         int count = _botsPerWave[wave];
         float hpMult = _hpMultiplier[wave];
         var usedSlots = new HashSet<int>();
+
+        // Kill all existing bots from previous waves first
+        foreach (var old in Utilities.GetPlayers())
+        {
+            if (old != null && old.IsValid && old.IsBot && old.PawnIsAlive)
+            {
+                var pawn = old.PlayerPawn?.Value;
+                if (pawn != null)
+                {
+                    pawn.Health = 0;
+                    Utilities.SetStateChanged(pawn, "CBaseEntity", "m_iHealth");
+                }
+            }
+        }
 
         for (int i = 0; i < count; i++)
         {

@@ -68,14 +68,15 @@ public static class LevelSystem
             rp.UnspentPoints++;
             gained++;
         }
-        // если раса на капе — XP идёт в Paragon (бесконечный дивизион)
+        // Paragon: cost grows 10% per paragon level
         if (rp.Level >= max)
         {
-            long paragonNeed = XpForLevel(rp.Level, tier, 8);
+            long paragonNeed = (long)(XpForLevel(rp.Level, tier, 8) * (1 + rp.ParagonLevel * 0.10));
             while (rp.Xp >= paragonNeed)
             {
                 rp.Xp -= paragonNeed;
                 rp.ParagonLevel++;
+                paragonNeed = (long)(XpForLevel(rp.Level, tier, 8) * (1 + rp.ParagonLevel * 0.10));
             }
         }
         return gained;

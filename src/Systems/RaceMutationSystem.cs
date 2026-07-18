@@ -108,6 +108,26 @@ public class RaceMutationSystem
         return _activeMutation?.Type == MutationType.DoubleUltDamage ? 2f : 1f;
     }
 
+    public void OnPlayerSpawn(CCSPlayerController p)
+    {
+        if (_activeMutation == null || p == null || !p.IsValid || p.IsBot) return;
+        switch (_activeMutation.Type)
+        {
+            case MutationType.SpeedBoost:
+                _engine.SetSpeed(p.Slot, 1.5f);
+                break;
+            case MutationType.LifestealAura:
+                _combat.Apply(EffectTag.Lifesteal, p.Slot, 0.2f, _activeMutation.Duration);
+                break;
+            case MutationType.MegaShield:
+                _engine.AddArmor(p.Slot, 100, 300);
+                break;
+            case MutationType.DoubleUltDamage:
+            case MutationType.NoCooldowns:
+                break;
+        }
+    }
+
     private void RemoveMutationFromAll()
     {
         if (_activeMutation == null) return;
@@ -121,6 +141,9 @@ public class RaceMutationSystem
                     break;
                 case MutationType.LifestealAura:
                     _combat.RemoveEffect(p.Slot, EffectTag.Lifesteal);
+                    break;
+                case MutationType.MegaShield:
+                    _engine.AddArmor(p.Slot, 0, 0);
                     break;
             }
         }

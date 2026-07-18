@@ -41,7 +41,7 @@ public static class CosmeticCatalog
         new() { Id="title_legend", Type=CosmeticType.Title, Name="Легенда", Value="Легенда", RequiredLevel=100 },
         new() { Id="title_godslayer", Type=CosmeticType.Title, Name="Богоборец", Value="Богоборец", RequiredLevel=200, RequiredDivision=5 },
         new() { Id="title_eternal", Type=CosmeticType.Title, Name="Вечный", Value="Вечный", RequiredLevel=500, RequiredDivision=7 },
-        new() { Id="title_dragon", Type=CosmeticType.Title, Name="Дракон", Value="🐉 Дракон", RequiredAchievement="boss_kill_10" },
+        new() { Id="title_dragon", Type=CosmeticType.Title, Name="Дракон", Value="🐉 Дракон", RequiredAchievement="boss_master" },
         new() { Id="title_guild_member", Type=CosmeticType.Title, Name="Братство", Value="⚔ Братство", RequiredGuild=true },
 
         // ── ЦВЕТА НИКА ──
@@ -51,15 +51,15 @@ public static class CosmeticCatalog
         new() { Id="color_purple", Type=CosmeticType.NameColor, Name="Фиолетовый", Value="#FF00FF", RequiredLevel=35 },
         new() { Id="color_gold", Type=CosmeticType.NameColor, Name="Золотой", Value="#FFD700", RequiredLevel=60, RequiredDivision=3 },
         new() { Id="color_red", Type=CosmeticType.NameColor, Name="Красный", Value="#FF4444", RequiredLevel=80, RequiredDivision=4 },
-        new() { Id="color_ember", Type=CosmeticType.NameColor, Name="Пламя", Value="#FF6600", RequiredAchievement="kill_1000" },
+        new() { Id="color_ember", Type=CosmeticType.NameColor, Name="Пламя", Value="#FF6600", RequiredAchievement="killer_1000" },
         new() { Id="color_ice", Type=CosmeticType.NameColor, Name="Лёд", Value="#88DDFF", RequiredAchievement="streak_10" },
 
         // ── БЕЙДЖИ ──
         new() { Id="badge_first_blood", Type=CosmeticType.Badge, Name="Первая кровь", Value="🩸", RequiredAchievement="first_blood" },
-        new() { Id="badge_boss_slayer", Type=CosmeticType.Badge, Name="Убийца Боссов", Value="💀", RequiredAchievement="boss_kill_5" },
+        new() { Id="badge_boss_slayer", Type=CosmeticType.Badge, Name="Убийца Боссов", Value="💀", RequiredAchievement="boss_slayer" },
         new() { Id="badge_guild_hero", Type=CosmeticType.Badge, Name="Герой Гильдии", Value="⚔", RequiredGuild=true, RequiredLevel=50 },
-        new() { Id="badge_ace", Type=CosmeticType.Badge, Name="Эйс", Value="🎯", RequiredAchievement="ace" },
-        new() { Id="badge_wisp_friend", Type=CosmeticType.Badge, Name="Друг Духа", Value="✨", RequiredAchievement="wisp_max" },
+        new() { Id="badge_ace", Type=CosmeticType.Badge, Name="Эйс", Value="🎯", RequiredAchievement="ace_1" },
+        new() { Id="badge_wisp_friend", Type=CosmeticType.Badge, Name="Друг Духа", Value="✨", RequiredAchievement="guild_join" },
     };
 
     public static CosmeticDef? Get(string id) => Cosmetics.FirstOrDefault(c => c.Id == id);
@@ -134,5 +134,14 @@ public class CosmeticSystem
         }
 
         p.PrintToChat(" \x09Команды: !title <id> | !color <id>");
+
+        var badges = CosmeticCatalog.Cosmetics.Where(c => c.Type == CosmeticType.Badge).ToList();
+        p.PrintToChat(" \x06БЕЙДЖИ:");
+        foreach (var b in badges)
+        {
+            bool owned = CanEquip(d, b);
+            string status = owned ? " \x04[доступен]" : " \x07[locked]";
+            p.PrintToChat($" {b.Value} {b.Name}{status}");
+        }
     }
 }

@@ -74,8 +74,8 @@ public class EtherPortalSystem
         var pawn = anchor.PlayerPawn?.Value;
         if (pawn?.AbsOrigin == null) return;
 
-        float x = pawn.AbsOrigin.X + _rng.Next(-1500, 1500);
-        float y = pawn.AbsOrigin.Y + _rng.Next(-1500, 1500);
+        float x = pawn.AbsOrigin.X + _rng.Next(-800, 800);
+        float y = pawn.AbsOrigin.Y + _rng.Next(-800, 800);
         float z = pawn.AbsOrigin.Z;
 
         // 5% legendary, 25% rare, 70% normal

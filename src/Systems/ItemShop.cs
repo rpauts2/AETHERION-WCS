@@ -80,7 +80,7 @@ public static class ItemShop
             return (false, L10n.GetF("Systems_ItemShop_MaxStack", "Достигнут лимит ({0}).",
                 ("item.MaxStack", item.MaxStack)));
 
-        p.Gold -= item.Price;
+        if (!EconomySystem.SpendGold(p, item.Price)) return (false, "Недостаточно золота.");
         if (owned == null) p.Inventory.Add(new OwnedItem { ItemId = itemId, Count = 1 });
         else owned.Count++;
         return (true, L10n.GetF("Systems_ItemShop_BuySuccess", "Куплено: {0} ({1}).",

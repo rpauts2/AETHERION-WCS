@@ -40,12 +40,11 @@ public static class GuildCraftSystem
         if (!_recipes.TryGetValue(recipeId, out var r)) return false;
         if (g.Treasury < r.GoldCost) return false;
         if (g.CraftedIds.Contains(recipeId)) return false;
+        // Check tier requirement
+        if (r.Tier > g.Tier) return false;
         g.Treasury -= r.GoldCost;
         g.CraftedIds.Add(recipeId);
         GuildManager.Instance.AddBannerXp(g, r.BannerXpReward);
-
-        // Effects are passive — computed from BannerLevel
-        // GoldBonus, XpBonus, MaxMembers are properties on Guild that scale with BannerLevel
 
         return true;
     }

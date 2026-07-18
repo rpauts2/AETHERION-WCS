@@ -26,7 +26,6 @@ public class DuelArenaSystem
     private readonly IEngineApi _engine;
     private readonly Func<ulong, Models.PlayerData> _dataFn;
     private readonly Action<Models.PlayerData> _saveFn;
-    private readonly Dictionary<ulong, int> _elo = new();
     private readonly Dictionary<ulong, int> _winStreak = new();
     private DuelState? _currentDuel;
     private float _duelTimeout;
@@ -42,7 +41,11 @@ public class DuelArenaSystem
         _saveFn = saveFn;
     }
 
-    public int GetElo(ulong steamId) => _elo.GetValueOrDefault(steamId, ELO_START);
+    public int GetElo(ulong steamId)
+    {
+        var d = _dataFn(steamId);
+        return d.DuelElo;
+    }
 
     public void Invite(CCSPlayerController caller, CCSPlayerController target)
     {
@@ -71,6 +74,10 @@ public class DuelArenaSystem
         if (_currentDuel.Opponent.Slot != p.Slot)
         { p.PrintToChat(" \x07Это приглашение не тебе!"); return; }
 
+        // Check both players are alive
+        if (!_currentDuel.Challenger.PawnIsAlive || !_currentDuel.Opponent.PawnIsAlive)
+        { p.PrintToChat(" \x07Оба игрока должны быть живы!"); return; }
+
         _currentDuel.Active = true;
         _currentDuel.Round = 1;
         _currentDuel.ChallengerWins = 0;
@@ -80,9 +87,11 @@ public class DuelArenaSystem
         _currentDuel.StartTime = Server.CurrentTime;
         _duelTimeout = DUEL_TIMEOUT;
 
+        // Teleport opponent near challenger
         var pos = _engine.GetPosition(_currentDuel.Challenger.Slot);
         _engine.Teleport(_currentDuel.Opponent.Slot, pos.x + 200, pos.y, pos.z);
 
+        // Set both to 100 HP
         Server.PrintToChatAll($" \x06[AETHERION] ⚔ {_currentDuel.Challenger.PlayerName} vs {_currentDuel.Opponent.PlayerName} — ДУЭЛЬ (до {_currentDuel.MaxRounds} побед)!");
     }
 
@@ -107,6 +116,8 @@ public class DuelArenaSystem
             Server.PrintToChatAll($" \x06⚔ {_currentDuel.Challenger.PlayerName} {_currentDuel.ChallengerWins}:{_currentDuel.OpponentWins} {_currentDuel.Opponent.PlayerName}");
             if (_currentDuel.ChallengerWins >= (_currentDuel.MaxRounds + 1) / 2)
                 EndDuel(_currentDuel.Challenger, "Победа в матче");
+            else
+                PrepareNextRound();
         }
         else if (killer.Slot == _currentDuel.Opponent.Slot && victim.Slot == _currentDuel.Challenger.Slot)
         {
@@ -115,7 +126,19 @@ public class DuelArenaSystem
             Server.PrintToChatAll($" \x06⚔ {_currentDuel.Challenger.PlayerName} {_currentDuel.ChallengerWins}:{_currentDuel.OpponentWins} {_currentDuel.Opponent.PlayerName}");
             if (_currentDuel.OpponentWins >= (_currentDuel.MaxRounds + 1) / 2)
                 EndDuel(_currentDuel.Opponent, "Победа в матче");
+            else
+                PrepareNextRound();
         }
+    }
+
+    private void PrepareNextRound()
+    {
+        if (_currentDuel == null) return;
+        // Teleport both to start positions with full HP
+        var pos = _engine.GetPosition(_currentDuel.Challenger.Slot);
+        _engine.Teleport(_currentDuel.Opponent.Slot, pos.x + 200, pos.y, pos.z);
+        _engine.Teleport(_currentDuel.Challenger.Slot, pos.x - 200, pos.y, pos.z);
+        _duelTimeout = DUEL_TIMEOUT;
     }
 
     public void Tick()
@@ -124,9 +147,18 @@ public class DuelArenaSystem
         _duelTimeout -= 1f;
         if (_duelTimeout <= 0)
         {
-            var leader = _currentDuel.ChallengerWins > _currentDuel.OpponentWins
-                ? _currentDuel.Challenger : _currentDuel.Opponent;
-            EndDuel(leader, "Таймаут");
+            // Tie: nobody wins
+            if (_currentDuel.ChallengerWins == _currentDuel.OpponentWins)
+            {
+                Server.PrintToChatAll($" \x06⚔ Дуэль {_currentDuel.Challenger.PlayerName} vs {_currentDuel.Opponent.PlayerName} — НИЧЬЯ!");
+                _currentDuel = null;
+            }
+            else
+            {
+                var leader = _currentDuel.ChallengerWins > _currentDuel.OpponentWins
+                    ? _currentDuel.Challenger : _currentDuel.Opponent;
+                EndDuel(leader, "Таймаут");
+            }
         }
     }
 
@@ -136,14 +168,19 @@ public class DuelArenaSystem
         var loser = winner.Slot == _currentDuel.Challenger.Slot
             ? _currentDuel.Opponent : _currentDuel.Challenger;
 
-        int winnerElo = GetElo(winner.SteamID);
-        int loserElo = GetElo(loser.SteamID);
+        var dW = _dataFn(winner.SteamID);
+        var dL = _dataFn(loser.SteamID);
+
+        int winnerElo = dW.DuelElo;
+        int loserElo = dL.DuelElo;
 
         double expectedWin = 1.0 / (1.0 + Math.Pow(10, (loserElo - winnerElo) / 400.0));
         int delta = (int)(ELO_K * (1.0 - expectedWin));
 
-        _elo[winner.SteamID] = winnerElo + delta;
-        _elo[loser.SteamID] = Math.Max(100, loserElo - delta);
+        dW.DuelElo = winnerElo + delta;
+        dW.DuelWins++;
+        dL.DuelElo = Math.Max(100, loserElo - delta);
+        dL.DuelLosses++;
 
         _winStreak[winner.SteamID] = _winStreak.GetValueOrDefault(winner.SteamID) + 1;
         _winStreak[loser.SteamID] = 0;
@@ -152,19 +189,18 @@ public class DuelArenaSystem
         int goldReward = 75 + (streak > 2 ? streak * 30 : 0) + delta;
         int xpReward = 40 + delta / 2;
 
-        var dW = _dataFn(winner.SteamID);
         EconomySystem.AddGold(dW, goldReward);
         LevelSystem.AddXp(dW, dW.GetRace(dW.CurrentRaceId), Races.RaceTier.T1_Spark, xpReward);
-        _saveFn(dW);
 
-        var dL = _dataFn(loser.SteamID);
         int lossXp = 15;
         LevelSystem.AddXp(dL, dL.GetRace(dL.CurrentRaceId), Races.RaceTier.T1_Spark, lossXp);
+
+        _saveFn(dW);
         _saveFn(dL);
 
         string score = $"{_currentDuel.ChallengerWins}:{_currentDuel.OpponentWins}";
-        winner.PrintToChat($" \x06🏆 {reason}! Счёт {score} | ELO: {_elo[winner.SteamID]} (+{delta}) +{goldReward}з");
-        loser.PrintToChat($" \x07{reason}. Счёт {score} | ELO: {_elo[loser.SteamID]} (-{delta}) +{lossXp}XP");
+        winner.PrintToChat($" \x06🏆 {reason}! Счёт {score} | ELO: {dW.DuelElo} (+{delta}) +{goldReward}з");
+        loser.PrintToChat($" \x07{reason}. Счёт {score} | ELO: {dL.DuelElo} (-{delta}) +{lossXp}XP");
 
         if (streak >= 3)
             Server.PrintToChatAll($" \x06[AETHERION] 🔥 {winner.PlayerName} на серии {streak} побед!");
@@ -174,10 +210,11 @@ public class DuelArenaSystem
 
     public void ShowStatus(CCSPlayerController p)
     {
-        int elo = GetElo(p.SteamID);
+        var d = _dataFn(p.SteamID);
+        int elo = d.DuelElo;
         int streak = _winStreak.GetValueOrDefault(p.SteamID);
         p.PrintToChat(" \x0B═══ АРЕНА 1v1 ═══");
-        p.PrintToChat($"  ELO: {elo} | Серия побед: {streak}");
+        p.PrintToChat($"  ELO: {elo} | Побед: {d.DuelWins} | Поражений: {d.DuelLosses} | Серия: {streak}");
         if (_currentDuel != null && _currentDuel.Active)
         {
             int timeLeft = (int)_duelTimeout;

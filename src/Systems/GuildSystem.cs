@@ -23,6 +23,15 @@ public class Guild
     public int WeeklyFrags;
     public HashSet<int> CraftedIds = new();
     public int Level => BannerLevel;
+    public GuildTier Tier => BannerLevel switch
+    {
+        <= 5 => GuildTier.Wood,
+        <= 10 => GuildTier.Iron,
+        <= 20 => GuildTier.Bronze,
+        <= 35 => GuildTier.Silver,
+        <= 50 => GuildTier.Gold,
+        _ => GuildTier.Aether,
+    };
     public long Bank => Treasury;
     public long BannerXpNeeded => 5000L * BannerLevel * BannerLevel;
     public float GoldBonus => 0.02f * BannerLevel + CraftedGoldBonus();
@@ -128,15 +137,18 @@ public class GuildManager
         ulong sid = p.SteamID;
         if (!_playerGuild.TryGetValue(sid, out var gid)) return false;
         var g = _guilds[gid];
-        g.Members.Remove(sid); g.Officers.Remove(sid);
-        _playerGuild.Remove(sid);
+
+        // Find heir BEFORE removing the leader from Officers
         if (g.LeaderSteamId == sid)
         {
             var heir = g.Officers.FirstOrDefault(x => x != sid);
-            if (heir == 0) heir = g.Members.FirstOrDefault();
-            if (heir == 0) _guilds.Remove(gid);
+            if (heir == 0) heir = g.Members.FirstOrDefault(x => x != sid);
+            if (heir == 0) { _guilds.Remove(gid); g.Members.Clear(); g.Officers.Clear(); }
             else g.LeaderSteamId = heir;
         }
+
+        g.Members.Remove(sid); g.Officers.Remove(sid);
+        _playerGuild.Remove(sid);
         NotifyChanged();
         return true;
     }
@@ -211,8 +223,7 @@ public static class GuildMenu
         if (store == null) { p.PrintToChat(" Ошибка: хранилище данных недоступно."); return; }
         var d = store.Load(p.SteamID) ?? new Models.PlayerData { SteamId = p.SteamID, Name = p.PlayerName };
         long cost = 200 + g.BannerLevel * 50;
-        if (d.Gold < cost) { p.PrintToChat($" Нужно {cost} золота для укрепления знамени."); return; }
-        d.Gold -= cost;
+        if (!EconomySystem.SpendGold(d, cost)) { p.PrintToChat($" Нужно {cost} золота для укрепления знамени."); return; }
         long xpGain = 50 + g.BannerLevel * 10;
         GuildManager.Instance.AddBannerXp(g, xpGain);
         store.Save(d);

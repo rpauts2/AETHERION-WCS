@@ -56,6 +56,11 @@ public class PlayerData
     public double XpBoostMultiplier { get; set; } = 1.0;
     public long XpBoostExpiresUnix { get; set; } = 0;
 
+    // Duel ELO
+    public int DuelElo { get; set; } = 1000;
+    public int DuelWins { get; set; } = 0;
+    public int DuelLosses { get; set; } = 0;
+
     public RaceProgress GetRace(int raceId)
     {
         if (!Races.TryGetValue(raceId, out var rp))

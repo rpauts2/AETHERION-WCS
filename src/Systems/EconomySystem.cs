@@ -18,7 +18,7 @@ public static class EconomySystem
 
     public static bool SpendGold(PlayerData p, long amount)
     {
-        if (p.Gold < amount) return false;
+        if (amount <= 0 || p.Gold < amount) return false;
         p.Gold -= amount;
         return true;
     }

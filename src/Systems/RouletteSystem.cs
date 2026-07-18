@@ -33,11 +33,9 @@ public class RouletteSystem
 
     public (bool ok, string message, RoulettePrize? prize) Spin(PlayerData p, RouletteWheel wheel)
     {
-        if (p.Gold < wheel.Cost)
+        if (!EconomySystem.SpendGold(p, wheel.Cost))
             return (false, L10n.GetF("Systems_RouletteSystem_NoGoldLabel", "Недостаточно золота. Нужно {0}.",
                 ("wheel.Cost", wheel.Cost)), null);
-
-        p.Gold -= wheel.Cost;
 
         int spins = _pity.GetValueOrDefault(p.SteamId) + 1;
         var jackpot = wheel.Prizes.FirstOrDefault(x => x.IsJackpot);

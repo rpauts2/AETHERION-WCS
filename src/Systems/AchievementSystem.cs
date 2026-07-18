@@ -307,8 +307,11 @@ public sealed class AchievementSystem
         var def = _dailyPool.FirstOrDefault(c => c.Id == dailyId);
         if (def == null) return false;
 
-        int progress = d.QuestCounters.GetValueOrDefault(def.Counter, 0);
-        if (progress < def.Target) return false;
+        // Use daily-adjusted progress (same as CheckDailies), not total counter
+        int snapshot = d.DailyCounterSnapshots.GetValueOrDefault(def.Counter, 0);
+        int current = d.QuestCounters.GetValueOrDefault(def.Counter, 0);
+        int dailyProgress = Math.Max(0, current - snapshot);
+        if (dailyProgress < def.Target) return false;
 
         d.ClaimedAchievements.Add(claimKey);
         EconomySystem.AddGold(d, def.GoldReward);
