@@ -25,15 +25,22 @@ public static class AetherHud
     //  Без переносов (worldtext на одну строку читается стабильнее).
     // ═══════════════════════════════════════════════════════════════════
     public static string NameplateHtml(string playerName, string raceName, int level,
-        long paragon, int division, int wispBond, bool vip, int tier)
+        long paragon, int division, int wispBond, bool vip, int tier,
+        string titleDisplay = "", string nameColorHex = "", string rankBadge = "")
     {
-        const string CName = "#FFFFFF";
+        string CName = string.IsNullOrEmpty(nameColorHex) ? "#FFFFFF" : nameColorHex;
         var cRace = tier switch { 5 => "#FF4D6D", 4 => "#C77DFF", 3 => "#7C5CFF", 2 => "#46E0FF", _ => "#9AA0A6" };
         const string CDiv = "#FFD200";
         const string CWisp = "#7CFFA0";
         const string CVip = "#FFB347";
+        const string CBadge = "#FF6B9D";
+        const string CRank = "#FFD200";
 
         var sb = new StringBuilder();
+        if (!string.IsNullOrEmpty(rankBadge))
+            sb.Append($"<font color='{CRank}' class='fontSize-s'>{rankBadge}</font> ");
+        if (!string.IsNullOrEmpty(titleDisplay))
+            sb.Append($"<font color='{CBadge}' class='fontSize-s'>[{Truncate(titleDisplay, 12)}]</font> ");
         sb.Append($"<font color='{CName}'>{Truncate(playerName, 16)}</font>");
         sb.Append($" <font color='{cRace}'> {Truncate(raceName, 14)} ур.{level}</font>");
         if (paragon > 0) sb.Append($" <font color='{CDiv}'>★{paragon}</font>");

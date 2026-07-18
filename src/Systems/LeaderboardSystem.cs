@@ -29,21 +29,17 @@ public class LeaderboardSystem
     {
         if (_store == null) { p.PrintToChat(" \x07Лидерборд недоступен."); return; }
 
-        var top = _store.TopPlayers(15);
+        string sortField = category switch
+        {
+            "gold" => "gold",
+            "level" => "level",
+            _ => "level"
+        };
+
+        var top = _store.TopPlayers(15, sortField);
         p.PrintToChat(" \x0B═══ ЛИДЕРБОРД ═══");
 
-        switch (category)
-        {
-            case "kills":
-            case "level":
-            case "gold":
-            case "wisp":
-                ShowGenericLeaderboard(p, top, category);
-                break;
-            default:
-                ShowGenericLeaderboard(p, top, "kills");
-                break;
-        }
+        ShowGenericLeaderboard(p, top, category);
     }
 
     private void ShowGenericLeaderboard(CCSPlayerController p,
@@ -78,5 +74,29 @@ public class LeaderboardSystem
             p.PrintToChat($" {medal} {name} — {val}");
             rank++;
         }
+    }
+
+    public int GetPlayerRank(ulong steamId, string category)
+    {
+        if (_store == null) return -1;
+        string sortField = category switch
+        {
+            "gold" => "gold",
+            _ => "level"
+        };
+        var top = _store.TopPlayers(100, sortField);
+        for (int i = 0; i < top.Count; i++)
+        {
+            if (top[i].SteamId == steamId) return i + 1;
+        }
+        return -1;
+    }
+
+    public string GetPlayerRankDisplay(ulong steamId, string category)
+    {
+        int rank = GetPlayerRank(steamId, category);
+        if (rank <= 0) return "";
+        string medal = rank switch { 1 => "🥇", 2 => "🥈", 3 => "🥉", _ => $"#{rank}" };
+        return $"[{medal} {category}]";
     }
 }

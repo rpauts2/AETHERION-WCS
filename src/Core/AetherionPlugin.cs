@@ -289,9 +289,13 @@ public class AetherionPlugin : BasePlugin
         try
         {
             if (def == null) return;
+            var title = _cosmetics.GetTitleDisplay(d);
+            var color = _cosmetics.GetColorDisplay(d);
+            var rankBadge = _leaderboard.GetPlayerRankDisplay(p.SteamID, "level");
             var html = AetherHud.NameplateHtml(
                 p.PlayerName, def.Name, rp.Level, rp.ParagonLevel,
-                d.Division, rp.WispBond, VipMult(d), def.Tier);
+                d.Division, rp.WispBond, VipMult(d), def.Tier,
+                title, color, rankBadge);
             _nameplates.Attach(p, html);
         }
         catch (Exception ex) { Console.WriteLine($"[AETHERION] nameplate attach err: {ex.Message}"); }
@@ -463,6 +467,12 @@ public class AetherionPlugin : BasePlugin
 
             // Арена дуэлей
             _duelArena.OnKill(attacker, victim);
+
+            // Гильдейский турнир
+            GuildTournamentSystem.OnKill(attacker);
+
+            // 1v1 дуэли
+            GuildTournamentSystem.OnDuelKill(attacker, victim);
 
             // Шторм: фикс убийств ботов
             if (victim.IsBot) _stormWave.OnBotKilled();
