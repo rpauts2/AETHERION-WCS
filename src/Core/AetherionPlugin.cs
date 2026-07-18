@@ -109,6 +109,7 @@ public class AetherionPlugin : BasePlugin
         foreach (var r in _races.Races.Values) r.IndexAbilities();
         _models.Load(cfgDir);
         _audio.Load(cfgDir);
+        _seasons.Load(Path.Combine(cfgDir, "seasons.json"));
         RegisterListener<Listeners.OnServerPrecacheResources>(m => { _models.Precache(m); AuraManager.Precache(m); });
 
         _store = new SqlitePlayerStore(Path.Combine(ModuleDirectory, "aetherion.db"));
@@ -290,13 +291,14 @@ public class AetherionPlugin : BasePlugin
         {
             if (def == null) return;
             var title = _cosmetics.GetTitleDisplay(d);
-            var color = _cosmetics.GetColorDisplay(d);
+            var colorHex = _cosmetics.GetColorDisplay(d);
             var rankBadge = _leaderboard.GetPlayerRankDisplay(p.SteamID, "level");
             var html = AetherHud.NameplateHtml(
                 p.PlayerName, def.Name, rp.Level, rp.ParagonLevel,
                 d.Division, rp.WispBond, VipMult(d), def.Tier,
-                title, color, rankBadge);
-            _nameplates.Attach(p, html);
+                title, colorHex, rankBadge);
+            var cosmeticColor = NameplateManager.ParseHexColor(colorHex);
+            _nameplates.Attach(p, html, cosmeticColor);
         }
         catch (Exception ex) { Console.WriteLine($"[AETHERION] nameplate attach err: {ex.Message}"); }
     }

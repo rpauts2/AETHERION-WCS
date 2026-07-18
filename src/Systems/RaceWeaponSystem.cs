@@ -38,6 +38,12 @@ public sealed class RaceWeaponSystem
         ["Trickster"]  = "weapon_deagle",
         ["Engineer"]   = "weapon_mp9",
         ["Paladin"]    = "weapon_famas",
+        ["caster"]     = "weapon_awp",
+        ["god"]        = "weapon_awp",
+        ["zone"]       = "weapon_m4a1_silencer",
+        ["mage"]       = "weapon_awp",
+        ["berserker"]  = "weapon_macs10",
+        ["assassin"]   = "weapon_deagle",
     };
 
     // PaintKit ID по расе (CS2 paintkit IDs — стандартные работают без кастомных файлов).
@@ -83,6 +89,17 @@ public sealed class RaceWeaponSystem
         [33] = 655,
         [34] = 540,
         [35] = 416,
+        // 1110-1119 — новые расы
+        [1110] = 655, // Хроно-Страж — Fade
+        [1111] = 416, // Теневой Охотник — Neo-Noir
+        [1112] = 376, // Рунный Мастер — Prisma
+        [1113] = 540, // Звёздный Всадник — Bloodsport
+        [1114] = 655, // Призрак Бури — Fade
+        [1115] = 416, // Пламенный Серафим — Neo-Noir
+        [1116] = 85,  // Ледяной Колосс — Safari Mesh
+        [1117] = 376, // Теневой Душитель — Prisma
+        [1118] = 655, // Громобой — Fade
+        [1119] = 540, // Хранитель Рун — Bloodsport
     };
 
     // Custom overrides from JSON

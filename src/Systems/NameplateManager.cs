@@ -30,12 +30,13 @@ public sealed class NameplateManager
         public CCSPlayerPawn? BoundPawn;
         public string Html = "";
         public Color Color = Color.White;
+        public Color CosmeticColor = Color.Transparent;
     }
 
     private readonly Dictionary<int, Plate> _plates = new();
 
     // Создать/пересоздать неймплейт для игрока. html — уже сформированная разметка.
-    public void Attach(CCSPlayerController p, string html)
+    public void Attach(CCSPlayerController p, string html, Color? cosmeticColor = null)
     {
         if (p == null || !p.IsValid) return;
         var pawn = p.PlayerPawn?.Value;
@@ -46,7 +47,7 @@ public sealed class NameplateManager
         var ent = Utilities.CreateEntityByName<CPointWorldText>("point_worldtext");
         if (ent == null) return;
 
-        var color = TeamColor(p.TeamNum);
+        var color = cosmeticColor ?? TeamColor(p.TeamNum);
         ent.MessageText = html;
         ent.Enabled = true;
         ent.FontSize = 18;
@@ -69,7 +70,8 @@ public sealed class NameplateManager
             Entity = ent,
             BoundPawn = pawn,
             Html = html,
-            Color = color
+            Color = color,
+            CosmeticColor = cosmeticColor ?? Color.Transparent
         };
     }
 
@@ -87,10 +89,11 @@ public sealed class NameplateManager
     }
 
     // Обновить цвет по текущей команде (после смены команды).
+    // Если есть косметический цвет — используем его вместо командного.
     public void Recolor(int slot, int team)
     {
         if (!_plates.TryGetValue(slot, out var plate) || plate.Entity == null || !plate.Entity.IsValid) return;
-        var c = TeamColor(team);
+        var c = plate.CosmeticColor != Color.Transparent ? plate.CosmeticColor : TeamColor(team);
         plate.Color = c;
         try
         {
@@ -159,4 +162,17 @@ public sealed class NameplateManager
         2 => Color.FromArgb(255, 255, 170, 70),    // T  — янтарь
         _ => Color.FromArgb(255, 200, 200, 200),   // спектаторы/прочие — серый
     };
+
+    public static Color? ParseHexColor(string hex)
+    {
+        if (string.IsNullOrEmpty(hex) || hex.Length != 7 || !hex.StartsWith('#')) return null;
+        try
+        {
+            int r = Convert.ToInt32(hex.Substring(1, 2), 16);
+            int g = Convert.ToInt32(hex.Substring(3, 2), 16);
+            int b = Convert.ToInt32(hex.Substring(5, 2), 16);
+            return Color.FromArgb(255, r, g, b);
+        }
+        catch { return null; }
+    }
 }

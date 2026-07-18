@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using WcsInfinity.Models;
 
 namespace WcsInfinity.Systems;
@@ -68,6 +70,84 @@ public class SeasonSystem
     public SeasonSystem(Func<string, string, string> locProvider)
     {
         _locProvider = locProvider;
+    }
+
+    public void Load(string path)
+    {
+        if (!File.Exists(path)) { Console.WriteLine($"[SeasonSystem] Config not found: {path}"); return; }
+        try
+        {
+            var json = File.ReadAllText(path);
+            var root = JsonDocument.Parse(json).RootElement;
+            int activeId = root.GetProperty("active_season_id").GetInt32();
+            var seasons = root.GetProperty("seasons");
+            foreach (var s in seasons.EnumerateArray())
+            {
+                if (s.GetProperty("id").GetInt32() != activeId) continue;
+                var season = new Season
+                {
+                    Id = activeId,
+                    Name = s.GetProperty("name").GetString() ?? "",
+                    NameEn = s.GetProperty("name_en").GetString() ?? "",
+                    StartUtc = DateTime.Parse(s.GetProperty("start_utc").GetString()!),
+                    EndUtc = DateTime.Parse(s.GetProperty("end_utc").GetString()!),
+                    Weeks = s.TryGetProperty("weeks", out var w) ? w.GetInt32() : 5
+                };
+                if (s.TryGetProperty("season_pass", out var sp))
+                {
+                    season.SeasonPass = new SeasonPassConfig
+                    {
+                        FreeTierMaxLevel = sp.TryGetProperty("free_tier_max_level", out var ft) ? ft.GetInt32() : 50,
+                        PremiumTierMaxLevel = sp.TryGetProperty("premium_tier_max_level", out var pt) ? pt.GetInt32() : 50,
+                        PremiumTag = sp.TryGetProperty("premium_tag", out var ptag) ? ptag.GetString() ?? "Aether+" : "Aether+",
+                        AutoClaimUnlockedFree = sp.TryGetProperty("auto_claim_unlocked_free", out var acf) && acf.GetBoolean()
+                    };
+                }
+                if (s.TryGetProperty("balance_mods", out var bm))
+                {
+                    foreach (var kv in bm.EnumerateObject())
+                        if (int.TryParse(kv.Name, out int rid))
+                            season.RaceBalanceMods[rid] = kv.Value.GetDouble();
+                }
+                if (s.TryGetProperty("cosmetics", out var cos))
+                {
+                    foreach (var c in cos.EnumerateArray())
+                    {
+                        season.Cosmetics.Add(new CosmeticDefinition
+                        {
+                            Id = c.GetProperty("id").GetString() ?? "",
+                            Type = c.GetProperty("type").GetString() ?? "",
+                            LabelRu = c.TryGetProperty("label_ru", out var lr) ? lr.GetString() ?? "" : "",
+                            LabelEn = c.TryGetProperty("label_en", out var le) ? le.GetString() ?? "" : "",
+                            Color = c.TryGetProperty("color", out var co) ? co.GetString() ?? "" : "",
+                            Rarity = c.TryGetProperty("rarity", out var ra) ? ra.GetString() ?? "" : "",
+                            TierLevel = c.GetProperty("tier_level").GetInt32()
+                        });
+                    }
+                }
+                Current = season;
+                if (Current.Tiers.Count == 0)
+                {
+                    int maxTier = Current.SeasonPass.FreeTierMaxLevel;
+                    for (int i = 1; i <= maxTier; i++)
+                    {
+                        var cosDef = Current.Cosmetics.FirstOrDefault(c => c.TierLevel == i);
+                        Current.Tiers.Add(new BattlePassTier
+                        {
+                            Level = i,
+                            XpRequired = XpForTier(i),
+                            Reward = cosDef != null ? Enum.Parse<RewardType>(cosDef.Type, true) : RewardType.GoldBonus,
+                            RewardValue = cosDef?.LabelRu ?? $"{50 * i}з",
+                            PremiumOnly = false
+                        });
+                    }
+                }
+                Console.WriteLine($"[SeasonSystem] Loaded season #{season.Id} «{season.Name}» — {Current.Tiers.Count} tiers, {season.Cosmetics.Count} cosmetics");
+                return;
+            }
+            Console.WriteLine($"[SeasonSystem] Active season #{activeId} not found in config");
+        }
+        catch (Exception ex) { Console.WriteLine($"[SeasonSystem] Load error: {ex.Message}"); }
     }
 
     // ── XP → Tier conversion ─────────────────────────────────────────────

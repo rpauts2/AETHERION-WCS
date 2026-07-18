@@ -441,10 +441,19 @@ public sealed class BossSystem
                 }
                 catch (Exception ex) { Console.WriteLine($"[Boss] MVP reward err: {ex.Message}"); }
 
-                // MVP loot drop
-                string[] mvpDrops = { "Зелье Берсерка", "Камень Возврата", "Зелье Фантома" };
-                string drop = mvpDrops[_rng.Next(mvpDrops.Length)];
-                Server.PrintToChatAll($@" \x06[AETHERION] MVP: \x09{top.PlayerName}\x06 — двойная награда + {drop}!");
+                // MVP loot drop — add item to inventory
+                int[] mvpDropIds = { 4, 7, 5 }; // Берсерк=4, Камень=7, Фантом=5
+                int dropId = mvpDropIds[_rng.Next(mvpDropIds.Length)];
+                var dropItem = ItemShop.Get(dropId);
+                if (dropItem != null)
+                {
+                    var mvpData = _dataFn(top.SteamID);
+                    var owned = mvpData.Inventory.FirstOrDefault(o => o.ItemId == dropId);
+                    if (owned == null) mvpData.Inventory.Add(new OwnedItem { ItemId = dropId, Count = 1 });
+                    else if (owned.Count < dropItem.MaxStack) owned.Count++;
+                    _saveFn(mvpData);
+                    Server.PrintToChatAll($@" \x06[AETHERION] MVP: \x09{top.PlayerName}\x06 — двойная награда + {dropItem.Name}!");
+                }
             }
         }
 

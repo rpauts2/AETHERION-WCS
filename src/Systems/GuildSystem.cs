@@ -25,9 +25,52 @@ public class Guild
     public int Level => BannerLevel;
     public long Bank => Treasury;
     public long BannerXpNeeded => 5000L * BannerLevel * BannerLevel;
-    public float GoldBonus => 0.02f * BannerLevel;
-    public float XpBonus => 0.015f * BannerLevel;
-    public int MaxMembers => 10 + BannerLevel * 2;
+    public float GoldBonus => 0.02f * BannerLevel + CraftedGoldBonus();
+    public float XpBonus => 0.015f * BannerLevel + CraftedXpBonus();
+    public int MaxMembers => 10 + BannerLevel * 2 + CraftedMemberSlots();
+
+    private float CraftedGoldBonus()
+    {
+        float b = 0f;
+        foreach (var id in CraftedIds)
+        {
+            var r = GuildCraftSystem.GetRecipe(id);
+            if (r == null) continue;
+            if (r.Effect == "gold_bonus") b += 0.02f;
+            else if (r.Effect == "all_bonuses") b += 0.02f;
+            else if (r.Effect == "all_bonuses_big") b += 0.03f;
+            else if (r.Effect == "guild_heart") b += 0.05f;
+        }
+        return b;
+    }
+
+    private float CraftedXpBonus()
+    {
+        float b = 0f;
+        foreach (var id in CraftedIds)
+        {
+            var r = GuildCraftSystem.GetRecipe(id);
+            if (r == null) continue;
+            if (r.Effect == "xp_bonus") b += 0.02f;
+            else if (r.Effect == "all_bonuses") b += 0.02f;
+            else if (r.Effect == "all_bonuses_big") b += 0.03f;
+            else if (r.Effect == "guild_heart") b += 0.05f;
+        }
+        return b;
+    }
+
+    private int CraftedMemberSlots()
+    {
+        int s = 0;
+        foreach (var id in CraftedIds)
+        {
+            var r = GuildCraftSystem.GetRecipe(id);
+            if (r == null) continue;
+            if (r.Effect == "member_slot") s += 1;
+            else if (r.Effect == "guild_heart") s += 2;
+        }
+        return s;
+    }
 }
 
 public class GuildManager
