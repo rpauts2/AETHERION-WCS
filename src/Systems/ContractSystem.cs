@@ -34,6 +34,7 @@ public class ContractSystem
     private readonly Dictionary<ulong, List<PlayerContract>> _contracts = new();
     private readonly Random _rng = new();
     private DateTime _lastReset = DateTime.MinValue;
+    private readonly Dictionary<ulong, DateTime> _contractDay = new();
     private Func<int, RaceDefinition?>? _raceDefFn;
 
     private static readonly ContractDef[] _templates =
@@ -65,17 +66,21 @@ public class ContractSystem
         if (DateTime.UtcNow.Date <= _lastReset.Date) return;
         _lastReset = DateTime.UtcNow;
         _contracts.Clear();
+        _contractDay.Clear();
     }
 
     private List<PlayerContract> GetContracts(ulong steamId)
     {
-        if (_contracts.TryGetValue(steamId, out var list)) return list;
+        var today = DateTime.UtcNow.Date;
+        if (_contracts.TryGetValue(steamId, out var list) && _contractDay.GetValueOrDefault(steamId) == today)
+            return list;
 
         list = new List<PlayerContract>();
         var available = _templates.OrderBy(_ => _rng.Next()).Take(3).ToList();
         foreach (var def in available)
             list.Add(new PlayerContract { Def = def, Progress = 0, Claimed = false });
         _contracts[steamId] = list;
+        _contractDay[steamId] = today;
         return list;
     }
 

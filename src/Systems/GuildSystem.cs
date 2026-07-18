@@ -167,12 +167,13 @@ public static class GuildMenu
     {
         if (store == null) { p.PrintToChat(" Ошибка: хранилище данных недоступно."); return; }
         var d = store.Load(p.SteamID) ?? new Models.PlayerData { SteamId = p.SteamID, Name = p.PlayerName };
-        long cost = 200;
+        long cost = 200 + g.BannerLevel * 50;
         if (d.Gold < cost) { p.PrintToChat($" Нужно {cost} золота для укрепления знамени."); return; }
         d.Gold -= cost;
-        GuildManager.Instance.AddBannerXp(g, 50);
+        long xpGain = 50 + g.BannerLevel * 10;
+        GuildManager.Instance.AddBannerXp(g, xpGain);
         store.Save(d);
-        p.PrintToChat($" Знамя укреплено! XP: {g.BannerXp}/{g.BannerXpNeeded} (ур. {g.BannerLevel})");
+        p.PrintToChat($" Знамя укреплено! +{xpGain} XP → {g.BannerXp}/{g.BannerXpNeeded} (ур. {g.BannerLevel})");
     }
 
     private static void Leave(CCSPlayerController p, BasePlugin plugin, Guild g)

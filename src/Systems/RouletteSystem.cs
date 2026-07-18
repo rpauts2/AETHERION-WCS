@@ -34,14 +34,14 @@ public class RouletteSystem
     public (bool ok, string message, RoulettePrize? prize) Spin(PlayerData p, RouletteWheel wheel)
     {
         if (p.Gold < wheel.Cost)
-            return (false, L10n.GetF("Systems_RouletteSystem_NoGoldLabel", "Недостаточно золота. Нужо {0}.",
+            return (false, L10n.GetF("Systems_RouletteSystem_NoGoldLabel", "Недостаточно золота. Нужно {0}.",
                 ("wheel.Cost", wheel.Cost)), null);
 
         p.Gold -= wheel.Cost;
 
-        // пити-гарант
         int spins = _pity.GetValueOrDefault(p.SteamId) + 1;
         var jackpot = wheel.Prizes.FirstOrDefault(x => x.IsJackpot);
+
         if (jackpot != null && spins >= wheel.PityThreshold)
         {
             _pity[p.SteamId] = 0;
@@ -50,7 +50,6 @@ public class RouletteSystem
                 ("jackpot.Name", jackpot.Name)), jackpot);
         }
 
-        // обычный розыгрыш по шансам
         double roll = _rng.NextDouble();
         double acc = 0;
         foreach (var prize in wheel.Prizes)

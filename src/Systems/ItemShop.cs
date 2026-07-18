@@ -25,7 +25,8 @@ public class ShopItem
     public long Price;
     public string Rarity = "Обычный";
     public int MaxStack = 1;
-    // эффект-теги, читаемые боевым движком
+    public int MinLevel = 0;     // минимальный уровень любой расы для покупки
+    public int MinDivision = 0;  // минимальный дивизион для покупки
     public Dictionary<string,float> Effects = new();
 }
 
@@ -39,21 +40,21 @@ public static class ItemShop
         new ShopItem{ Id=1, Name=L10n.Get("Systems_ItemShop_Name_Boots", "Сапоги Эфира"), Desc=L10n.Get("Systems_ItemShop_Boot_Speed", "+8% скорость на раунд"), Kind=ItemKind.RoundPassive,
             Slot=ItemSlot.Boots, Price=600, Rarity="Обычный", Effects={["speed"]=0.08f} },
         new ShopItem{ Id=2, Name=L10n.Get("Systems_ItemShop_Name_Gloves", "Перчатки Хвата"), Desc=L10n.Get("Systems_ItemShop_Gloves_KnifeDmg", "+10% урон ножом"), Kind=ItemKind.RoundPassive,
-            Slot=ItemSlot.Gloves, Price=750, Rarity="Обычный", Effects={["knife_dmg"]=0.10f} },
+            Slot=ItemSlot.Gloves, Price=750, Rarity="Обычный", MinLevel=3, Effects={["knife_dmg"]=0.10f} },
         new ShopItem{ Id=3, Name=L10n.Get("Systems_ItemShop_Name_Amulet", "Амулет Жизни"), Desc=L10n.Get("Systems_ItemShop_Amulet_HP", "+15 HP при спавне"), Kind=ItemKind.RoundPassive,
-            Slot=ItemSlot.Amulet, Price=900, Rarity="Редкий", Effects={["bonus_hp"]=15f} },
+            Slot=ItemSlot.Amulet, Price=900, Rarity="Редкий", MinLevel=5, Effects={["bonus_hp"]=15f} },
         new ShopItem{ Id=4, Name=L10n.Get("Systems_ItemShop_Name_BerserkPotion", "Зелье Берсерка"), Desc=L10n.Get("Systems_ItemShop_BerserkPotion", "+20% урон 8 сек (актив)"), Kind=ItemKind.Consumable,
             Slot=ItemSlot.Potion, Price=500, Rarity="Редкий", MaxStack=3, Effects={["berserk"]=0.20f,["dur"]=8f} },
         new ShopItem{ Id=5, Name=L10n.Get("Systems_ItemShop_Name_PhantomPotion", "Зелье Фантома"), Desc=L10n.Get("Systems_ItemShop_PhantomPotion", "невидимость 4 сек (актив)"), Kind=ItemKind.Consumable,
-            Slot=ItemSlot.Potion, Price=700, Rarity="Эпик", MaxStack=2, Effects={["invis"]=1f,["dur"]=4f} },
+            Slot=ItemSlot.Potion, Price=700, Rarity="Эпик", MaxStack=2, MinLevel=8, Effects={["invis"]=1f,["dur"]=4f} },
         new ShopItem{ Id=6, Name=L10n.Get("Systems_ItemShop_Name_EtherRelic", "Реликвия Эфира"), Desc=L10n.Get("Systems_ItemShop_EtherRelic", "+15% накопление Эфира"), Kind=ItemKind.SessionPassive,
-            Slot=ItemSlot.Relic, Price=2500, Rarity="Эпик", Effects={["ether_gain"]=0.15f} },
+            Slot=ItemSlot.Relic, Price=2500, Rarity="Эпик", MinLevel=10, Effects={["ether_gain"]=0.15f} },
         new ShopItem{ Id=7, Name=L10n.Get("Systems_ItemShop_Name_RecallStone", "Камень Возврата"), Desc=L10n.Get("Systems_ItemShop_RecallStone", "1 раз/раунд: телепорт на спавн"), Kind=ItemKind.Consumable,
             Slot=ItemSlot.Special, Price=400, Rarity="Обычный", MaxStack=1, Effects={["recall"]=1f} },
         new ShopItem{ Id=8, Name=L10n.Get("Systems_ItemShop_Name_DragonHeart", "Сердце Дракона"), Desc=L10n.Get("Systems_ItemShop_DragonHeart", "+25 HP, +5% урон (сессия)"), Kind=ItemKind.SessionPassive,
-            Slot=ItemSlot.Relic, Price=5000, Rarity="Легендарный", Effects={["bonus_hp"]=25f,["dmg"]=0.05f} },
+            Slot=ItemSlot.Relic, Price=5000, Rarity="Легендарный", MinLevel=15, MinDivision=2, Effects={["bonus_hp"]=25f,["dmg"]=0.05f} },
         new ShopItem{ Id=9, Name=L10n.Get("Systems_ItemShop_Name_EternityShard", "Осколок Вечности"), Desc=L10n.Get("Systems_ItemShop_EternityShard", "-10% КД ультимейта (сессия)"), Kind=ItemKind.SessionPassive,
-            Slot=ItemSlot.Relic, Price=8000, Rarity="Мифик", Effects={["ult_cdr"]=0.10f} },
+            Slot=ItemSlot.Relic, Price=8000, Rarity="Мифик", MinLevel=20, MinDivision=3, Effects={["ult_cdr"]=0.10f} },
     };
 
     public static ShopItem? Get(int id) => Catalog.FirstOrDefault(i => i.Id == id);
@@ -64,6 +65,15 @@ public static class ItemShop
         if (item == null) return (false, L10n.Get("Systems_ItemShop_NotFound", "Предмет не найден."));
         if (p.Gold < item.Price) return (false, L10n.GetF("Systems_ItemShop_NotEnoughGold", "Не хватает золота ({0}/{1}).",
             ("p.Gold", p.Gold), ("item.Price", item.Price)));
+
+        if (item.MinLevel > 0)
+        {
+            int maxLevel = p.Races.Values.Any() ? p.Races.Values.Max(r => r.Level) : 0;
+            if (maxLevel < item.MinLevel)
+                return (false, $"Нужен уровень {item.MinLevel} (сейчас {maxLevel}).");
+        }
+        if (item.MinDivision > 0 && p.Division < item.MinDivision)
+            return (false, $"Нужен дивизион D{item.MinDivision} (сейчас D{p.Division}).");
 
         var owned = p.Inventory.FirstOrDefault(o => o.ItemId == itemId);
         if (owned != null && owned.Count >= item.MaxStack)
