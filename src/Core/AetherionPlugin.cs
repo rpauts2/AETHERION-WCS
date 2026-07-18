@@ -351,6 +351,21 @@ public class AetherionPlugin : BasePlugin
                 Utilities.SetStateChanged(pawn, "CBaseEntity", "m_iMaxHealth");
             }
 
+            // Бонусы от предметов магазина
+            var shopFx = ItemShop.AggregateEffects(d);
+            float shopHp = shopFx.GetValueOrDefault("bonus_hp", 0f);
+            if (shopHp > 0 && p.PlayerPawn?.Value != null)
+            {
+                var pawn = p.PlayerPawn.Value;
+                pawn.MaxHealth = (int)(pawn.MaxHealth + shopHp);
+                pawn.Health = pawn.MaxHealth;
+                Utilities.SetStateChanged(pawn, "CBaseEntity", "m_iHealth");
+                Utilities.SetStateChanged(pawn, "CBaseEntity", "m_iMaxHealth");
+            }
+            float shopSpeed = shopFx.GetValueOrDefault("speed", 0f);
+            if (shopSpeed > 0)
+                _engine.SetSpeed(p.Slot, 1f + shopSpeed);
+
             // Стартовый эфир
             _ether[p.SteamID] = Math.Min(EtherMax, 50);
             _ultCooldown.Remove(p.SteamID);
@@ -422,6 +437,7 @@ public class AetherionPlugin : BasePlugin
 
             EconomySystem.AddGold(d, gold);
             int up = LevelSystem.AddXp(d, rp, def?.TierEnum ?? RaceTier.T1_Spark, xp);
+            if (up > 0) UnlockSystem.RefreshDivision(d);
 
             // Античит: золото не может превысить 999999
             if (d.Gold > 999999) d.Gold = 999999;
@@ -534,6 +550,7 @@ public class AetherionPlugin : BasePlugin
             var d = Data(p.SteamID);
             EconomySystem.AddGold(d, EconomySystem.GoldBombObjective);
             LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), _races.Get(d.CurrentRaceId)?.TierEnum ?? RaceTier.T1_Spark, 60);
+            UnlockSystem.RefreshDivision(d);
             p.PrintToChat(" \x04[+з за установку бомбы]\x01");
         }
         catch (Exception ex) { Console.WriteLine($"[AETHERION] bomb planted err: {ex.Message}"); }
@@ -549,6 +566,7 @@ public class AetherionPlugin : BasePlugin
             var d = Data(p.SteamID);
             EconomySystem.AddGold(d, EconomySystem.GoldBombObjective);
             LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), _races.Get(d.CurrentRaceId)?.TierEnum ?? RaceTier.T1_Spark, 60);
+            UnlockSystem.RefreshDivision(d);
         }
         catch (Exception ex) { Console.WriteLine($"[AETHERION] bomb defused err: {ex.Message}"); }
         return HookResult.Continue;
@@ -584,6 +602,7 @@ public class AetherionPlugin : BasePlugin
                 long bonus = LevelSystem.XpRoundWin;
                 EconomySystem.AddGold(d, EconomySystem.GoldRoundWin);
                 LevelSystem.AddXp(d, rp, def?.TierEnum ?? RaceTier.T1_Spark, bonus);
+                UnlockSystem.RefreshDivision(d);
                 d.SeasonXp += bonus;
                 SyncBattlePass(d);
 
@@ -615,6 +634,11 @@ public class AetherionPlugin : BasePlugin
         if (player != null && player.IsValid)
         {
             ulong sid = player.SteamID;
+            // Сохранить данные перед очисткой (защита от потери прогресса)
+            if (_online.TryGetValue(sid, out var d))
+            {
+                try { _store.Save(d); } catch (Exception ex) { Console.WriteLine($"[AETHERION] disconnect save err: {ex.Message}"); }
+            }
             _online.Remove(sid);
             _ether.Remove(sid);
             _ultCooldown.Remove(sid);
