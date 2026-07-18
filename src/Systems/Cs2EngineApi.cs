@@ -123,11 +123,42 @@ public class Cs2EngineApi : IEngineApi
 
     public void PrintToCenter(int slot, string html) => P(slot)?.PrintToCenterHtml(html);
 
+    // Remap custom particle paths to built-in CS2 particles
+    private static readonly Dictionary<string, string> ParticleRemap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["particles/aether_explosion.vpcf"] = "particles/explosions_fx/explosion_default.vpcf",
+        ["particles/aether_thunder.vpcf"] = "particles/econ/items/sentry/sparks/sparks.vpcf",
+        ["particles/aether_thunder_arc.vpcf"] = "particles/econ/items/sentry/sparks/sparks.vpcf",
+        ["particles/aether_dash.vpcf"] = "particles/econ/weapons/unusual_smoke_trail.vpcf",
+        ["particles/aether_recall.vpcf"] = "particles/econ/weapons/unusual_smoke_trail.vpcf",
+        ["particles/aether_cast.vpcf"] = "particles/econ/weapons/unusual_smoke_trail.vpcf",
+        ["particles/aether_rift.vpcf"] = "particles/econ/items/sentry/sparks/sparks.vpcf",
+        ["particles/aether_capture.vpcf"] = "particles/econ/items/sentry/sparks/sparks.vpcf",
+        ["particles/aether_fire.vpcf"] = "particles/burning_fx/env_fire_medium.vpcf",
+        ["particles/aether_pickup.vpcf"] = "particles/econ/weapons/unusual_smoke_trail.vpcf",
+        ["particles/aether_dome.vpcf"] = "particles/econ/items/sentry/sparks/sparks.vpcf",
+        ["particles/aether_abyss.vpcf"] = "particles/econ/items/sentry/sparks/sparks.vpcf",
+        ["particles/aether_lightning_blade.vpcf"] = "particles/econ/items/sentry/sparks/sparks.vpcf",
+        ["particles/aether_storm_fortress.vpcf"] = "particles/econ/items/sentry/sparks/sparks.vpcf",
+        ["particles/aether_phantom.vpcf"] = "particles/econ/weapons/unusual_smoke_trail.vpcf",
+        ["particles/aether_apocalypse.vpcf"] = "particles/explosions_fx/explosion_default.vpcf",
+        ["particles/aether_paragon_ember.vpcf"] = "particles/burning_fx/env_fire_small.vpcf",
+        ["particles/aether_paragon_frost.vpcf"] = "particles/econ/weapons/unusual_smoke_trail.vpcf",
+        ["particles/aether_paragon_storm.vpcf"] = "particles/econ/items/sentry/sparks/sparks.vpcf",
+        ["particles/aether_paragon_void.vpcf"] = "particles/econ/weapons/unusual_smoke_trail.vpcf",
+        ["particles/aether_paragon_aether.vpcf"] = "particles/econ/items/sentry/sparks/sparks.vpcf",
+        ["particles/wisp/dust_dawn.vpcf"] = "particles/econ/weapons/unusual_smoke_trail.vpcf",
+        ["particles/wisp/arc_walk.vpcf"] = "particles/econ/items/sentry/sparks/sparks.vpcf",
+        ["particles/wisp/crown_flame.vpcf"] = "particles/burning_fx/env_fire_small.vpcf",
+        ["particles/ui/trap.vpcf"] = "particles/econ/items/sentry/sparks/sparks.vpcf",
+    };
+
     public void SpawnParticle(string path, float x, float y, float z)
     {
+        string resolvedPath = ParticleRemap.TryGetValue(path, out var remap) ? remap : path;
         var ent = Utilities.CreateEntityByName<CParticleSystem>("info_particle_system");
         if (ent == null) return;
-        ent.EffectName = path;
+        ent.EffectName = resolvedPath;
         ent.StartActive = true;
         ent.Teleport(new Vector(x,y,z), new QAngle(0,0,0), new Vector(0,0,0));
         ent.DispatchSpawn();
@@ -166,9 +197,17 @@ public class Cs2EngineApi : IEngineApi
 
     public void PlaySound(int slot, string sound)
     {
+        string resolved = SoundRemap.TryGetValue(sound, out var remap) ? remap : sound;
         var p = P(slot);
-        p?.ExecuteClientCommand($"play {sound}");
+        p?.ExecuteClientCommand($"play {resolved}");
     }
+
+    // Remap custom sounds to built-in CS2 sounds
+    private static readonly Dictionary<string, string> SoundRemap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["aether/resonance_blade"] = "weapons/smg_ssg08/fire1.wav",
+        ["aether/apocalypse"] = "weapons/rifle_ak47/fire1.wav",
+    };
 
     // AOE: урон всем ВРАГАМ в радиусе вокруг точки кастующего. Возвращает число задетых.
     public int DamageRadius(int slot, float radius, int damage, bool enemiesOnly = true)

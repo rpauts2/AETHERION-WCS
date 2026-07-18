@@ -235,12 +235,15 @@ public class AetherionPlugin : BasePlugin
         AddCommand("css_title", "Выбрать титул", CmdTitle);
         AddCommand("css_color", "Выбрать цвет", CmdColor);
         AddCommand("css_gt", "Гильдейский турнир", CmdGuildTournament);
+        AddCommand("css_use", "Использовать предмет", CmdUse);
+        AddCommand("css_inv", "Инвентарь", CmdInventory);
 
         // Тики
         AddTimer(0.5f, RiftTick, TimerFlags.REPEAT);
         AddTimer(1.0f, EtherRegen, TimerFlags.REPEAT);
         AddTimer(0.1f, HudTick, TimerFlags.REPEAT);
         AddTimer(1.0f, GameTick, TimerFlags.REPEAT);
+        AddTimer(60.0f, PeriodicSave, TimerFlags.REPEAT);
 
         // Интеграция Nexus
         NexusIntegration.Wire(this, _nexus, _races, _aetherRoulette, steamId => Data(steamId), pd => SaveData(pd));
@@ -435,6 +438,19 @@ public class AetherionPlugin : BasePlugin
                 tourney?.OnFrag(attacker);
             }
 
+            // Бонусы от предметов магазина
+            var shopFxAtk = ItemShop.AggregateEffects(d);
+
+            // Бонусы от магазина: knife_dmg (бонусный XP за нож)
+            float knifeDmgBonus = shopFxAtk.GetValueOrDefault("knife_dmg", 0f);
+            if (knifeDmgBonus > 0)
+            {
+                long knifeBonusXp = (long)(xp * knifeDmgBonus);
+                long knifeBonusGold = (long)(gold * knifeDmgBonus);
+                xp += knifeBonusXp;
+                gold += knifeBonusGold;
+            }
+
             EconomySystem.AddGold(d, gold);
             int up = LevelSystem.AddXp(d, rp, def?.TierEnum ?? RaceTier.T1_Spark, xp);
             if (up > 0) UnlockSystem.RefreshDivision(d);
@@ -446,9 +462,10 @@ public class AetherionPlugin : BasePlugin
             d.SeasonXp += xp;
             SyncBattlePass(d);
 
-            // Эфир за килл + бонус духа
+            // Эфир за килл + бонус духа + бонус магазина
             var wispBonuses = _wispCompanion.GetOwnerBonuses(attacker);
             float etherMult = 1f + wispBonuses.GetValueOrDefault("ether_gain", 0f);
+            etherMult += shopFxAtk.GetValueOrDefault("ether_gain", 0f);
             int baseEther = hs ? 18 : 12;
             _ether[attacker.SteamID] = Math.Min(EtherMax, _ether.GetValueOrDefault(attacker.SteamID, 0) + (int)(baseEther * etherMult));
 
@@ -776,7 +793,10 @@ public class AetherionPlugin : BasePlugin
 
             if (_runtime.Activate(ctx, def, rp, ab.Index))
             {
-                _ultCooldown[p.SteamID] = now + Math.Max(8f, ab.Cooldown);
+                // Магазин: ult_cdr снижает КД ультимейта
+                var shopFxUlt = ItemShop.AggregateEffects(d);
+                float cdrMult = 1f - shopFxUlt.GetValueOrDefault("ult_cdr", 0f);
+                _ultCooldown[p.SteamID] = now + Math.Max(4f, ab.Cooldown * cdrMult);
                 _audio.PlayCastUltimate(p, d.CurrentRaceId);
                 _achievements.OnUltCast(d, p);
                 _boss.OnUltCast(p);
@@ -1285,6 +1305,76 @@ public class AetherionPlugin : BasePlugin
         _cosmetics.EquipColor(d, info.GetArg(1));
         SaveData(d);
         p.PrintToChat($" \x04Цвет ника установлен!");
+    }
+
+    private void CmdUse(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null || !p.PawnIsAlive) return;
+        if (info.ArgCount < 2) { p.PrintToChat(" \x07Формат: !use <id предмета>. Список: !inv"); return; }
+        if (!int.TryParse(info.GetArg(1), out int itemId)) { p.PrintToChat(" \x07Неверный ID."); return; }
+        var d = Data(p.SteamID);
+        var owned = d.Inventory.FirstOrDefault(o => o.ItemId == itemId && o.Count > 0);
+        if (owned == null) { p.PrintToChat(" \x07Предмет отсутствует в инвентаре."); return; }
+        var item = ItemShop.Get(itemId);
+        if (item == null) { p.PrintToChat(" \x07Предмет не найден."); return; }
+
+        if (item.Kind == ItemKind.Consumable)
+        {
+            // Активация расходника
+            if (item.Effects.ContainsKey("berserk"))
+            {
+                float dmgMult = 1f + item.Effects["berserk"];
+                float dur = item.Effects.GetValueOrDefault("dur", 8f);
+                _combat.Apply(EffectTag.Berserk, p.Slot, dmgMult - 1f, dur);
+                p.PrintToChat($" \x04{item.Name} активирован! +{(int)(item.Effects["berserk"]*100)}% урон на {dur}с");
+            }
+            else if (item.Effects.ContainsKey("invis"))
+            {
+                float dur = item.Effects.GetValueOrDefault("dur", 4f);
+                _engine.SetInvisible(p.Slot, true);
+                AddTimer(dur, () => { try { _engine.SetInvisible(p.Slot, false); } catch { } });
+                p.PrintToChat($" \x04{item.Name} активирован! Невидимость {dur}с");
+            }
+            else if (item.Effects.ContainsKey("recall"))
+            {
+                var spawn = _engine.GetNearestSpawn(p.Slot, p.TeamNum);
+                if (spawn.HasValue)
+                {
+                    _engine.Teleport(p.Slot, spawn.Value.x, spawn.Value.y, spawn.Value.z);
+                    p.PrintToChat($" \x04{item.Name}: телепорт на спавн!");
+                }
+            }
+            owned.Count--;
+            if (owned.Count <= 0) d.Inventory.Remove(owned);
+        }
+        else
+        {
+            p.PrintToChat(" \x07Этот предмет нельзя использовать активно.");
+        }
+    }
+
+    private void CmdInventory(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        var d = Data(p.SteamID);
+        p.PrintToChat(" \x0B═══ ИНВЕНТАРЬ ═══");
+        if (d.Inventory.Count == 0) { p.PrintToChat(" Пусто."); return; }
+        foreach (var o in d.Inventory)
+        {
+            var item = ItemShop.Get(o.ItemId);
+            string name = item?.Name ?? $"Предмет#{o.ItemId}";
+            string kind = item?.Kind switch { ItemKind.Consumable => "[РАСХОДНИК]", _ => "" };
+            p.PrintToChat($" [{o.ItemId}] {name} x{o.Count} {kind}");
+        }
+        p.PrintToChat(" \x09!use <id> — использовать");
+    }
+
+    private void PeriodicSave()
+    {
+        foreach (var kv in _online)
+        {
+            try { _store.Save(kv.Value); } catch { }
+        }
     }
 
     private void CmdGuildTournament(CCSPlayerController? p, CommandInfo info)

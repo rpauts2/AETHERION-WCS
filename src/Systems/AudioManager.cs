@@ -512,10 +512,23 @@ public class AudioManager
         return null;
     }
 
+    // Remap custom sound paths loaded from sounds.json to built-in CS2 sounds
+    private static readonly Dictionary<string, string> SoundRemap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["aether/resonance_blade"] = "weapons/smg_ssg08/fire1.wav",
+        ["aether/apocalypse"] = "weapons/rifle_ak47/fire1.wav",
+        ["race/pudge_pull"] = "weapons/shotgun_xm1014/fire1.wav",
+        ["boss/boss_awaken"] = "UIPanorama.round_report_match_won",
+        ["boss/boss_death"] = "player/death1.wav",
+        ["ambient/menu_loop"] = "ui.button_click",
+        ["ambient/storm_loop"] = "ui.button_hover",
+    };
+
     private static void Execute(CCSPlayerController player, string? sound)
     {
         if (player == null || string.IsNullOrEmpty(sound)) return;
-        try { player.ExecuteClientCommand($"play {sound}"); }
+        string resolved = SoundRemap.TryGetValue(sound, out var remap) ? remap : sound;
+        try { player.ExecuteClientCommand($"play {resolved}"); }
         catch (Exception ex)
         {
             Console.WriteLine($"[AETHERION] sound fail: {ex.Message}");
