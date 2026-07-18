@@ -5,6 +5,7 @@ using System.Text;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Timers;
+using WcsInfinity.Systems;
 
 namespace WcsInfinity.Plugins;
 
@@ -127,16 +128,63 @@ public class AetherRoulette
     public static List<Prize> GoldPool() => new()
     {
         new Prize{ Name="50 золота", Color="#b0b0b0", Weight=400, Rarity="Обычный",
-            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.Gold+=50; } } },
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { EconomySystem.AddGold(d, 50); } } },
         new Prize{ Name="150 золота", Color="#b0b0b0", Weight=250, Rarity="Обычный",
-            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.Gold+=150; } } },
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { EconomySystem.AddGold(d, 150); } } },
         new Prize{ Name="400 золота", Color="#3da9fc", Weight=150, Rarity="Редкий",
-            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.Gold+=400; } } },
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { EconomySystem.AddGold(d, 400); } } },
         new Prize{ Name="1000 золота", Color="#a855f7", Weight=70, Rarity="Эпик",
-            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.Gold+=1000; } } },
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { EconomySystem.AddGold(d, 1000); } } },
         new Prize{ Name="Сундук", Color="#f59e0b", Weight=25, Rarity="Легендарный",
-            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.Gold+=2500; d.LevelBank+=5; } } },
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { EconomySystem.AddGold(d, 2500); d.LevelBank+=5; } } },
         new Prize{ Name="ДЖЕКПОТ 5000", Color="#ff3b6b", Weight=5, Rarity="Мифик",
-            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.Gold+=5000; d.LevelBank+=15; } } },
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { EconomySystem.AddGold(d, 5000); d.LevelBank+=15; } } },
+    };
+
+    public static List<Prize> RacePool() => new()
+    {
+        new Prize{ Name="300 золота", Color="#b0b0b0", Weight=300, Rarity="Обычный",
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { EconomySystem.AddGold(d, 300); } } },
+        new Prize{ Name="1 LevelBank", Color="#b0b0b0", Weight=200, Rarity="Обычный",
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.LevelBank+=1; } } },
+        new Prize{ Name="Случайная раса", Color="#3da9fc", Weight=200, Rarity="Редкий",
+            Grant=p => {
+                var plugin = WcsInfinity.Core.AetherionPlugin.Instance;
+                if (plugin == null) return;
+                var d = plugin.Data(p.SteamID);
+                if (d == null) return;
+                var races = plugin.GetUnlockedRaces().Where(r => !d.UnlockedRaces.Contains(r)).ToList();
+                if (races.Count == 0) { EconomySystem.AddGold(d, 500); return; }
+                var raceId = races[Random.Shared.Next(races.Count)];
+                d.UnlockedRaces.Add(raceId);
+                p.PrintToChat($" \x06✦ Разблокирована раса #{raceId}!");
+            }},
+        new Prize{ Name="Редкая раса", Color="#a855f7", Weight=100, Rarity="Эпик",
+            Grant=p => {
+                var plugin = WcsInfinity.Core.AetherionPlugin.Instance;
+                if (plugin == null) return;
+                var d = plugin.Data(p.SteamID);
+                if (d == null) return;
+                var races = plugin.GetUnlockedRaces().Where(r => !d.UnlockedRaces.Contains(r)).Take(30).ToList();
+                if (races.Count == 0) { EconomySystem.AddGold(d, 1000); return; }
+                var raceId = races[Random.Shared.Next(races.Count)];
+                d.UnlockedRaces.Add(raceId);
+                p.PrintToChat($" \x06✦ Разблокирована редкая раса #{raceId}!");
+            }},
+        new Prize{ Name="3 LevelBank + 500з", Color="#f59e0b", Weight=50, Rarity="Легендарный",
+            Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.LevelBank+=3; EconomySystem.AddGold(d, 500); } } },
+        new Prize{ Name="★ МЕГА-ДЖЕКПОТ ★", Color="#ff3b6b", Weight=10, Rarity="Мифик",
+            Grant=p => {
+                var plugin = WcsInfinity.Core.AetherionPlugin.Instance;
+                if (plugin == null) return;
+                var d = plugin.Data(p.SteamID);
+                if (d == null) return;
+                var locked = plugin.GetUnlockedRaces().Where(r => !d.UnlockedRaces.Contains(r)).ToList();
+                int count = Math.Min(5, locked.Count);
+                for (int i = 0; i < count; i++) d.UnlockedRaces.Add(locked[i]);
+                d.LevelBank += 5;
+                EconomySystem.AddGold(d, 2000);
+                p.PrintToChat($" \x06✦ ★ МЕГА-ДЖЕКПОТ: +{count} рас + 5 LB + 2000з!");
+            }},
     };
 }

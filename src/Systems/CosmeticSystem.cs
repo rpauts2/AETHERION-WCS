@@ -74,6 +74,9 @@ public class CosmeticSystem
         if (def.RequiredDivision > 0 && d.Division < def.RequiredDivision) return false;
         if (def.RequiredGuild && d.GuildId == 0) return false;
         if (!string.IsNullOrEmpty(def.RequiredAchievement) && !d.Achievements.Contains(def.RequiredAchievement)) return false;
+        // Auto-add to owned when requirements are met
+        if (!d.OwnedCosmetics.Contains(def.Id))
+            d.OwnedCosmetics.Add(def.Id);
         return true;
     }
 

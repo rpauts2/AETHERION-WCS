@@ -1035,7 +1035,22 @@ public class AetherionPlugin : BasePlugin
     private void CmdSpin(CCSPlayerController? p, CommandInfo info)
     {
         if (p == null) return;
-        _aetherRoulette.Spin(p, AetherRoulette.RouletteType.Gold, AetherRoulette.GoldPool());
+        string sub = info.ArgCount >= 2 ? info.GetArg(1).ToLowerInvariant() : "gold";
+
+        long cost = sub == "race" ? 500 : 200;
+        var d = Data(p.SteamID);
+        if (!EconomySystem.SpendGold(d, cost))
+        { p.PrintToChat($" \x07Нужно {cost}з для рулетки (у тебя {d.Gold}з)."); return; }
+
+        if (sub == "race")
+            _aetherRoulette.Spin(p, AetherRoulette.RouletteType.Race, AetherRoulette.RacePool());
+        else
+            _aetherRoulette.Spin(p, AetherRoulette.RouletteType.Gold, AetherRoulette.GoldPool());
+    }
+
+    public List<int> GetUnlockedRaces()
+    {
+        return _races.Races.Keys.ToList();
     }
 
     private void CmdGuild(CCSPlayerController? p, CommandInfo info)
