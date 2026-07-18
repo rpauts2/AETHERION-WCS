@@ -62,6 +62,8 @@ public class AetherionPlugin : BasePlugin
     private EtherPortalSystem _etherPortal = null!;
     private ContractSystem _contracts = null!;
     private RaceMutationSystem _mutation = null!;
+    private LeaderboardSystem _leaderboard = null!;
+    private CosmeticSystem _cosmetics = null!;
 
     // — Кэши рантайма —
     private readonly Dictionary<ulong, PlayerData> _online = new();
@@ -181,6 +183,8 @@ public class AetherionPlugin : BasePlugin
         _contracts = new ContractSystem(sid => Data(sid), pd => SaveData(pd));
         _contracts.SetRaceLookup(id => _races.Get(id));
         _mutation = new RaceMutationSystem(_engine, _combat);
+        _leaderboard = new LeaderboardSystem(sid => Data(sid), _store);
+        _cosmetics = new CosmeticSystem();
 
         // Хуки событий
         RegisterEventHandler<EventPlayerDeath>(OnDeath);
@@ -222,6 +226,14 @@ public class AetherionPlugin : BasePlugin
         AddCommand("css_duel", "Дуэль", CmdDuel);
         AddCommand("css_contracts", "Контракты", (p, _) => { if (p != null) _contracts.ShowContracts(p); });
         AddCommand("css_claim", "Забрать награду контракта", CmdClaim);
+        AddCommand("css_lb", "Лидерборд", (p, _) => { if (p != null) _leaderboard.ShowLeaderboard(p, "kills"); });
+        AddCommand("css_lb_kills", "Лидерборд убийств", (p, _) => { if (p != null) _leaderboard.ShowLeaderboard(p, "kills"); });
+        AddCommand("css_lb_level", "Лидерборд уровней", (p, _) => { if (p != null) _leaderboard.ShowLeaderboard(p, "level"); });
+        AddCommand("css_lb_gold", "Лидерборд золота", (p, _) => { if (p != null) _leaderboard.ShowLeaderboard(p, "gold"); });
+        AddCommand("css_cosmetics", "Косметика", (p, _) => { if (p != null) { var d = Data(p.SteamID); _cosmetics.ShowMenu(p, d); } });
+        AddCommand("css_title", "Выбрать титул", CmdTitle);
+        AddCommand("css_color", "Выбрать цвет", CmdColor);
+        AddCommand("css_gt", "Гильдейский турнир", CmdGuildTournament);
 
         // Тики
         AddTimer(0.5f, RiftTick, TimerFlags.REPEAT);
@@ -1216,6 +1228,62 @@ public class AetherionPlugin : BasePlugin
         if (info.ArgCount < 2 || !int.TryParse(info.GetArg(1), out int idx))
         { p.PrintToChat(" \x07Формат: !claim <1-3>"); return; }
         _contracts.Claim(p, idx - 1);
+    }
+
+    private void CmdTitle(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        if (info.ArgCount < 2) { p.PrintToChat(" \x07Формат: !title <id>. Список: !cosmetics"); return; }
+        var d = Data(p.SteamID);
+        _cosmetics.EquipTitle(d, info.GetArg(1));
+        SaveData(d);
+        p.PrintToChat($" \x04Титул установлен!");
+    }
+
+    private void CmdColor(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        if (info.ArgCount < 2) { p.PrintToChat(" \x07Формат: !color <id>. Список: !cosmetics"); return; }
+        var d = Data(p.SteamID);
+        _cosmetics.EquipColor(d, info.GetArg(1));
+        SaveData(d);
+        p.PrintToChat($" \x04Цвет ника установлен!");
+    }
+
+    private void CmdGuildTournament(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        var sub = info.ArgCount >= 2 ? info.GetArg(1).ToLower() : "list";
+
+        switch (sub)
+        {
+            case "list":
+                GuildTournamentSystem.ShowTournaments(p);
+                break;
+            case "create":
+                if (info.ArgCount < 3) { p.PrintToChat(" \x07Формат: !gt create <имя>"); return; }
+                var t = GuildTournamentSystem.Create(info.GetArg(2));
+                t.State = TournamentState.Registration;
+                p.PrintToChat($" \x06Турнир #{t.Id} «{t.Name}» создан! Регистрация открыта.");
+                break;
+            case "join":
+                if (info.ArgCount < 3 || !int.TryParse(info.GetArg(2), out int tid))
+                { p.PrintToChat(" \x07Формат: !gt join <id>"); return; }
+                var tourney = GuildTournamentSystem.Get(tid);
+                if (tourney == null) { p.PrintToChat(" \x07Турнир не найден."); return; }
+                var guild = GuildManager.Instance.Of(p.SteamID);
+                if (guild == null) { p.PrintToChat(" \x07Ты не в гильдии."); return; }
+                tourney.Register(guild);
+                p.PrintToChat($" \x06Гильдия [{guild.Tag}] зарегистрирована!");
+                break;
+            case "start":
+                if (info.ArgCount < 3 || !int.TryParse(info.GetArg(2), out int sid2))
+                { p.PrintToChat(" \x07Формат: !gt start <id>"); return; }
+                if (!CounterStrikeSharp.API.Modules.Admin.AdminManager.PlayerHasPermissions(p, "@css/config")) { p.PrintToChat(" \x07Нет прав."); return; }
+                var tr = GuildTournamentSystem.Get(sid2);
+                if (tr != null) tr.Start();
+                break;
+        }
     }
 
     private void CmdReset(CCSPlayerController? p, CommandInfo info)

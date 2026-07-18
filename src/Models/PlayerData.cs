@@ -39,6 +39,8 @@ public class PlayerData
     public HashSet<int> ClaimedFreePassTiers { get; set; } = new();
     public HashSet<int> ClaimedPremiumPassTiers { get; set; } = new();
     public List<string> OwnedCosmetics { get; set; } = new();
+    public string EquippedTitle { get; set; } = "";
+    public string EquippedColor { get; set; } = "";
 
     // Гильдия
     public int GuildId { get; set; } = 0;
