@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using WcsInfinity.Systems;
 
 namespace WcsInfinity.Systems;
 
@@ -185,5 +184,16 @@ public static class GuildTournamentSystem
         if (open.Count == 0) p.PrintToChat(" Нет открытых турниров.");
         foreach (var t in open)
             p.PrintToChat($" #{t.Id} «{t.Name}» | {t.SideA.Count + t.SideB.Count} гильдий | Осталось: {t.TimeLeft.Minutes}м");
+    }
+
+    public static void ShowDuelStats(CCSPlayerController p)
+    {
+        int wins = _duelWins.GetValueOrDefault(p.SteamID, 0);
+        p.PrintToChat(" \x0B═══ ДУЭЛИ ═══");
+        p.PrintToChat($" Побед: {wins}");
+        if (_pendingDuel != null && _pendingDuel.Active)
+            p.PrintToChat($" ⚔ Идёт: {_pendingDuel.ChallengerName} vs {_pendingDuel.OpponentName}");
+        else
+            p.PrintToChat(" Используй !duel <игрок> для вызова");
     }
 }

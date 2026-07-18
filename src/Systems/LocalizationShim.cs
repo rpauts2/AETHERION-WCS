@@ -1,5 +1,3 @@
-using CounterStrikeSharp.API.Core;
-
 namespace WcsInfinity.Systems;
 
 public static class L10n

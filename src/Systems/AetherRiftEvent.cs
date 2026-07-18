@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using WcsInfinity.Races;
-using WcsInfinity.Systems;
 
 namespace WcsInfinity.Systems;
 

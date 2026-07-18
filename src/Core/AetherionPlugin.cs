@@ -1223,6 +1223,7 @@ public class AetherionPlugin : BasePlugin
         var sub = info.GetArg(1).ToLowerInvariant();
         if (sub == "accept") { _duelArena.Accept(p); return; }
         if (sub == "leave") { _duelArena.Leave(p); return; }
+        if (sub == "stats") { GuildTournamentSystem.ShowDuelStats(p); return; }
 
         string targetName = info.GetArg(1);
         var target = Utilities.GetPlayers()
