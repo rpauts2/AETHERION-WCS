@@ -46,22 +46,22 @@ public static class LevelSystem
         return 1000; // глобальный кап уровня расы
     }
 
-    // Начислить опыт с расой-источником (правильный кап = сумма способностей).
+    // Начислить опыт с расой-источником (правильный кап + правильный дивизион расы).
     public static int AddXp(PlayerData p, RaceProgress rp, WcsInfinity.Races.RaceDefinition def, long amount)
-        => AddXpInternal(p, rp, def != null ? def.TierEnum : RaceTier.T1_Spark, MaxLevelForRace(def), amount);
+        => AddXpInternal(p, rp, def != null ? def.TierEnum : RaceTier.T1_Spark, MaxLevelForRace(def), amount, def?.Division ?? p.Division);
 
     // Начислить опыт. Возвращает кол-во поднятых уровней (для уведомлений).
     public static int AddXp(PlayerData p, RaceProgress rp, RaceTier tier, long amount)
-        => AddXpInternal(p, rp, tier, MaxLevelForRace(tier), amount);
+        => AddXpInternal(p, rp, tier, MaxLevelForRace(tier), amount, p.Division);
 
-    private static int AddXpInternal(PlayerData p, RaceProgress rp, RaceTier tier, int max, long amount)
+    private static int AddXpInternal(PlayerData p, RaceProgress rp, RaceTier tier, int max, long amount, int division)
     {
         amount = (long)(amount * p.XpBoostMultiplier);
         rp.Xp += amount;
         int gained = 0;
         while (rp.Level < max)
         {
-            long need = XpForLevel(rp.Level, tier, p.Division);
+            long need = XpForLevel(rp.Level, tier, division);
             if (rp.Xp < need) break;
             rp.Xp -= need;
             rp.Level++;

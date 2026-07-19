@@ -342,10 +342,62 @@ public sealed class BossSystem
     // ═══════════════════════════════════════════════
     public void OnPlayerHurt(CCSPlayerController? victim, CCSPlayerController? attacker, int damage)
     {
-        // Boss is a prop_dynamic — it does NOT cause player_hurt events.
-        // Boss damage goes through DealDirectDamage() only.
-        // This handler intentionally does nothing for boss HP tracking.
-        // (PvP damage must not reduce boss HP.)
+        // Intentionally empty — boss is a prop, not a player.
+        // Boss damage goes through DealDirectDamage and CheckAoeDamage.
+    }
+
+    // Called by CombatEffects when AOE damage is dealt — checks if boss is in range
+    public void CheckAoeDamage(float x, float y, float z, float radius, int damage)
+    {
+        if (!_bossActive || _bossProp == null || !_bossProp.IsValid) return;
+        var bossPos = _bossProp.AbsOrigin;
+        if (bossPos == null) return;
+        float dx = bossPos.X - x, dy = bossPos.Y - y, dz = bossPos.Z - z;
+        float dist = MathF.Sqrt(dx * dx + dy * dy + dz * dz);
+        if (dist <= radius + 100f)
+        {
+            int scaled = Math.Max(1, damage / 3);
+            _bossHp = Math.Max(0, _bossHp - scaled);
+            FlashBoss();
+            if (_bossHp <= 0) OnBossDefeated();
+        }
+    }
+
+    // Called when a player directly attacks the boss (melee/weapon)
+    public void OnBossAttacked(CCSPlayerController attacker, int damage)
+    {
+        if (!_bossActive || attacker == null || !attacker.IsValid || attacker.IsBot) return;
+        if (_bossProp == null || !_bossProp.IsValid) return;
+        var pawn = attacker.PlayerPawn?.Value;
+        if (pawn?.AbsOrigin == null) return;
+        var bossPos = _bossProp.AbsOrigin;
+        if (bossPos == null) return;
+        float dx = bossPos.X - pawn.AbsOrigin.X, dy = bossPos.Y - pawn.AbsOrigin.Y;
+        float dist = MathF.Sqrt(dx * dx + dy * dy);
+        if (dist > 200f) return; // must be close to boss
+        DealDirectDamage(attacker, damage);
+    }
+
+    private void FlashBoss()
+    {
+        if (_bossProp == null || !_bossProp.IsValid) return;
+        try
+        {
+            _bossProp.Render = Color.FromArgb(255, 255, 200, 200);
+            Utilities.SetStateChanged(_bossProp, "CBaseModelEntity", "m_clrRender");
+            var skin = BossData[_bossIndex];
+            Server.NextFrame(() =>
+            {
+                if (_bossProp != null && _bossProp.IsValid)
+                    try
+                    {
+                        _bossProp.Render = Color.FromArgb(255, skin.R, skin.G, skin.B);
+                        Utilities.SetStateChanged(_bossProp, "CBaseModelEntity", "m_clrRender");
+                    }
+                    catch { }
+            });
+        }
+        catch { }
     }
 
     public void DealDirectDamage(CCSPlayerController attacker, int amount)

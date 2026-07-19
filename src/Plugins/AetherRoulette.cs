@@ -153,11 +153,12 @@ public class AetherRoulette
                 if (plugin == null) return;
                 var d = plugin.Data(p.SteamID);
                 if (d == null) return;
-                var races = plugin.GetUnlockedRaces().Where(r => !d.UnlockedRaces.Contains(r)).ToList();
+                var races = plugin.GetEligibleRacePool(p.SteamID);
                 if (races.Count == 0) { EconomySystem.AddGold(d, 500); return; }
                 var raceId = races[Random.Shared.Next(races.Count)];
                 d.UnlockedRaces.Add(raceId);
-                p.PrintToChat($" \x06✦ Разблокирована раса #{raceId}!");
+                var rDef = plugin.GetRaceDef(raceId);
+                p.PrintToChat($" \x06✦ Разблокирована раса: {rDef?.Name ?? $"#{raceId}"}!");
             }},
         new Prize{ Name="Редкая раса", Color="#a855f7", Weight=100, Rarity="Эпик",
             Grant=p => {
@@ -165,11 +166,12 @@ public class AetherRoulette
                 if (plugin == null) return;
                 var d = plugin.Data(p.SteamID);
                 if (d == null) return;
-                var races = plugin.GetUnlockedRaces().Where(r => !d.UnlockedRaces.Contains(r)).Take(30).ToList();
+                var races = plugin.GetEligibleRacePool(p.SteamID).Take(30).ToList();
                 if (races.Count == 0) { EconomySystem.AddGold(d, 1000); return; }
                 var raceId = races[Random.Shared.Next(races.Count)];
                 d.UnlockedRaces.Add(raceId);
-                p.PrintToChat($" \x06✦ Разблокирована редкая раса #{raceId}!");
+                var rDef = plugin.GetRaceDef(raceId);
+                p.PrintToChat($" \x06✦ Разблокирована редкая раса: {rDef?.Name ?? $"#{raceId}"}!");
             }},
         new Prize{ Name="3 LevelBank + 500з", Color="#f59e0b", Weight=50, Rarity="Легендарный",
             Grant=p => { var d = WcsInfinity.Core.AetherionPlugin.Instance?.Data(p.SteamID); if(d!=null) { d.LevelBank+=3; EconomySystem.AddGold(d, 500); } } },
@@ -179,7 +181,7 @@ public class AetherRoulette
                 if (plugin == null) return;
                 var d = plugin.Data(p.SteamID);
                 if (d == null) return;
-                var locked = plugin.GetUnlockedRaces().Where(r => !d.UnlockedRaces.Contains(r)).ToList();
+                var locked = plugin.GetEligibleRacePool(p.SteamID);
                 int count = Math.Min(5, locked.Count);
                 for (int i = 0; i < count; i++) d.UnlockedRaces.Add(locked[i]);
                 d.LevelBank += 5;

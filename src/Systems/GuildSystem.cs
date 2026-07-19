@@ -92,6 +92,13 @@ public class GuildManager
 
     private void NotifyChanged() => OnChanged?.Invoke();
 
+    public void ClearAll()
+    {
+        _guilds.Clear();
+        _playerGuild.Clear();
+        _nextId = 1;
+    }
+
     public void RestoreGuild(Guild g)
     {
         _guilds[g.Id] = g;

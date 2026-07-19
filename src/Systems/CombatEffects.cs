@@ -35,6 +35,10 @@ public class CombatEffects
 {
     private readonly IEngineApi _engine;
     private readonly List<ActiveEffect> _effects = new();
+
+    // Callback for AOE damage — allows systems like BossSystem to react
+    public Action<float, float, float, float, int>? OnAoeDamage { get; set; }
+
     public CombatEffects(IEngineApi engine) { _engine = engine; }
 
     public void Apply(EffectTag tag, int slot, float value, float durationSec,
@@ -175,6 +179,8 @@ public class CombatEffects
             int finalDamage = Math.Min(scaledDamage, victimHealth);
             _engine.SetHealth(slot, Math.Max(0, victimHealth - finalDamage));
         }
+        // Notify external systems (e.g. boss damage)
+        OnAoeDamage?.Invoke(x, y, z, radius, scaledDamage);
     }
 
     // AOE + наложение CC-эффекта на каждого задетого врага

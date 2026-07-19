@@ -118,6 +118,7 @@ public class AetherionPlugin : BasePlugin
         // Загрузка гильдий из БД
         if (_store is SqlitePlayerStore sqlite)
         {
+            GuildManager.Instance.ClearAll();
             var savedGuilds = sqlite.LoadAllGuilds();
             var memberMap = sqlite.LoadGuildMembers();
             foreach (var g in savedGuilds)
@@ -129,6 +130,7 @@ public class AetherionPlugin : BasePlugin
         // Движок и боевые эффекты
         _engine = new Cs2EngineApi();
         _combat = new CombatEffects(_engine);
+        _combat.OnAoeDamage = (x, y, z, r, d) => _boss.CheckAoeDamage(x, y, z, r, d);
 
         // UI / премиальные системы
         _nexus = new AetherNexus(this);
@@ -373,6 +375,9 @@ public class AetherionPlugin : BasePlugin
             // Стартовый эфир
             _ether[p.SteamID] = Math.Min(EtherMax, 50);
             _ultCooldown.Remove(p.SteamID);
+
+            // Мутации: пере-применить активную мутацию при респавне
+            _mutation.OnPlayerSpawn(p);
 
             // Дейлики (обновление при новом дне)
             _achievements.RefreshDailies(d);
@@ -649,6 +654,7 @@ public class AetherionPlugin : BasePlugin
         try { _auras.Remove(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] aura remove err: {ex.Message}"); }
         try { _auras.RemoveAcc(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] aura acc remove err: {ex.Message}"); }
         try { _sigils.CleanupSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] sigil cleanup err: {ex.Message}"); }
+        try { _resonance.ClearPlayer(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] resonance cleanup err: {ex.Message}"); }
         // Clean up SteamID-keyed caches
         var player = Utilities.GetPlayerFromSlot(slot);
         if (player != null && player.IsValid)
@@ -1052,6 +1058,16 @@ public class AetherionPlugin : BasePlugin
     {
         return _races.Races.Keys.ToList();
     }
+
+    public List<int> GetEligibleRacePool(ulong steamId)
+    {
+        var d = Data(steamId);
+        return _races.RacesForDivision(d.Division)
+            .Where(r => !d.UnlockedRaces.Contains(r.Id))
+            .Select(r => r.Id).ToList();
+    }
+
+    public WcsInfinity.Races.RaceDefinition? GetRaceDef(int id) => _races.Get(id);
 
     private void CmdGuild(CCSPlayerController? p, CommandInfo info)
     {
