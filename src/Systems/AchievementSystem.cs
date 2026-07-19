@@ -45,6 +45,9 @@ public sealed class AchievementSystem
     private readonly List<DailyChallengeDef> _dailyPool = new();
     private readonly Random _rng = new();
     private RaceManager? _raceManager;
+    private Func<ulong, Models.PlayerData>? _dataFn;
+
+    public Action<ulong, int>? OnRaceUnlockReward { get; set; } // callback: (steamId, raceId)
 
     // Счётчики прогресса (стримятся в PlayerData.QuestCounters)
     private const string C_KILLS = "kills";
@@ -72,6 +75,7 @@ public sealed class AchievementSystem
     }
 
     public void SetRaceManager(RaceManager rm) => _raceManager = rm;
+    public void SetDataLookup(Func<ulong, Models.PlayerData> fn) => _dataFn = fn;
 
     // ═══════════════════════════════════════════════════════════
     //  РЕГИСТРАЦИЯ АЧИВОК
@@ -355,6 +359,20 @@ public sealed class AchievementSystem
             p.PrintToChat($" {tierColor}  {ach.Description} → +{ach.GoldReward}з +{ach.XpReward}XP");
             if (!string.IsNullOrEmpty(ach.CosmeticReward))
                 p.PrintToChat($" {tierColor}  Косметическая награда: {ach.CosmeticReward}");
+        }
+
+        // Milestone: every 5 achievements = free race unlock
+        int totalUnlocked = d.Achievements.Count;
+        if (totalUnlocked > 0 && totalUnlocked % 5 == 0 && _raceManager != null && _dataFn != null && OnRaceUnlockReward != null)
+        {
+            var eligible = _raceManager.RacesForDivision(d.Division)
+                .Where(r => !d.UnlockedRaces.Contains(r.Id)).ToList();
+            if (eligible.Count > 0)
+            {
+                var race = eligible[_rng.Next(eligible.Count)];
+                OnRaceUnlockReward.Invoke(d.SteamId, race.Id);
+                p.PrintToChat($" \x06✦ МИЛЙСТОУН: за {totalUnlocked} ачивок разблокирована раса «{race.Name}»!");
+            }
         }
     }
 

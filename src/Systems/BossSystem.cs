@@ -28,6 +28,7 @@ public sealed class BossSystem
     private readonly Action<WcsInfinity.Models.PlayerData> _saveFn;
     private readonly Func<int, WcsInfinity.Races.RaceDefinition?> _raceDefFn;
     private readonly Action<ulong, int> _addEther;
+    private readonly Func<ulong, int>? _raceUnlockChance; // returns raceId to unlock, or 0
 
     // Боссы: имя, RGB цвет модели, награда золота, награда XP, HP множитель
     private static readonly IReadOnlyList<(string Name, int R, int G, int B, int Gold, int Xp, float HpMult, string Ability)> BossData = new List<(string, int, int, int, int, int, float, string)>
@@ -82,7 +83,8 @@ public sealed class BossSystem
         Func<ulong, WcsInfinity.Models.PlayerData> dataFn,
         Action<WcsInfinity.Models.PlayerData> saveFn,
         Func<int, WcsInfinity.Races.RaceDefinition?> raceDefFn,
-        Action<ulong, int> addEther)
+        Action<ulong, int> addEther,
+        Func<ulong, int>? raceUnlockChance = null)
     {
         _plugin = plugin;
         _engine = engine;
@@ -90,6 +92,7 @@ public sealed class BossSystem
         _saveFn = saveFn;
         _raceDefFn = raceDefFn;
         _addEther = addEther;
+        _raceUnlockChance = raceUnlockChance;
     }
 
     public bool IsBossActive => _bossActive;
@@ -462,7 +465,17 @@ public sealed class BossSystem
             }
             catch (Exception ex) { Console.WriteLine($"[Boss] reward err: {ex.Message}"); }
 
-            attacker.PrintToChat($@" \x06[AETHERION] Награда: \x09{gold}з + {xp}XP + {ether}⚡");
+                attacker.PrintToChat($@" \x06[AETHERION] Награда: \x09{gold}з + {xp}XP + {ether}⚡");
+                // 20% chance for race unlock on boss kill
+                if (_raceUnlockChance != null && _rng.NextDouble() < 0.20)
+                {
+                    int raceId = _raceUnlockChance(attacker.SteamID);
+                    if (raceId > 0)
+                    {
+                        var raceDef = _raceDefFn(raceId);
+                        attacker.PrintToChat($@" \x06[AETHERION] ✦ БОСС-НАГРАДА: разблокирована раса «{raceDef?.Name ?? $"#{raceId}"}»!");
+                    }
+                }
         }
 
         // MVP bonus: double gold + extra ether + guaranteed item drop

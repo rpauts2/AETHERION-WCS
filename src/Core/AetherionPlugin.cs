@@ -143,7 +143,16 @@ public class AetherionPlugin : BasePlugin
             _contracts.OnSigilUsed(p.SteamID);
         };
         _boss = new BossSystem(this, _engine, sid => Data(sid), pd => SaveData(pd), id => _races.Get(id),
-            (sid, amount) => { _ether[sid] = Math.Min(EtherMax, _ether.GetValueOrDefault(sid, 0) + amount); });
+            (sid, amount) => { _ether[sid] = Math.Min(EtherMax, _ether.GetValueOrDefault(sid, 0) + amount); },
+            sid => {
+                var d = Data(sid);
+                var eligible = _races.RacesForDivision(d.Division)
+                    .Where(r => !d.UnlockedRaces.Contains(r.Id)).ToList();
+                if (eligible.Count == 0) return 0;
+                var pick = eligible[Random.Shared.Next(eligible.Count)];
+                d.UnlockedRaces.Add(pick.Id);
+                return pick.Id;
+            });
         _boss.OnBossSpawn = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossAwaken(pl); };
         _boss.OnBossAttack = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossEnrage(pl); };
         _boss.OnBossDeath = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossDeath(pl); };
@@ -189,6 +198,12 @@ public class AetherionPlugin : BasePlugin
         _mutation = new RaceMutationSystem(_engine, _combat);
         _leaderboard = new LeaderboardSystem(sid => Data(sid), _store);
         _cosmetics = new CosmeticSystem();
+        _achievements.OnRaceUnlockReward = (sid, raceId) =>
+        {
+            var d = Data(sid);
+            if (!d.UnlockedRaces.Contains(raceId))
+                d.UnlockedRaces.Add(raceId);
+        };
 
         // Хуки событий
         RegisterEventHandler<EventPlayerDeath>(OnDeath);
@@ -240,6 +255,8 @@ public class AetherionPlugin : BasePlugin
         AddCommand("css_gt", "Гильдейский турнир", CmdGuildTournament);
         AddCommand("css_use", "Использовать предмет", CmdUse);
         AddCommand("css_inv", "Инвентарь", CmdInventory);
+        AddCommand("css_invest", "Влить уровень из банка в расу", CmdInvest);
+        AddCommand("css_unlock", "Разблокировать расу за уровень", CmdUnlockRace);
 
         // Тики
         AddTimer(0.5f, RiftTick, TimerFlags.REPEAT);
@@ -1537,9 +1554,64 @@ public class AetherionPlugin : BasePlugin
         if (reward == null) { p.PrintToChat(" \x07[ЕЖЕДНЕВКА] Уже забрал сегодня. Приходи завтра!"); return; }
         EconomySystem.AddGold(d, reward.Gold);
         d.FreeSpins += reward.FreeSpins;
+        // Apply BonusXp
+        if (reward.BonusXp > 0)
+        {
+            var rp = d.GetRace(d.CurrentRaceId);
+            var raceDef = _races.Get(d.CurrentRaceId);
+            LevelSystem.AddXp(d, rp, raceDef?.TierEnum ?? WcsInfinity.Races.RaceTier.T1_Spark, reward.BonusXp);
+        }
+        // Apply VipDays
+        if (reward.VipDays > 0)
+        {
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            long current = d.VipExpiresUnix;
+            long baseTime = current > now ? current : now;
+            d.VipExpiresUnix = baseTime + reward.VipDays * 86400L;
+        }
         SaveData(d);
-        p.PrintToChat($" \x06[ЕЖЕДНЕВКА] День {reward.Day}: +{reward.Gold}з, +{reward.FreeSpins} спинов!");
+        string msg = $" \x06[ЕЖЕДНЕВКА] День {reward.Day}: +{reward.Gold}з";
+        if (reward.FreeSpins > 0) msg += $", +{reward.FreeSpins} спинов";
+        if (reward.BonusXp > 0) msg += $", +{reward.BonusXp}XP";
+        if (reward.VipDays > 0) msg += $", +{reward.VipDays} VIP дн.";
+        if (reward.IsMilestone) msg += " ★ ДЖЕКПОТ НЕДЕЛИ ★";
+        p.PrintToChat(msg);
         _audio.PlayDailyReward(p);
+    }
+
+    private void CmdInvest(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        var d = Data(p.SteamID);
+        if (d.LevelBank <= 0) { p.PrintToChat(" \x07Банк уровней пуст. Крути рулетку или лови джекпоты!"); return; }
+
+        var rp = d.GetRace(d.CurrentRaceId);
+        rp.Level++;
+        rp.UnspentPoints++;
+        d.LevelBank--;
+        SaveData(d);
+        var def = _races.Get(d.CurrentRaceId);
+        p.PrintToChat($" \x06✦ +1 уровень {def?.Name ?? "?"} из банка! (осталось в банке: {d.LevelBank})");
+    }
+
+    private void CmdUnlockRace(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        if (info.ArgCount < 2) { p.PrintToChat(" \x07Формат: !unlock <id расы> (стоимость: 5 уровней из банка)"); return; }
+        if (!int.TryParse(info.GetArg(1), out int raceId)) { p.PrintToChat(" \x07Неверный ID расы."); return; }
+
+        var d = Data(p.SteamID);
+        if (d.UnlockedRaces.Contains(raceId)) { p.PrintToChat(" \x07Эта раса уже разблокирована!"); return; }
+        if (d.LevelBank < 5) { p.PrintToChat(" \x07Нужно 5 уровней из банка для разблокировки."); return; }
+
+        var def = _races.Get(raceId);
+        if (def == null) { p.PrintToChat(" \x07Раса не найдена."); return; }
+        if (def.Division > d.Division) { p.PrintToChat($" \x07Нужен дивизион D{def.Division} для этой расы."); return; }
+
+        d.UnlockedRaces.Add(raceId);
+        d.LevelBank -= 5;
+        SaveData(d);
+        p.PrintToChat($" \x06✦ Раса «{def.Name}» разблокирована! (−5 из банка, осталось: {d.LevelBank})");
     }
 
     private void CmdAdmin(CCSPlayerController? p, CommandInfo info)
