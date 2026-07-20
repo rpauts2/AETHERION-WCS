@@ -89,6 +89,7 @@ public class GuildManager
     private static readonly Dictionary<ulong, int> _playerGuild = new();
     private static int _nextId = 1;
     public Action? OnChanged { get; set; }
+    public List<int> DisbandedGuildIds { get; } = new();
 
     private void NotifyChanged() => OnChanged?.Invoke();
 
@@ -150,7 +151,7 @@ public class GuildManager
         {
             var heir = g.Officers.FirstOrDefault(x => x != sid);
             if (heir == 0) heir = g.Members.FirstOrDefault(x => x != sid);
-            if (heir == 0) { _guilds.Remove(gid); g.Members.Clear(); g.Officers.Clear(); }
+            if (heir == 0) { _guilds.Remove(gid); g.Members.Clear(); g.Officers.Clear(); DisbandedGuildIds.Add(gid); }
             else g.LeaderSteamId = heir;
         }
 
@@ -203,7 +204,7 @@ public static class GuildMenu
             menu.AddItem($"Члены: {g.Members.Count}/{g.MaxMembers}", null);
             menu.AddItem("Внести золото", (pl, _) => OpenDonate(pl, plugin, g));
             menu.AddItem("Усилить знамя (XP)", (pl, _) => BannerUp(pl, plugin, g, store));
-            menu.AddItem("Покинуть гильдию", (pl, _) => Leave(pl, plugin, g));
+            menu.AddItem("Покинуть гильдию", (pl, _) => Leave(pl, plugin, g, store));
             menu.AddItem("Рейтинг знамён", (pl, _) => OpenRating(pl, plugin));
         }
         menu.Display(p, 0);
@@ -237,9 +238,17 @@ public static class GuildMenu
         p.PrintToChat($" Знамя укреплено! +{xpGain} XP → {g.BannerXp}/{g.BannerXpNeeded} (ур. {g.BannerLevel})");
     }
 
-    private static void Leave(CCSPlayerController p, BasePlugin plugin, Guild g)
+    private static void Leave(CCSPlayerController p, BasePlugin plugin, Guild g, Database.IPlayerStore? store)
     {
-        if (GuildManager.Instance.Leave(p)) p.PrintToChat(" Ты покинул гильдию.");
+        if (GuildManager.Instance.Leave(p))
+        {
+            if (store != null)
+            {
+                var d = store.Load(p.SteamID);
+                if (d != null) { d.GuildId = 0; store.Save(d); }
+            }
+            p.PrintToChat(" Ты покинул гильдию.");
+        }
         else p.PrintToChat(" Не получилось.");
     }
 

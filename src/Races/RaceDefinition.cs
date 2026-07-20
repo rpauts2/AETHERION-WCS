@@ -20,11 +20,17 @@ public class AbilityDef
     [JsonPropertyName("cd")]     public float Cooldown { get; set; } = 0f;
     [JsonPropertyName("ether")]  public int EtherCost { get; set; } = 0;
 
-    // Связь с движком (опциональные теги; если пусто — навык чисто пассивно-числовой)
-    [JsonPropertyName("effect")] public string Effect { get; set; } = "";   // тег из EffectLibrary
-    [JsonPropertyName("value")]  public float Value { get; set; } = 0f;     // параметр эффекта
+    // Связь с движком
+    [JsonPropertyName("effect")] public string Effect { get; set; } = "";
+    [JsonPropertyName("value")]  public float Value { get; set; } = 0f;
 
-    // Назначается автоматически при загрузке (позиция в списке способностей)
+    // Доп. параметры (используются в races.json для тонкой настройки)
+    [JsonPropertyName("stack")]   public string Stack { get; set; } = "";
+    [JsonPropertyName("radius")]  public float Radius { get; set; } = 0f;
+    [JsonPropertyName("duration")] public float Duration { get; set; } = 0f;
+    [JsonPropertyName("angle")]   public float Angle { get; set; } = 0f;
+
+    // Назначается автоматически при загрузке
     [JsonIgnore] public int Index { get; set; }
 }
 
@@ -36,7 +42,7 @@ public class RaceDefinition
     [JsonPropertyName("archetype")] public string Archetype { get; set; } = "";
     [JsonPropertyName("tier")]      public int Tier { get; set; } = 1;
     [JsonPropertyName("division")]  public int Division { get; set; } = 1;
-    [JsonPropertyName("unlock")]    public int RequiredLevelToUnlock { get; set; } = 0;
+    [JsonPropertyName("unlock_level")] public int RequiredLevelToUnlock { get; set; } = 0;
     [JsonPropertyName("guild")]     public bool IsGuildRace { get; set; } = false;
     [JsonPropertyName("abilities")] public List<AbilityDef> Abilities { get; set; } = new();
 

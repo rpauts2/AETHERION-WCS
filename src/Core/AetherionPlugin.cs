@@ -281,6 +281,9 @@ public class AetherionPlugin : BasePlugin
     private void SaveGuilds()
     {
         if (_store is not SqlitePlayerStore sqlite) return;
+        foreach (var gid in GuildManager.Instance.DisbandedGuildIds)
+            try { sqlite.DeleteGuild(gid); } catch { }
+        GuildManager.Instance.DisbandedGuildIds.Clear();
         var all = GuildManager.Instance.All.Values.ToList();
         var memberMap = GuildManager.Instance.PlayerGuildMap;
         sqlite.SaveAllGuilds(all, memberMap);
@@ -676,6 +679,7 @@ public class AetherionPlugin : BasePlugin
                     _achievements.OnRoundEnd(d, player, true);
 
                 _store.Save(d);
+                d.IsDirty = false;
             }
             catch (Exception ex) { Console.WriteLine($"[AETHERION] OnRoundEnd player err: {ex.Message}"); }
         }
@@ -1949,7 +1953,7 @@ public class AetherionPlugin : BasePlugin
         _customWeapons.RegisterRaceWeapon(1107, CustomWeaponType.RocketLauncher); // Небесный Страж
     }
 
-    public void SaveData(PlayerData data) => _store.Save(data);
+    public void SaveData(PlayerData data) { _store.Save(data); data.IsDirty = false; }
 
     private void OpenAchievementsMenu(CCSPlayerController p)
     {
