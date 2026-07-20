@@ -80,6 +80,9 @@ public class CombatEffects
             case EffectTag.Shield:
                 _engine.AddArmor(slot, (int)value, 200);
                 break;
+            case EffectTag.Berserk:
+                _engine.SetSpeed(slot, 1f + value);
+                break;
             case EffectTag.Reflect:
             case EffectTag.ManaShield:
                 _engine.AddArmor(slot, (int)value, 250);
@@ -98,7 +101,8 @@ public class CombatEffects
             case EffectTag.SpeedBuff:
             case EffectTag.Slow:
             case EffectTag.Root:
-            case EffectTag.Fear:      _engine.SetSpeed(e.Slot, 1f); break;
+            case EffectTag.Fear:
+            case EffectTag.Berserk:  _engine.SetSpeed(e.Slot, 1f); break;
             case EffectTag.Freeze:
             case EffectTag.Stun:      _engine.SetFrozen(e.Slot, false); break;
         }

@@ -97,7 +97,7 @@ public class ContractSystem
             if (c.Def.Type == ContractType.KillEnemies && !c.Claimed)
                 c.Progress = Math.Min(c.Def.Target, c.Progress + 1);
             if (c.Def.Type == ContractType.GetKillsNoDeath && !c.Claimed)
-                c.Progress = Math.Min(c.Def.Target, streak);
+                c.Progress = Math.Min(c.Def.Target, Math.Max(c.Progress, streak));
         }
     }
 

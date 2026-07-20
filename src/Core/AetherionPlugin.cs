@@ -160,7 +160,14 @@ public class AetherionPlugin : BasePlugin
         // Ачивки
         _achievements = new AchievementSystem();
         _achievements.SetRaceManager(_races);
+        _achievements.SetDataLookup(sid => Data(sid));
         _achievements.RegisterRaceAchievements(_races.Races.Keys);
+
+        _boss.OnPlayerBossKill = sid => {
+            var d = Data(sid);
+            var p = Utilities.GetPlayers().FirstOrDefault(x => x != null && x.IsValid && !x.IsBot && x.SteamID == sid);
+            if (p != null) _achievements.OnBossKill(d, p);
+        };
 
         // Неймплейты над головой
         _nameplates = new NameplateManager();
@@ -1512,8 +1519,8 @@ public class AetherionPlugin : BasePlugin
         p.PrintToChat(" \x0B═══ ТОП ИГРОКОВ ═══");
         if (top.Count == 0) { p.PrintToChat(" \x08Пока нет данных."); return; }
         int i = 1;
-        foreach (var (sid, name, xp, lvl, gold) in top)
-            p.PrintToChat($"  \x06{i++}.\x01 {name} — ур.\x04{lvl}\x01 XP:\x06{xp}\x01 З:\x06{gold}");
+        foreach (var (sid, name, xp, lvl, gold, kills) in top)
+            p.PrintToChat($"  \x06{i++}.\x01 {name} — ур.\x04{lvl}\x01 XP:\x06{xp}\x01 З:\x06{gold}\x01 Kills:\x06{kills}");
         p.PrintToChat(" \x01Сортировка: \x04!top [level|xp|gold]");
     }
 

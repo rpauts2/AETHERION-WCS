@@ -78,6 +78,7 @@ public sealed class BossSystem
     public Action? OnBossAttack;
     public Action? OnBossDeath;
     public Action? OnVoteStart;
+    public Action<ulong>? OnPlayerBossKill;
 
     public BossSystem(BasePlugin plugin, IEngineApi engine,
         Func<ulong, WcsInfinity.Models.PlayerData> dataFn,
@@ -462,8 +463,7 @@ public sealed class BossSystem
                 d.SeasonXp += xp;
                 _addEther(attacker.SteamID, ether);
                 _saveFn(d);
-            }
-            catch (Exception ex) { Console.WriteLine($"[Boss] reward err: {ex.Message}"); }
+                try { OnPlayerBossKill?.Invoke(attacker.SteamID); } catch { }
 
                 attacker.PrintToChat($@" \x06[AETHERION] Награда: \x09{gold}з + {xp}XP + {ether}⚡");
                 // 20% chance for race unlock on boss kill
@@ -472,10 +472,13 @@ public sealed class BossSystem
                     int raceId = _raceUnlockChance(attacker.SteamID);
                     if (raceId > 0)
                     {
-                        var raceDef = _raceDefFn(raceId);
-                        attacker.PrintToChat($@" \x06[AETHERION] ✦ БОСС-НАГРАДА: разблокирована раса «{raceDef?.Name ?? $"#{raceId}"}»!");
+                        var unlockedDef = _raceDefFn(raceId);
+                        attacker.PrintToChat($@" \x06[AETHERION] ✦ БОСС-НАГРАДА: разблокирована раса «{unlockedDef?.Name ?? $"#{raceId}"}»!");
+                        _saveFn(d);
                     }
                 }
+            }
+            catch (Exception ex) { Console.WriteLine($"[Boss] reward err: {ex.Message}"); }
         }
 
         // MVP bonus: double gold + extra ether + guaranteed item drop

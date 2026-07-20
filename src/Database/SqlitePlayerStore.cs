@@ -206,9 +206,9 @@ public class SqlitePlayerStore : IPlayerStore
     }
 
     // ── Leaderboard ──────────────────────────────────────────────────────
-    public List<(ulong SteamId, string Name, long TotalXp, int TopLevel, long Gold)> TopPlayers(int count, string sortField = "level")
+    public List<(ulong SteamId, string Name, long TotalXp, int TopLevel, long Gold, long Kills)> TopPlayers(int count, string sortField = "level")
     {
-        var result = new List<(ulong, string, long, int, long)>();
+        var result = new List<(ulong, string, long, int, long, long)>();
         using var con = new SqliteConnection(_connStr);
         con.Open();
         using var cmd = con.CreateCommand();
@@ -229,7 +229,8 @@ public class SqlitePlayerStore : IPlayerStore
                     totalXp += rp.Xp;
                     topLevel = Math.Max(topLevel, rp.Level);
                 }
-                result.Add((sid, name, totalXp, topLevel, pd.Gold));
+                long kills = pd.QuestCounters.GetValueOrDefault("kills", 0);
+                result.Add((sid, name, totalXp, topLevel, pd.Gold, kills));
             }
             catch { }
         }
@@ -237,6 +238,7 @@ public class SqlitePlayerStore : IPlayerStore
         {
             "gold" => result.OrderByDescending(x => x.Item5).Take(count).ToList(),
             "xp" => result.OrderByDescending(x => x.Item3).Take(count).ToList(),
+            "kills" => result.OrderByDescending(x => x.Item6).Take(count).ToList(),
             _ => result.OrderByDescending(x => x.Item4).ThenByDescending(x => x.Item3).Take(count).ToList()
         };
     }

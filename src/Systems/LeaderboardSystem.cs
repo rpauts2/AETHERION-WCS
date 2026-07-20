@@ -33,6 +33,7 @@ public class LeaderboardSystem
         {
             "gold" => "gold",
             "level" => "level",
+            "kills" => "kills",
             _ => "level"
         };
 
@@ -43,13 +44,14 @@ public class LeaderboardSystem
     }
 
     private void ShowGenericLeaderboard(CCSPlayerController p,
-        List<(ulong SteamId, string Name, long TotalXp, int TopLevel, long Gold)> top,
+        List<(ulong SteamId, string Name, long TotalXp, int TopLevel, long Gold, long Kills)> top,
         string category)
     {
         List<(string Name, long Value)> sorted = category switch
         {
             "gold" => top.Select(t => (t.Name, t.Gold)).ToList(),
             "level" => top.Select(t => (t.Name, (long)t.TopLevel)).ToList(),
+            "kills" => top.Select(t => (t.Name, t.Kills)).ToList(),
             _ => top.Select(t => (t.Name, t.TotalXp)).ToList(),
         };
 
@@ -59,6 +61,7 @@ public class LeaderboardSystem
         {
             "gold" => "ЗОЛОТО",
             "level" => "УРОВНИ",
+            "kills" => "УБИЙСТВА",
             _ => "ОПЫТ"
         };
 
@@ -69,6 +72,7 @@ public class LeaderboardSystem
             string val = category switch
             {
                 "gold" => $"{value}з",
+                "kills" => $"{value} kills",
                 _ => $"{value}"
             };
             p.PrintToChat($" {medal} {name} — {val}");

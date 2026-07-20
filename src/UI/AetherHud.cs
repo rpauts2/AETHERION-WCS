@@ -78,7 +78,7 @@ public static class AetherHud
         // Общий уровень игрока (сумма всех рас) + прогресс до следующего Круга
         long total = UnlockSystem.TotalLevel(p);
         int curDiv = UnlockSystem.DivisionForTotalLevel(total);
-        long[] __t = {0,200,500,1000,1800,3000,4500,7000}; long nextThr = curDiv < 8 ? __t[curDiv] : 0L;
+        long nextThr = curDiv < UnlockSystem.DivThresholds.Length ? UnlockSystem.DivThresholds[curDiv] : 0L;
         sb.Append($"<font color='{Gold}'>{L10n.GetF("UI_AetherHud_RaceCard_TotalLevel", "Σ Общий уровень: {0}", ("total", total))}</font>");
         if (nextThr > 0) sb.Append($" <font color='{Gray}' class='fontSize-s'>{L10n.GetF("UI_AetherHud_RaceCard_ProgressHint", "(до Круга {0}: {1})", ("circle", curDiv + 1), ("needed", nextThr - total))}</font>");
         sb.Append("<br>");
