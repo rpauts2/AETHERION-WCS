@@ -48,6 +48,7 @@ public static class NexusIntegration
                     Enabled = ok,
                     OnSelect = pl =>
                     {
+                        if (!ok) { pl.PrintToChat(" \x07Раса не разблокирована!"); return; }
                         var pd = data(pl.SteamID);
                         pd.CurrentRaceId = rid;
                         save(pd);

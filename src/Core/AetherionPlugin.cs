@@ -39,7 +39,6 @@ public class AetherionPlugin : BasePlugin
     private readonly ModelManager _models = new();
     private readonly AudioManager _audio = new();
     private readonly AuraManager _auras = new();
-    private readonly RouletteSystem _roulette = new();
     private readonly GuildManager _guilds = GuildManager.Instance;
     private readonly SeasonSystem _seasons = new();
     private readonly AetherRiftEvent _rift = new();
@@ -1069,11 +1068,6 @@ public class AetherionPlugin : BasePlugin
             _aetherRoulette.Spin(p, AetherRoulette.RouletteType.Race, AetherRoulette.RacePool());
         else
             _aetherRoulette.Spin(p, AetherRoulette.RouletteType.Gold, AetherRoulette.GoldPool());
-    }
-
-    public List<int> GetUnlockedRaces()
-    {
-        return _races.Races.Keys.ToList();
     }
 
     public List<int> GetEligibleRacePool(ulong steamId)
