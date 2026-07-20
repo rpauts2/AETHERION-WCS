@@ -61,6 +61,11 @@ public static class DailyRewardSystem
         else p.LoginStreak = 1;                              // пропуск — стрик заново
 
         p.LastLoginUnix = new DateTimeOffset(today, TimeSpan.Zero).ToUnixTimeSeconds();
-        return Compute(p.LoginStreak);
+        var reward = Compute(p.LoginStreak);
+
+        // 7-дневный стрик = бесплатная разблокировка расы
+        if (p.LoginStreak % 7 == 0) reward.IsMilestone = true;
+
+        return reward;
     }
 }

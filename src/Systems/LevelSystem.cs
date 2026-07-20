@@ -58,6 +58,7 @@ public static class LevelSystem
     {
         amount = (long)(amount * p.XpBoostMultiplier);
         rp.Xp += amount;
+        p.IsDirty = true;
         int gained = 0;
         while (rp.Level < max)
         {

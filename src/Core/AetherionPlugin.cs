@@ -427,11 +427,14 @@ public class AetherionPlugin : BasePlugin
             // — Босс: фикс смерти (вызываем до проверки attacker) —
             _boss.OnPlayerDeath(victim, attacker, 0);
 
-            // Жертва: гасим духа до респавна
+            // Жертва: гасим духа до респавна + сброс вин-стрека
             if (!victim.IsBot)
             {
                 _wispCompanion.NotifyDeath(victim);
                 _contracts.OnDeath(victim.SteamID);
+                var vd = Data(victim.SteamID);
+                vd.WinStreak = 0;
+                vd.IsDirty = true;
             }
 
             if (attacker == null || !attacker.IsValid || attacker.IsBot) return HookResult.Continue;
@@ -501,6 +504,23 @@ public class AetherionPlugin : BasePlugin
             _roundKills[attacker.SteamID] = _roundKills.GetValueOrDefault(attacker.SteamID, 0) + 1;
             _lastKillTime[attacker.SteamID] = Server.CurrentTime;
             int streak = _roundKills[attacker.SteamID];
+
+            // Win streak (consecutive kills without dying)
+            d.WinStreak++;
+            d.IsDirty = true;
+            if (d.WinStreak > d.BestWinStreak) d.BestWinStreak = d.WinStreak;
+            if (d.WinStreak > 0 && d.WinStreak % 10 == 0)
+            {
+                var divRaces = _races.RacesForDivision(d.Division)
+                    .Where(r => !d.UnlockedRaces.Contains(r.Id)).ToList();
+                if (divRaces.Count > 0)
+                {
+                    var rng = Random.Shared;
+                    var race = divRaces[rng.Next(divRaces.Count)];
+                    d.UnlockedRaces.Add(race.Id);
+                    attacker.PrintToChat($" \x06✦ ВИН-СТРИК {d.WinStreak}! Разблокирована раса «{race.Name}»!");
+                }
+            }
 
             // Звуки стрика/первой крови
             if (!_firstBlood)
@@ -1417,7 +1437,8 @@ public class AetherionPlugin : BasePlugin
     {
         foreach (var kv in _online)
         {
-            try { _store.Save(kv.Value); } catch { }
+            if (!kv.Value.IsDirty) continue;
+            try { _store.Save(kv.Value); kv.Value.IsDirty = false; } catch { }
         }
     }
 
@@ -1568,7 +1589,18 @@ public class AetherionPlugin : BasePlugin
         if (reward.FreeSpins > 0) msg += $", +{reward.FreeSpins} спинов";
         if (reward.BonusXp > 0) msg += $", +{reward.BonusXp}XP";
         if (reward.VipDays > 0) msg += $", +{reward.VipDays} VIP дн.";
-        if (reward.IsMilestone) msg += " ★ ДЖЕКПОТ НЕДЕЛИ ★";
+        if (reward.IsMilestone && d.LoginStreak % 7 == 0)
+        {
+            var divRaces = _races.RacesForDivision(d.Division)
+                .Where(r => !d.UnlockedRaces.Contains(r.Id)).ToList();
+            if (divRaces.Count > 0)
+            {
+                var race = divRaces[Random.Shared.Next(divRaces.Count)];
+                d.UnlockedRaces.Add(race.Id);
+                msg += $" ★ Разблокирована раса «{race.Name}»!";
+            }
+        }
+        else if (reward.IsMilestone) msg += " ★ ДЖЕКПОТ НЕДЕЛИ ★";
         p.PrintToChat(msg);
         _audio.PlayDailyReward(p);
     }
@@ -1625,6 +1657,7 @@ public class AetherionPlugin : BasePlugin
             case "lvl": AdminLvl(p, info); break;
             case "boss": AdminBoss(p); break;
             case "storm": AdminStorm(p); break;
+            case "race": AdminRace(p, info); break;
             default: OpenAdminMenu(p); break;
         }
     }
@@ -1637,6 +1670,17 @@ public class AetherionPlugin : BasePlugin
         p.PrintToChat(" \x04!admin lvl <имя> <уровни> — выдать уровни расы");
         p.PrintToChat(" \x04!admin boss — призвать босса (голосование)");
         p.PrintToChat(" \x04!admin storm — запустить Эфирную Бурю");
+        p.PrintToChat(" \x0B═══ RACE WORKSHOP ═══");
+        p.PrintToChat(" \x04!admin race list [div] — список рас");
+        p.PrintToChat(" \x04!admin race info <id> — детали расы");
+        p.PrintToChat(" \x04!admin race setdiv <id> <div> — дивизион");
+        p.PrintToChat(" \x04!admin race settier <id> <tier> — тир (1-5)");
+        p.PrintToChat(" \x04!admin race setcd <id> <абил#> <сек> — кулдаун");
+        p.PrintToChat(" \x04!admin race setval <id> <абил#> <значение> — сила");
+        p.PrintToChat(" \x04!admin race setmax <id> <абил#> <ур> — макс. ур.");
+        p.PrintToChat(" \x04!admin race setname <id> <имя> — переименовать");
+        p.PrintToChat(" \x04!admin race reload — перезагрузить все расы");
+        p.PrintToChat(" \x04!admin race save — сохранить расы в JSON");
     }
 
     private CCSPlayerController? FindPlayer(string nameOrId)
@@ -1708,6 +1752,108 @@ public class AetherionPlugin : BasePlugin
     {
         _rift.Spawn(_engine);
         p.PrintToChat(" \x04[ADMIN] Эфирная Буря запущена!");
+    }
+
+    private void AdminRace(CCSPlayerController p, CommandInfo info)
+    {
+        if (info.ArgCount < 3) { p.PrintToChat(" \x04!admin race <list|info|setdiv|settier|setcd|setval|setmax|setname|reload|save>"); return; }
+        var cmd = info.GetArg(2).ToLowerInvariant();
+        switch (cmd)
+        {
+            case "list": AdminRaceList(p, info); break;
+            case "info": AdminRaceInfo(p, info); break;
+            case "setdiv": AdminRaceSetField(p, info, "division"); break;
+            case "settier": AdminRaceSetField(p, info, "tier"); break;
+            case "setcd": AdminRaceSetAbility(p, info, "cd"); break;
+            case "setval": AdminRaceSetAbility(p, info, "value"); break;
+            case "setmax": AdminRaceSetAbility(p, info, "max"); break;
+            case "setname": AdminRaceSetName(p, info); break;
+            case "reload": _races.Reload(); p.PrintToChat($" \x04[WORKSHOP] Перезагружено {_races.Count} рас."); break;
+            case "save":
+                var cfgDir = Path.Combine(ModuleDirectory, "..", "..", "configs");
+                if (_races.SaveToFile(Path.Combine(cfgDir, "races.json")))
+                    p.PrintToChat(" \x04[WORKSHOP] Расы сохранены в races.json");
+                else p.PrintToChat(" \x07[WORKSHOP] Ошибка сохранения!");
+                break;
+            default: p.PrintToChat(" \x04Неизвестная команда. list|info|setdiv|settier|setcd|setval|setmax|setname|reload|save"); break;
+        }
+    }
+
+    private void AdminRaceList(CCSPlayerController p, CommandInfo info)
+    {
+        int filterDiv = info.ArgCount >= 4 && int.TryParse(info.GetArg(3), out int d) ? d : -1;
+        var races = filterDiv > 0
+            ? _races.Races.Values.Where(r => r.Division == filterDiv).OrderBy(r => r.Id).ToList()
+            : _races.Races.Values.OrderBy(r => r.Division).ThenBy(r => r.Id).ToList();
+        p.PrintToChat($" \x0B═══ RACES ({races.Count}) ═══");
+        foreach (var r in races.Take(30))
+            p.PrintToChat($" \x04#{r.Id}\x01 [{r.Division}] T{r.Tier} \x06{r.Name}\x01 — {r.Abilities.Count} абил.");
+        if (races.Count > 30) p.PrintToChat($" \x08...и ещё {races.Count - 30}");
+    }
+
+    private void AdminRaceInfo(CCSPlayerController p, CommandInfo info)
+    {
+        if (info.ArgCount < 4 || !int.TryParse(info.GetArg(3), out int id)) { p.PrintToChat(" \x04!admin race info <id>"); return; }
+        var r = _races.Get(id);
+        if (r == null) { p.PrintToChat($" \x07Раса #{id} не найдена."); return; }
+        p.PrintToChat($" \x0B═══ #{r.Id} {r.Name} ═══");
+        p.PrintToChat($" \x01Архетип: \x06{r.Archetype}\x01 | Тир: \x04T{r.Tier}\x01 | Дивизион: \x04D{r.Division}");
+        p.PrintToChat($" \x01Лор: {r.Lore}");
+        for (int i = 0; i < r.Abilities.Count; i++)
+        {
+            var a = r.Abilities[i];
+            string typeTag = a.Type == "Active" ? "\x04[ACT]" : a.Type == "Ultimate" ? "\x10[ULT]" : "\x08[PAS]";
+            p.PrintToChat($"  {typeTag} \x06{a.Name}\x01 — ур.{a.MaxLevel} кд.{a.Cooldown:F0}с эфир:{a.EtherCost} тег:{a.Effect} сил:{a.Value:F1}");
+        }
+    }
+
+    private void AdminRaceSetField(CCSPlayerController p, CommandInfo info, string field)
+    {
+        if (info.ArgCount < 5 || !int.TryParse(info.GetArg(3), out int id) || !int.TryParse(info.GetArg(4), out int val))
+        { p.PrintToChat($" \x04!admin race {field} <id> <значение>"); return; }
+        var r = _races.Get(id);
+        if (r == null) { p.PrintToChat($" \x07Раса #{id} не найдена."); return; }
+        switch (field)
+        {
+            case "division": r.Division = Math.Clamp(val, 1, 8); break;
+            case "tier": r.Tier = Math.Clamp(val, 1, 5); break;
+        }
+        p.PrintToChat($" \x04[WORKSHOP] #{r.Name}.{field} = {val}");
+    }
+
+    private void AdminRaceSetAbility(CCSPlayerController p, CommandInfo info, string field)
+    {
+        if (info.ArgCount < 6 || !int.TryParse(info.GetArg(3), out int id) || !int.TryParse(info.GetArg(4), out int abilIdx) || !float.TryParse(info.GetArg(5), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float val))
+        { p.PrintToChat($" \x04!admin race {field} <race_id> <абил#> <значение>"); return; }
+        var r = _races.Get(id);
+        if (r == null) { p.PrintToChat($" \x07Раса #{id} не найдена."); return; }
+        if (abilIdx < 0 || abilIdx >= r.Abilities.Count) { p.PrintToChat($" \x07Нет абилки #{abilIdx} (max {r.Abilities.Count - 1})."); return; }
+        var a = r.Abilities[abilIdx];
+        switch (field)
+        {
+            case "cd": a.Cooldown = val; break;
+            case "value": a.Value = val; break;
+            case "max": a.MaxLevel = Math.Clamp((int)val, 1, 20); break;
+        }
+        p.PrintToChat($" \x04[WORKSHOP] #{r.Name}.{a.Name}.{field} = {val}");
+    }
+
+    private void AdminRaceSetName(CCSPlayerController p, CommandInfo info)
+    {
+        if (info.ArgCount < 5 || !int.TryParse(info.GetArg(3), out int id))
+        { p.PrintToChat(" \x04!admin race setname <id> <новое_имя>"); return; }
+        var r = _races.Get(id);
+        if (r == null) { p.PrintToChat($" \x07Раса #{id} не найдена."); return; }
+        var sb = new System.Text.StringBuilder();
+        for (int i = 4; i < info.ArgCount; i++)
+        {
+            if (sb.Length > 0) sb.Append(' ');
+            sb.Append(info.GetArg(i));
+        }
+        string newName = sb.ToString();
+        string oldName = r.Name;
+        r.Name = newName;
+        p.PrintToChat($" \x04[WORKSHOP] #{id}: «{oldName}» → «{newName}»");
     }
 
     private void OpenBindMenu(CCSPlayerController p)

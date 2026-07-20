@@ -14,12 +14,14 @@ public static class EconomySystem
     public static void AddGold(PlayerData p, long amount)
     {
         p.Gold = Math.Min(999999, p.Gold + Math.Max(0, amount));
+        p.IsDirty = true;
     }
 
     public static bool SpendGold(PlayerData p, long amount)
     {
         if (amount <= 0 || p.Gold < amount) return false;
         p.Gold -= amount;
+        p.IsDirty = true;
         return true;
     }
 }

@@ -61,6 +61,12 @@ public class PlayerData
     public int DuelWins { get; set; } = 0;
     public int DuelLosses { get; set; } = 0;
 
+    // Win streak (consecutive kills without dying)
+    public int WinStreak { get; set; } = 0;
+    public int BestWinStreak { get; set; } = 0;
+
+    [System.Text.Json.Serialization.JsonIgnore] public bool IsDirty { get; set; } = true;
+
     public RaceProgress GetRace(int raceId)
     {
         if (!Races.TryGetValue(raceId, out var rp))
