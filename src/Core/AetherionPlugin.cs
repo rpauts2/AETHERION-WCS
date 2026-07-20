@@ -312,7 +312,20 @@ public class AetherionPlugin : BasePlugin
         {
             var player = Utilities.GetPlayers().FirstOrDefault(p => p != null && p.IsValid && p.SteamID == d.SteamId);
             if (player != null)
+            {
+                // Auto-claim free tier rewards
+                for (int t = d.SeasonRank - gained + 1; t <= d.SeasonRank; t++)
+                {
+                    if (!_seasons.HasClaimed(d, t, false))
+                    {
+                        _seasons.TryClaim(d, t, false);
+                        var cos = _seasons.CosmeticForTier(t);
+                        if (cos != null)
+                            player.PrintToChat($" \x0B[Battle Pass]\x01 Тир {t}: \x06{cos.LabelRu}");
+                    }
+                }
                 player.PrintToChat($" \x0B[AETHERION]\x01 Battle Pass: +{gained} тир(ов)! Ранг: \x06{d.SeasonRank}");
+            }
         }
     }
 

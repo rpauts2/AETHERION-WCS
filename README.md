@@ -1,58 +1,101 @@
-# 🌌 AETHERION — WCS-мод для CS2
+# AETHERION WCS
 
-> RPG-мод в духе легендарных WCS-серверов CS:GO («Мир Героев», BlackStar),
-> переосмысленный под Source 2 / CounterStrikeSharp. Душа классики + эксклюзив.
+RCS2 server-side RPG mod for Counter-Strike 2 (CounterStrikeSharp/.NET 8). Port of WarCraft Source to Source 2.
+
+## Requirements
+
+- Counter-Strike 2 dedicated server
+- Metamod:Source 2
+- CounterStrikeSharp v1.0.362+
+- .NET 8.0 runtime
+
+## Installation
+
+1. Copy `bin/Release/net8.0/AetherionWcs.dll` to `addons/counterstrikesharp/plugins/Aetherion/`
+2. Copy `configs/` folder to `cfg/AETHERION/configs/` (relative to server root)
+3. Restart server or `css_plugins load AetherionWcs`
+
+## Features
+
+### Race System
+- **198+ races** across 8 divisions (D1-D8)
+- 114+ unique effect tags in the EffectLibrary
+- Abilities: Passive, Active, Ultimate
+- Race mutations, guild races, mythic races
+
+### Core Systems
+- XP + level system with division-based scaling
+- Economy (gold) + roulette (fair chances + pity)
+- SQLite player storage (thousands of races per player)
+- Battle Pass (free + premium tracks)
+- Daily login streak rewards
+
+### PvP/PvE
+- Boss system (vote-to-summon, 5 boss tiers)
+- Storm Wave PvE mode
+- Duel arena with ELO
+- Ether Rift events
+- Guild tournaments
+
+### Social
+- Guild system (create, upgrade, donate, craft)
+- Leaderboards (kills, levels, gold)
+- Achievement system (30+ achievements)
+- Contract system (daily objectives)
+- Wisp companion (5 evolution stages)
+
+### Admin Tools
+- `!admin` panel (gold, VIP, levels, boss, storm)
+- `!admin race` workshop (list, info, setdiv, settier, setcd, setval, setmax, setname, reload, save)
+
+### Player Commands
+| Command | Description |
+|---------|-------------|
+| `!wcs` | Main menu |
+| `!races` | Race selection |
+| `!rank` | Player stats |
+| `!spin gold/eth/race` | Roulette |
+| `!ult` | Ultimate ability |
+| `!cast` | Active ability |
+| `!sigil` | Draw sigil |
+| `!shop` | Item shop |
+| `!daily` | Daily reward |
+| `!bp` | Battle Pass |
+| `!guild` | Guild menu |
+| `!contracts` | Daily contracts |
+| `!ach` | Achievements |
+| `!invest` | Level bank |
+| `!unlock <id>` | Unlock race |
+
+## Build
+
+```bash
+dotnet build -c Release
+```
+
+Output: `bin/Release/net8.0/AetherionWcs.dll`
+
+## Project Structure
 
 ```
-  ▲ AETHERION
-  Мир Пробуждённых · Эфирная Буря · от Искры до Вечности
+src/
+  Core/           Main plugin (event hooks, commands, shop)
+  Models/         PlayerData, RaceProgress
+  Races/          RaceManager, RaceDefinition, RaceRuntime (EffectLibrary)
+  Systems/        XP, Economy, Boss, Guild, Season, Combat, etc.
+  Database/       SQLite storage (SqlitePlayerStore)
+  Plugins/        AetherNexus, AetherRoulette, AetherSigils, SigilResonance, WispEvolution
+  UI/             AetherHud (panorama-style HUD)
+configs/
+  races.json      Extended races (198+)
+  races/races_core.json  Core races (120)
+  seasons.json    Season + Battle Pass config
 ```
 
-## 📁 СТРУКТУРА ПРОЕКТА
-```
-AETHERION-WCS/
-├── docs/
-│   ├── LORE.md            — мир, ресурс Эфир, дивизионы, тиры
-│   └── PLUGINS_DESIGN.md  — эксклюзивные плагины (меню/админка/VIP/гильдии)
-├── research/
-│   └── RACE_AUDIT.md      — аудит рас классических серверов + баланс
-├── configs/
-│   ├── races.json         — активный конфиг рас
-│   └── races/races_core.json — 21 продуманная раса (D1/D2/D3/Guild)
-├── src/
-│   ├── Core/      — главный плагин (хуки CSSharp), движок
-│   ├── Models/    — данные игрока, прогресс рас
-│   ├── Races/     — система рас, поведения (Ниндзя и др.)
-│   ├── Systems/   — XP/уровни, экономика, рулетка
-│   ├── Database/  — SQLite-профили (тысячи рас на игрока)
-│   └── UI/        — AETHER HUD (креативное меню)
-├── assets/
-│   ├── models/    — концепт-арты рас (archangel_concept.png)
-│   ├── sounds/    — звуки (план)
-│   └── particles/ — эффекты (план)
-└── README.md
-```
+## Race Authoring
 
-## ✅ ЧТО ГОТОВО
-- 21 продуманная раса с лором, нишей и сбалансированными навыками:
-  - **D1 (Искра, T1):** Странник, Кровопийца, Хладокровный, Скороход, Дуэлянт Искры,
-    Бастион, Светоносец, Тень, Небокрыл, Берсерк
-  - **D2 (Пламя, T2):** Крюкохват, Стальной Жнец, Винтокрыл, Архитектор, Куролис
-  - **D3 (Шторм, T3):** Бог Тотемов, Архангел Гнева, Палач Дуэлей, Дитя Хаоса, Властелин Времени
-  - **Гильдия:** Страж Ордена
-- Система XP с дивизионной кривой (D1→D2→D3→D∞ Paragon)
-- Экономика (золото) + рулетка (честные шансы + пити)
-- SQLite-хранение, движок-абстракция, хуки CounterStrikeSharp
-- Креативное меню AETHER HUD (псевдографика, бары Эфира)
-- Концепт-арт Архангела (assets/models)
+See [docs/RACE_AUTHORING.md](docs/RACE_AUTHORING.md) for how to create custom races.
 
-## 🔜 ДАЛЬШЕ
-1. Контент: ещё расы (до сотен/тысяч), наполнить D2/D3
-2. Реализовать плагины из PLUGINS_DESIGN.md (меню-панель, админка, VIP, гильдии, сезоны)
-3. Заполнить боевые вызовы движка CounterStrikeSharp (HP/телепорт/частицы/ракеты)
-4. Ассеты: модели-скины, звуки, частицы Source 2
-5. WebUI-панель + Discord-бот
+## License
 
-## ⚙️ СБОРКА
-CS2 + Metamod:Source 2 + CounterStrikeSharp → `dotnet build -c Release` →
-DLL в `addons/counterstrikesharp/plugins/Aetherion/` + configs рядом.
+Internal project. Not for redistribution.

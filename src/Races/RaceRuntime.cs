@@ -172,6 +172,7 @@ public static class EffectLibrary
             var p = ctx.Engine.GetPosition(ctx.Slot);
             int team = ctx.Player.TeamNum;
             ctx.Combat.AoeApply(p.x,p.y,p.z, 240f, team, EffectTag.Freeze, 1f, 2f+0.2f*ctx.SkillLevel, (int)v, ctx.Slot);
+            ctx.Engine.SpawnParticle("particles/frost/frost_fall.vpcf", p.x, p.y, p.z + 30);
         },
 
         ["team_speed"] = v => ctx =>
@@ -188,6 +189,7 @@ public static class EffectLibrary
             var p = ctx.Engine.GetPosition(ctx.Slot);
             int team = ctx.Player.TeamNum;
             ctx.Combat.AoeApply(p.x,p.y,p.z, 220f+10f*ctx.SkillLevel, team, EffectTag.Slow, 0.5f, 3f, (int)(v*0.5f), ctx.Slot);
+            ctx.Engine.SpawnParticle("particles/frost/frost_fall.vpcf", p.x, p.y, p.z + 20);
         },
 
         ["fear_aoe"] = v => ctx =>
@@ -195,6 +197,7 @@ public static class EffectLibrary
             var p = ctx.Engine.GetPosition(ctx.Slot);
             int team = ctx.Player.TeamNum;
             ctx.Combat.AoeApply(p.x,p.y,p.z, 300f, team, EffectTag.Fear, 1f, 2.5f, (int)(v*0.3f), ctx.Slot);
+            ctx.Engine.SpawnParticle("particles/halloween/halloween_smoke.vpcf", p.x, p.y, p.z + 30);
         },
 
         ["stun_aoe"] = v => ctx =>
@@ -202,6 +205,7 @@ public static class EffectLibrary
             var p = ctx.Engine.GetPosition(ctx.Slot);
             int team = ctx.Player.TeamNum;
             ctx.Combat.AoeApply(p.x,p.y,p.z, 250f, team, EffectTag.Stun, 1f, 1.5f, (int)v, ctx.Slot);
+            ctx.Engine.SpawnParticle("particles/electrical_fx/emp_main_zap.vpcf", p.x, p.y, p.z + 30);
         },
 
         ["root_aoe"] = v => ctx =>
@@ -209,6 +213,7 @@ public static class EffectLibrary
             var p = ctx.Engine.GetPosition(ctx.Slot);
             int team = ctx.Player.TeamNum;
             ctx.Combat.AoeApply(p.x,p.y,p.z, 240f, team, EffectTag.Root, 1f, 2.5f, (int)(v*0.4f), ctx.Slot);
+            ctx.Engine.SpawnParticle("particles/world/healthstar.vpcf", p.x, p.y, p.z + 10);
         },
 
         ["poison_dot"] = v => ctx =>
@@ -652,7 +657,7 @@ public static class EffectLibrary
             ctx.Engine.SpawnParticle("particles/aether_thunder.vpcf", p.x, p.y, p.z+30);
         },
 
-        ["illuison"] = v => ctx =>
+        ["illusion"] = v => ctx =>
         {
             var p = ctx.Engine.GetPosition(ctx.Slot);
             int team = ctx.Player.TeamNum;

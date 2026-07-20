@@ -4,7 +4,7 @@
     "name": "Странник",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "baseline",
     "lore": "Первый шаг Пробуждённого. Чистый потенциал Эфира.",
     "abilities": [
@@ -49,7 +49,7 @@
     "name": "Кровопийца",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "sustain",
     "lore": "Эфир научил его пить чужую жизнь.",
     "abilities": [
@@ -94,7 +94,7 @@
     "name": "Хладокровный",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "control",
     "lore": "В его венах течёт жидкий лёд.",
     "abilities": [
@@ -139,7 +139,7 @@
     "name": "Скороход",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "mobility",
     "lore": "Эфир сделал его быстрее ветра.",
     "abilities": [
@@ -184,7 +184,7 @@
     "name": "Дуэлянт Искры",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "duelist",
     "lore": "Признаёт только дуэль один на один.",
     "abilities": [
@@ -229,7 +229,7 @@
     "name": "Бастион",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "tank",
     "lore": "Стоит как скала, пока другие падают.",
     "abilities": [
@@ -274,7 +274,7 @@
     "name": "Светоносец",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "support",
     "lore": "Несёт свет Эфира своим союзникам.",
     "abilities": [
@@ -319,7 +319,7 @@
     "name": "Тень",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "mobility",
     "lore": "Двигается там, где никто не смотрит.",
     "abilities": [
@@ -364,7 +364,7 @@
     "name": "Небокрыл",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "mobility",
     "lore": "Эфир подарил ему крылья.",
     "abilities": [
@@ -409,7 +409,7 @@
     "name": "Берсерк",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "aggressor",
     "lore": "Чем ближе смерть — тем сильнее ярость.",
     "abilities": [
@@ -454,7 +454,7 @@
     "name": "Крюкохват",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "control",
     "lore": "Притягивает добычу цепью Эфира. (аналог Пуджа)",
     "abilities": [
@@ -509,7 +509,7 @@
     "name": "Стальной Жнец",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "tank",
     "lore": "Машина войны, что не знает усталости. (аналог Терминатора)",
     "abilities": [
@@ -562,7 +562,7 @@
     "name": "Винтокрыл",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Хозяин неба с залпом ракет. (аналог Вертолёта)",
     "abilities": [
@@ -617,7 +617,7 @@
     "name": "Архитектор",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Строит укрепления силой мысли. (аналог Строителя)",
     "abilities": [
@@ -674,7 +674,7 @@
     "name": "Куролис",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "mobility",
     "lore": "Превращается в неуловимую птицу. (аналог Курицы)",
     "abilities": [
@@ -729,7 +729,7 @@
     "name": "Бог Тотемов",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "support",
     "lore": "Возводит алтари, питающие союзников Эфиром.",
     "abilities": [
@@ -788,7 +788,7 @@
     "name": "Архангел Гнева",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Низвергает кару тотемами разрушения.",
     "abilities": [
@@ -845,7 +845,7 @@
     "name": "Палач Дуэлей",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "duelist",
     "lore": "Изолирует жертву на арене, где нет спасения.",
     "abilities": [
@@ -900,7 +900,7 @@
     "name": "Дитя Хаоса",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "chaos",
     "lore": "Эфир в нём нестабилен — каждый раз новый.",
     "abilities": [
@@ -955,7 +955,7 @@
     "name": "Властелин Времени",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "control",
     "lore": "Сгибает мгновения под свою волю.",
     "abilities": [
@@ -1012,7 +1012,7 @@
     "name": "Страж Ордена",
     "tier": 4,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "support",
     "guild": true,
     "lore": "Раса, доступная только членам гильдии. Сила растёт с активностью гильдии.",
@@ -1060,7 +1060,7 @@
     "name": "Громовержец",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "aggressor",
     "lore": "В кулаках его спит гроза.",
     "abilities": [
@@ -1105,7 +1105,7 @@
     "name": "Каменный",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "tank",
     "lore": "Кожа его — гранит.",
     "abilities": [
@@ -1150,7 +1150,7 @@
     "name": "Огнерождённый",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "aggressor",
     "lore": "Пламя — его кровь.",
     "abilities": [
@@ -1195,7 +1195,7 @@
     "name": "Знахарь",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "support",
     "lore": "Лечит травами Эфира.",
     "abilities": [
@@ -1242,7 +1242,7 @@
     "name": "Дезертир",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "duelist",
     "lore": "Выживает любой ценой.",
     "abilities": [
@@ -1289,7 +1289,7 @@
     "name": "Призыватель",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Зовёт духов Эфира в бой.",
     "abilities": [
@@ -1346,7 +1346,7 @@
     "name": "Берсерк-Волк",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "aggressor",
     "lore": "Оборотень, что рвёт в клочья.",
     "abilities": [
@@ -1401,7 +1401,7 @@
     "name": "Снайпер-Призрак",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "duelist",
     "lore": "Один выстрел — одна душа.",
     "abilities": [
@@ -1456,7 +1456,7 @@
     "name": "Пожиратель Душ",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "sustain",
     "lore": "Каждая убитая душа делает его сильнее.",
     "abilities": [
@@ -1513,7 +1513,7 @@
     "name": "Повелитель Бурь",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Командует ветром и молнией.",
     "abilities": [
@@ -1570,7 +1570,7 @@
     "name": "Аватар Эфира",
     "tier": 5,
     "division": 4,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "mythic",
     "lore": "Высшая форма Пробуждённого. Сам выбирает свою силу.",
     "abilities": [
@@ -1627,7 +1627,7 @@
     "name": "Хронарх",
     "tier": 5,
     "division": 4,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "mythic",
     "lore": "Властелин самого времени на пике Вечности.",
     "abilities": [
@@ -1684,7 +1684,7 @@
     "name": "Авангард Ордена",
     "tier": 4,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "aggressor",
     "guild": true,
     "lore": "Ударная гильд-раса. Тем сильнее, чем активнее гильдия.",
@@ -1732,7 +1732,7 @@
     "name": "Ветродув",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "duelist",
     "lore": "Дитя степных ветров, что танцует меж пуль.",
     "abilities": [
@@ -1777,7 +1777,7 @@
     "name": "Углежог",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "aggressor",
     "lore": "Кузнец, чьё дыхание — раскалённый горн.",
     "abilities": [
@@ -1822,7 +1822,7 @@
     "name": "Следопыт",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "support",
     "lore": "Глаза леса видят то, что скрыто.",
     "abilities": [
@@ -1869,7 +1869,7 @@
     "name": "Послушник",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "support",
     "lore": "Молодой адепт Эфира, познающий исцеление.",
     "abilities": [
@@ -1916,7 +1916,7 @@
     "name": "Задира",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "aggressor",
     "lore": "Уличный боец, что прёт напролом.",
     "abilities": [
@@ -1961,7 +1961,7 @@
     "name": "Шептун",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "duelist",
     "lore": "Говорит с тенями, и тени отвечают.",
     "abilities": [
@@ -2006,7 +2006,7 @@
     "name": "Звонарь",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Колокол его души оглушает врагов.",
     "abilities": [
@@ -2053,7 +2053,7 @@
     "name": "Лозоход",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "support",
     "lore": "Чувствует течения Эфира под землёй.",
     "abilities": [
@@ -2100,7 +2100,7 @@
     "name": "Камнетёс",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "tank",
     "lore": "Терпелив как скала, твёрд как гранит.",
     "abilities": [
@@ -2145,7 +2145,7 @@
     "name": "Бегун",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "duelist",
     "lore": "Быстрее всех — значит живее всех.",
     "abilities": [
@@ -2192,7 +2192,7 @@
     "name": "Искрожог",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "aggressor",
     "lore": "В пальцах его пляшут первые искры Эфира.",
     "abilities": [
@@ -2237,7 +2237,7 @@
     "name": "Знаменосец",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "support",
     "lore": "Его флаг вдохновляет идущих рядом.",
     "abilities": [
@@ -2284,7 +2284,7 @@
     "name": "Дымокур",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Прячет союзников в эфирной дымке.",
     "abilities": [
@@ -2331,7 +2331,7 @@
     "name": "Точильщик",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "aggressor",
     "lore": "Его клинок всегда жаждет крови.",
     "abilities": [
@@ -2376,7 +2376,7 @@
     "name": "Подмастерье Бурь",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Учится укрощать грозу, что внутри.",
     "abilities": [
@@ -2423,7 +2423,7 @@
     "name": "Чумной Лекарь",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Лечит своих и травит чужих одним дыханием.",
     "abilities": [
@@ -2480,7 +2480,7 @@
     "name": "Двуликий",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "duelist",
     "lore": "Две души в одном теле — атака и защита.",
     "abilities": [
@@ -2535,7 +2535,7 @@
     "name": "Костяной Маг",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Поднимает павших в эфирных костяных стражей.",
     "abilities": [
@@ -2592,7 +2592,7 @@
     "name": "Громовой Кулак",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "aggressor",
     "lore": "Каждый удар — раскат грома.",
     "abilities": [
@@ -2647,7 +2647,7 @@
     "name": "Зеркальный",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "duelist",
     "lore": "Отражает чужую боль обратно.",
     "abilities": [
@@ -2702,7 +2702,7 @@
     "name": "Ледяная Дева",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Там, где ступает она, стынет даже Эфир.",
     "abilities": [
@@ -2757,7 +2757,7 @@
     "name": "Песчаный Странник",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "duelist",
     "lore": "Растворяется в песке и бьёт из ниоткуда.",
     "abilities": [
@@ -2814,7 +2814,7 @@
     "name": "Кровавый Жрец",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "sustain",
     "lore": "Платит кровью за силу — своей и чужой.",
     "abilities": [
@@ -2871,7 +2871,7 @@
     "name": "Часовой",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "tank",
     "lore": "Страж рубежа, что не пропустит никого.",
     "abilities": [
@@ -2928,7 +2928,7 @@
     "name": "Эфирный Вор",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "duelist",
     "lore": "Крадёт не золото — чужую силу.",
     "abilities": [
@@ -2985,7 +2985,7 @@
     "name": "Друид Эфира",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "support",
     "lore": "Слышит, как растут эфирные травы.",
     "abilities": [
@@ -3042,7 +3042,7 @@
     "name": "Дуэлянт",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "duelist",
     "lore": "Один на один ему нет равных.",
     "abilities": [
@@ -3097,7 +3097,7 @@
     "name": "Заклинатель Огня",
     "tier": 2,
     "division": 2,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Пламя послушно его воле.",
     "abilities": [
@@ -3154,7 +3154,7 @@
     "name": "Повелитель Бури",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Сам Шторм склоняется пред его волей.",
     "abilities": [
@@ -3211,7 +3211,7 @@
     "name": "Пожиратель Душ",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "sustain",
     "lore": "С каждой душой он становится сильнее — навсегда в раунде.",
     "abilities": [
@@ -3268,7 +3268,7 @@
     "name": "Хронолог",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "control",
     "lore": "Время — глина в его пальцах.",
     "abilities": [
@@ -3325,7 +3325,7 @@
     "name": "Титан",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "tank",
     "lore": "Гора, что научилась ходить.",
     "abilities": [
@@ -3382,7 +3382,7 @@
     "name": "Жнец",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "assassin",
     "lore": "Приходит за теми, чей час пробил.",
     "abilities": [
@@ -3439,7 +3439,7 @@
     "name": "Архимаг",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "caster",
     "lore": "Магия Эфира течёт сквозь него рекой.",
     "abilities": [
@@ -3496,7 +3496,7 @@
     "name": "Берсерк Бури",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "aggressor",
     "lore": "Чем ближе смерть, тем страшнее его ярость.",
     "abilities": [
@@ -3553,7 +3553,7 @@
     "name": "Призыватель",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "summoner",
     "lore": "Один в поле не воин — но он никогда не один.",
     "abilities": [
@@ -3610,7 +3610,7 @@
     "name": "Палач Света",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "paladin",
     "lore": "Свет, что выжигает скверну дотла.",
     "abilities": [
@@ -3667,7 +3667,7 @@
     "name": "Теневой Клинок",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "assassin",
     "lore": "Тень с тысячью клинков.",
     "abilities": [
@@ -3724,7 +3724,7 @@
     "name": "Чумной Лорд",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "zone",
     "lore": "Его дыхание — конец для целых отрядов.",
     "abilities": [
@@ -3781,7 +3781,7 @@
     "name": "Драконорождённый",
     "tier": 3,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "bruiser",
     "lore": "В его венах течёт кровь древних драконов.",
     "abilities": [
@@ -3838,7 +3838,7 @@
     "name": "Аватар Шторма",
     "tier": 5,
     "division": 4,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "god",
     "lore": "Сам Эфирный Шторм обрёл плоть. Ходячая буря.",
     "abilities": [
@@ -3895,7 +3895,7 @@
     "name": "Вечный",
     "tier": 5,
     "division": 4,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "immortal",
     "lore": "Он умирал тысячи раз и всегда возвращался.",
     "abilities": [
@@ -3952,7 +3952,7 @@
     "name": "Архитектор Реальности",
     "tier": 5,
     "division": 4,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "control",
     "lore": "Он переписывает правила поля боя.",
     "abilities": [
@@ -4009,7 +4009,7 @@
     "name": "Бог Войны",
     "tier": 5,
     "division": 4,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "god",
     "lore": "Война — его молитва, поле боя — его храм.",
     "abilities": [
@@ -4066,7 +4066,7 @@
     "name": "Пожиратель Миров",
     "tier": 5,
     "division": 4,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "sustain",
     "lore": "Голод, что поглотил звёзды.",
     "abilities": [
@@ -4123,7 +4123,7 @@
     "name": "Светоносный",
     "tier": 5,
     "division": 4,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "paladin",
     "lore": "Первый свет, рассеявший Тьму до начала времён.",
     "abilities": [
@@ -4180,7 +4180,7 @@
     "name": "Владыка Тьмы",
     "tier": 5,
     "division": 4,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "god",
     "lore": "Тьма между звёзд, что помнит конец вселенной.",
     "abilities": [
@@ -4237,7 +4237,7 @@
     "name": "Первородный",
     "tier": 5,
     "division": 4,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "god",
     "lore": "То, что было до Эфира. Источник всего.",
     "abilities": [
@@ -4294,7 +4294,7 @@
     "name": "Знаменосец Гильдии",
     "tier": 4,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "guild": true,
     "archetype": "support",
     "lore": "Несёт Знамя — и братья по гильдии становятся непобедимы.",
@@ -4352,7 +4352,7 @@
     "name": "Хранитель Казны",
     "tier": 4,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "guild": true,
     "archetype": "economy",
     "lore": "Богатство гильдии — его оружие.",
@@ -4410,7 +4410,7 @@
     "name": "Кузнец Эфира",
     "tier": 4,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "guild": true,
     "archetype": "support",
     "lore": "Кует эфирное оружие для всей гильдии.",
@@ -4468,7 +4468,7 @@
     "name": "Маршал Гильдии",
     "tier": 4,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "guild": true,
     "archetype": "commander",
     "lore": "Полководец, чьи приказы меняют ход битвы.",
@@ -4526,7 +4526,7 @@
     "name": "Дух Предков",
     "tier": 4,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "guild": true,
     "archetype": "summoner",
     "lore": "Призывает павших героев гильдии на подмогу.",
@@ -4584,7 +4584,7 @@
     "name": "Эфирный Оракул",
     "tier": 4,
     "division": 3,
-    "unlock": 0,
+    "unlock_level": 0,
     "guild": true,
     "archetype": "support",
     "lore": "Видит будущее и ведёт гильдию к победе.",
@@ -4642,7 +4642,7 @@
     "name": "Скибиди-Оператор",
     "tier": 1,
     "division": 1,
-    "unlock": 0,
+    "unlock_level": 0,
     "archetype": "baseline",
     "lore": "Камера-голова, что видит всё. Транслирует поле боя в Эфир.",
     "abilities": [
@@ -4686,7 +4686,7 @@
     "name": "Герта, Гений Кукол",
     "tier": 3,
     "division": 3,
-    "unlock": 3000,
+    "unlock_level": 3000,
     "archetype": "caster",
     "lore": "Гениальный учёный Эфира, дублирует себя марионетками.",
     "abilities": [
@@ -4730,7 +4730,7 @@
     "name": "Лего-Рыцарь Тьмы",
     "tier": 2,
     "division": 2,
-    "unlock": 3000,
+    "unlock_level": 3000,
     "archetype": "bruiser",
     "lore": "Кубический мститель ночи.",
     "abilities": [
@@ -4774,7 +4774,7 @@
     "name": "Лего-Вдова",
     "tier": 2,
     "division": 2,
-    "unlock": 4000,
+    "unlock_level": 4000,
     "archetype": "bruiser",
     "lore": "Шпионка-кубик, мастер ближнего боя.",
     "abilities": [
@@ -4818,7 +4818,7 @@
     "name": "Лего-Капитан",
     "tier": 2,
     "division": 2,
-    "unlock": 5000,
+    "unlock_level": 5000,
     "archetype": "bruiser",
     "lore": "Несокрушимый щитоносец.",
     "abilities": [
@@ -4862,7 +4862,7 @@
     "name": "Лего-Протокол CE-P0",
     "tier": 3,
     "division": 3,
-    "unlock": 9000,
+    "unlock_level": 9000,
     "archetype": "caster",
     "lore": "Кубический дроид-страж с протоколом аннигиляции.",
     "abilities": [
@@ -4906,7 +4906,7 @@
     "name": "Лего-Клон-Солдат",
     "tier": 1,
     "division": 1,
-    "unlock": 1400,
+    "unlock_level": 1400,
     "archetype": "baseline",
     "lore": "Солдат армии клонов.",
     "abilities": [
@@ -4950,7 +4950,7 @@
     "name": "Лего-Лорд Ситхов",
     "tier": 3,
     "division": 3,
-    "unlock": 12000,
+    "unlock_level": 12000,
     "archetype": "caster",
     "lore": "Тёмный владыка Силы в кубической форме.",
     "abilities": [
@@ -4994,7 +4994,7 @@
     "name": "Лего-Болтун",
     "tier": 2,
     "division": 2,
-    "unlock": 9000,
+    "unlock_level": 9000,
     "archetype": "bruiser",
     "lore": "Бессмертный наёмник-кубик.",
     "abilities": [
@@ -5038,7 +5038,7 @@
     "name": "Лего-Соколиный Глаз",
     "tier": 1,
     "division": 1,
-    "unlock": 2000,
+    "unlock_level": 2000,
     "archetype": "baseline",
     "lore": "Лучник, не знающий промаха.",
     "abilities": [
@@ -5082,7 +5082,7 @@
     "name": "Лего-Железный",
     "tier": 3,
     "division": 3,
-    "unlock": 16500,
+    "unlock_level": 16500,
     "archetype": "caster",
     "lore": "Гений в кубической броне.",
     "abilities": [
@@ -5126,7 +5126,7 @@
     "name": "Лего-Костяк",
     "tier": 1,
     "division": 1,
-    "unlock": 2400,
+    "unlock_level": 2400,
     "archetype": "baseline",
     "lore": "Весёлый кубический скелет.",
     "abilities": [
@@ -5170,7 +5170,7 @@
     "name": "Лего-Громовержец",
     "tier": 3,
     "division": 3,
-    "unlock": 19500,
+    "unlock_level": 19500,
     "archetype": "caster",
     "lore": "Бог грома в кубической форме.",
     "abilities": [
@@ -5214,7 +5214,7 @@
     "name": "Маалик, Адский Владыка",
     "tier": 4,
     "division": 4,
-    "unlock": 28000,
+    "unlock_level": 28000,
     "archetype": "god",
     "lore": "Инфернальный князь из бездны Эфира.",
     "abilities": [
@@ -5258,7 +5258,7 @@
     "name": "НекоАрк, Хаос-Кот",
     "tier": 2,
     "division": 2,
-    "unlock": 15000,
+    "unlock_level": 15000,
     "archetype": "bruiser",
     "lore": "Безумный кот-вампир, ломающий реальность.",
     "abilities": [
@@ -5302,7 +5302,7 @@
     "name": "Костяной Жнец",
     "tier": 2,
     "division": 2,
-    "unlock": 16000,
+    "unlock_level": 16000,
     "archetype": "bruiser",
     "lore": "Восставший воин-скелет.",
     "abilities": [
@@ -5346,7 +5346,7 @@
     "name": "Мистер Морожко",
     "tier": 1,
     "division": 1,
-    "unlock": 3400,
+    "unlock_level": 3400,
     "archetype": "baseline",
     "lore": "Зловещий мороженщик из кошмаров.",
     "abilities": [
@@ -5390,7 +5390,7 @@
     "name": "Миямото, Клинок Чести",
     "tier": 3,
     "division": 3,
-    "unlock": 27000,
+    "unlock_level": 27000,
     "archetype": "caster",
     "lore": "Странствующий самурай Эфира.",
     "abilities": [
@@ -5434,7 +5434,7 @@
     "name": "Акулий Хищник",
     "tier": 2,
     "division": 2,
-    "unlock": 19000,
+    "unlock_level": 19000,
     "archetype": "bruiser",
     "lore": "Двуногая акула, чующая кровь.",
     "abilities": [
@@ -5478,7 +5478,7 @@
     "name": "Гарант Стабильности",
     "tier": 4,
     "division": 4,
-    "unlock": 40000,
+    "unlock_level": 40000,
     "archetype": "god",
     "lore": "Воплощение абсолютной власти Эфира.",
     "abilities": [
@@ -5522,7 +5522,7 @@
     "name": "Тёмный Санта",
     "tier": 2,
     "division": 2,
-    "unlock": 21000,
+    "unlock_level": 21000,
     "archetype": "bruiser",
     "lore": "Санта, раздающий не только подарки.",
     "abilities": [
@@ -5566,7 +5566,7 @@
     "name": "Тролль-Лик",
     "tier": 1,
     "division": 1,
-    "unlock": 4400,
+    "unlock_level": 4400,
     "archetype": "baseline",
     "lore": "Само воплощение троллинга.",
     "abilities": [
@@ -5610,7 +5610,7 @@
     "name": "Хроно-Страж",
     "tier": 3,
     "division": 3,
-    "unlock": 8000,
+    "unlock_level": 8000,
     "archetype": "caster",
     "lore": "Стражник времени, повелевающий потоками секунд.",
     "abilities": [
@@ -5657,7 +5657,7 @@
     "name": "Теневой Охотник",
     "tier": 3,
     "division": 3,
-    "unlock": 10000,
+    "unlock_level": 10000,
     "archetype": "assassin",
     "lore": "Охотник из тьмы, его жертвы не видят рассвета.",
     "abilities": [
@@ -5704,7 +5704,7 @@
     "name": "Рунный Мастер",
     "tier": 2,
     "division": 2,
-    "unlock": 5000,
+    "unlock_level": 5000,
     "archetype": "caster",
     "lore": "Мастер рун, чьи знаки определяют судьбу.",
     "abilities": [
@@ -5751,7 +5751,7 @@
     "name": "Звёздный Всадник",
     "tier": 4,
     "division": 3,
-    "unlock": 25000,
+    "unlock_level": 25000,
     "guild": true,
     "archetype": "god",
     "lore": "Всадник на спине звёздной твари, несущий космический огонь.",
@@ -5799,7 +5799,7 @@
     "name": "Призрак Бури",
     "tier": 2,
     "division": 2,
-    "unlock": 6000,
+    "unlock_level": 6000,
     "archetype": "zone",
     "lore": "Призрак, рождённый из шторма, несущий хаос.",
     "abilities": [
@@ -5846,7 +5846,7 @@
     "name": "Пламенный Серафим",
     "tier": 4,
     "division": 3,
-    "unlock": 20000,
+    "unlock_level": 20000,
     "guild": true,
     "archetype": "mage",
     "lore": "Небесный воин, чьё пламя сжигает души еретиков.",
@@ -5894,7 +5894,7 @@
     "name": "Ледяной Колосс",
     "tier": 3,
     "division": 2,
-    "unlock": 12000,
+    "unlock_level": 12000,
     "archetype": "tank",
     "lore": "Древний голем, замёрзший на тысячу лет и пробудившийся в ярости.",
     "abilities": [
@@ -5941,7 +5941,7 @@
     "name": "Теневой Душитель",
     "tier": 2,
     "division": 2,
-    "unlock": 8000,
+    "unlock_level": 8000,
     "archetype": "assassin",
     "lore": "Никто не видит его. Никто не выживает.",
     "abilities": [
@@ -5988,7 +5988,7 @@
     "name": "Громобой",
     "tier": 4,
     "division": 4,
-    "unlock": 30000,
+    "unlock_level": 30000,
     "guild": true,
     "archetype": "berserker",
     "lore": "Его крик раскалывает небо, молнии пляшут на его клинке.",
@@ -6036,7 +6036,7 @@
     "name": "Хранитель Рун",
     "tier": 3,
     "division": 3,
-    "unlock": 15000,
+    "unlock_level": 15000,
     "archetype": "support",
     "lore": "Его руны — ключи к запечатанным силам мироздания.",
     "abilities": [
