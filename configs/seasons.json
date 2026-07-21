@@ -39,6 +39,15 @@
           "tier_level": 5
         },
         {
+          "id": "cosmetic_premium_title_awakening",
+          "type": "Title",
+          "label_ru": "Эфирный Первопроходец",
+          "label_en": "Aether Pathfinder",
+          "rarity": "Exclusive",
+          "tier_level": 5,
+          "premium_only": true
+        },
+        {
           "id": "cosmetic_namecolor_awakening",
           "type": "NameColor",
           "label_ru": "Эфирный индиго",
@@ -63,6 +72,16 @@
           "color": "#7B2FFF",
           "rarity": "Rare",
           "tier_level": 25
+        },
+        {
+          "id": "cosmetic_premium_trail_awakening",
+          "type": "EtherTrail",
+          "label_ru": "След Эфира: Королевский",
+          "label_en": "Aether Trail: Royal",
+          "color": "#F2C14E",
+          "rarity": "Legendary",
+          "tier_level": 25,
+          "premium_only": true
         },
         {
           "id": "cosmetic_killsound_awakening",
@@ -103,6 +122,15 @@
           "label_en": "Battle Pass frame: Gold",
           "rarity": "Exclusive",
           "tier_level": 50
+        },
+        {
+          "id": "cosmetic_premium_frame_awakening",
+          "type": "PassFrame",
+          "label_ru": "Рамка Aether+: Пробуждение",
+          "label_en": "Aether+ Frame: Awakening",
+          "rarity": "Exclusive",
+          "tier_level": 50,
+          "premium_only": true
         }
       ]
     }

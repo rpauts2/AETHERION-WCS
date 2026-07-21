@@ -10,6 +10,7 @@ public class RaceManager
 {
     private readonly Dictionary<int, RaceDefinition> _races = new();
     private readonly List<string> _loadedPaths = new();
+    private readonly Dictionary<int, string> _sourcePaths = new();
 
     public IReadOnlyDictionary<int, RaceDefinition> Races => _races;
 
@@ -21,7 +22,12 @@ public class RaceManager
             if (!_loadedPaths.Contains(path)) _loadedPaths.Add(path);
             var json = File.ReadAllText(path);
             var list = JsonSerializer.Deserialize<List<RaceDefinition>>(json) ?? new();
-            foreach (var r in list) { r.IndexAbilities(); _races[r.Id] = r; }
+            foreach (var r in list)
+            {
+                r.IndexAbilities();
+                _races[r.Id] = r;
+                _sourcePaths[r.Id] = path;
+            }
         }
         catch (Exception ex)
         {
@@ -46,16 +52,20 @@ public class RaceManager
     public void Reload()
     {
         _races.Clear();
+        _sourcePaths.Clear();
         foreach (var path in _loadedPaths) LoadFromFile(path);
     }
 
-    public bool SaveToFile(string path)
+    public bool SaveLoadedFiles()
     {
         try
         {
-            var list = _races.Values.OrderBy(r => r.Id).ToList();
-            var json = JsonSerializer.Serialize(list, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(path, json);
+            foreach (var group in _sourcePaths.GroupBy(kv => kv.Value))
+            {
+                var list = group.Select(kv => _races[kv.Key]).OrderBy(r => r.Id).ToList();
+                var json = JsonSerializer.Serialize(list, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(group.Key, json);
+            }
             return true;
         }
         catch { return false; }

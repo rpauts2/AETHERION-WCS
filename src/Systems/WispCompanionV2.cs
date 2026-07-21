@@ -376,7 +376,13 @@ public sealed class WispCompanionV2
         return FallbackModel;
     }
 
-    private void ReparentIfNeeded(V2State s, CCSPlayerPawn pawn) { }
+    private void ReparentIfNeeded(V2State s, CCSPlayerPawn pawn)
+    {
+        // Spawn events recreate the visuals for a new pawn. While alive, only
+        // clear stale entity references; teleporting below keeps valid visuals following.
+        if (s.Prop != null && !s.Prop.IsValid) s.Prop = null;
+        if (s.AuraFx != null && !s.AuraFx.IsValid) s.AuraFx = null;
+    }
 
     private void DetachVisuals(V2State s)
     {
@@ -388,13 +394,12 @@ public sealed class WispCompanionV2
 
     // ── NOTIFICATIONS ──
 
-    public void NotifyKill(CCSPlayerController p, bool headshot)
+    public void NotifyKill(CCSPlayerController p, int oldBond)
     {
         if (p == null || !p.IsValid || p.IsBot) return;
         var s = GetOrInit(p);
         var data = _plugin.Data(p.SteamID);
         var rp = data.GetRace(data.CurrentRaceId);
-        int oldBond = Math.Max(0, rp.WispBond - (headshot ? 6 : 4));
         var evolved = WispEvolution.CheckEvolve(oldBond, rp.WispBond);
         if (evolved != null)
         {

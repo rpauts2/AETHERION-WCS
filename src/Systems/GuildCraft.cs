@@ -51,6 +51,7 @@ public static class GuildCraftSystem
 
     public static void InitDefaults()
     {
+        if (_recipes.Count > 0) return;
         Register("РУДНАЯ СВИТКА", "Каждый крафт даёт +2% золота ко всем доходам гильдии",
             GuildTier.Wood, 150, 30, "gold_bonus", "+2% золото");
 

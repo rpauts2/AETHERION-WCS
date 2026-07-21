@@ -35,7 +35,8 @@ public class SqlitePlayerStore : IPlayerStore
                 treasury INTEGER NOT NULL DEFAULT 0,
                 banner_level INTEGER NOT NULL DEFAULT 1,
                 banner_xp INTEGER NOT NULL DEFAULT 0,
-                weekly_frags INTEGER NOT NULL DEFAULT 0
+                weekly_frags INTEGER NOT NULL DEFAULT 0,
+                crafted_ids TEXT NOT NULL DEFAULT '[]'
             );",
             @"CREATE TABLE IF NOT EXISTS guild_members (
                 steam_id INTEGER PRIMARY KEY,
@@ -48,6 +49,9 @@ public class SqlitePlayerStore : IPlayerStore
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();
         }
+        using var migration = con.CreateCommand();
+        migration.CommandText = "ALTER TABLE guilds ADD COLUMN crafted_ids TEXT NOT NULL DEFAULT '[]'";
+        try { migration.ExecuteNonQuery(); } catch { }
     }
 
     public PlayerData? Load(ulong steamId)
@@ -81,7 +85,7 @@ public class SqlitePlayerStore : IPlayerStore
         using var con = new SqliteConnection(_connStr);
         con.Open();
         using var cmd = con.CreateCommand();
-        cmd.CommandText = "SELECT id,name,tag,leader_id,members,officers,treasury,banner_level,banner_xp,weekly_frags FROM guilds";
+        cmd.CommandText = "SELECT id,name,tag,leader_id,members,officers,treasury,banner_level,banner_xp,weekly_frags,crafted_ids FROM guilds";
         using var r = cmd.ExecuteReader();
         while (r.Read())
         {
@@ -96,7 +100,8 @@ public class SqlitePlayerStore : IPlayerStore
                 Treasury = r.GetInt64(6),
                 BannerLevel = r.GetInt32(7),
                 BannerXp = r.GetInt64(8),
-                WeeklyFrags = r.GetInt32(9)
+                WeeklyFrags = r.GetInt32(9),
+                CraftedIds = JsonSerializer.Deserialize<HashSet<int>>(r.GetString(10)) ?? new()
             };
             result.Add(g);
         }
@@ -108,10 +113,10 @@ public class SqlitePlayerStore : IPlayerStore
         using var con = new SqliteConnection(_connStr);
         con.Open();
         using var cmd = con.CreateCommand();
-        cmd.CommandText = @"INSERT INTO guilds (id,name,tag,leader_id,members,officers,treasury,banner_level,banner_xp,weekly_frags)
-            VALUES ($id,$name,$tag,$leader,$members,$officers,$treasury,$bl,$bx,$wf)
+        cmd.CommandText = @"INSERT INTO guilds (id,name,tag,leader_id,members,officers,treasury,banner_level,banner_xp,weekly_frags,crafted_ids)
+            VALUES ($id,$name,$tag,$leader,$members,$officers,$treasury,$bl,$bx,$wf,$crafted)
             ON CONFLICT(id) DO UPDATE SET name=$name,tag=$tag,leader_id=$leader,members=$members,officers=$officers,
-            treasury=$treasury,banner_level=$bl,banner_xp=$bx,weekly_frags=$wf";
+            treasury=$treasury,banner_level=$bl,banner_xp=$bx,weekly_frags=$wf,crafted_ids=$crafted";
         cmd.Parameters.AddWithValue("$id", g.Id);
         cmd.Parameters.AddWithValue("$name", g.Name);
         cmd.Parameters.AddWithValue("$tag", g.Tag);
@@ -122,6 +127,7 @@ public class SqlitePlayerStore : IPlayerStore
         cmd.Parameters.AddWithValue("$bl", g.BannerLevel);
         cmd.Parameters.AddWithValue("$bx", g.BannerXp);
         cmd.Parameters.AddWithValue("$wf", g.WeeklyFrags);
+        cmd.Parameters.AddWithValue("$crafted", JsonSerializer.Serialize(g.CraftedIds));
         cmd.ExecuteNonQuery();
     }
 
@@ -179,8 +185,8 @@ public class SqlitePlayerStore : IPlayerStore
         {
             using var cmd = con.CreateCommand();
             cmd.Transaction = tx;
-            cmd.CommandText = @"INSERT INTO guilds (id,name,tag,leader_id,members,officers,treasury,banner_level,banner_xp,weekly_frags)
-                VALUES ($id,$name,$tag,$leader,$members,$officers,$treasury,$bl,$bx,$wf)";
+            cmd.CommandText = @"INSERT INTO guilds (id,name,tag,leader_id,members,officers,treasury,banner_level,banner_xp,weekly_frags,crafted_ids)
+                VALUES ($id,$name,$tag,$leader,$members,$officers,$treasury,$bl,$bx,$wf,$crafted)";
             cmd.Parameters.AddWithValue("$id", g.Id);
             cmd.Parameters.AddWithValue("$name", g.Name);
             cmd.Parameters.AddWithValue("$tag", g.Tag);
@@ -191,6 +197,7 @@ public class SqlitePlayerStore : IPlayerStore
             cmd.Parameters.AddWithValue("$bl", g.BannerLevel);
             cmd.Parameters.AddWithValue("$bx", g.BannerXp);
             cmd.Parameters.AddWithValue("$wf", g.WeeklyFrags);
+            cmd.Parameters.AddWithValue("$crafted", JsonSerializer.Serialize(g.CraftedIds));
             cmd.ExecuteNonQuery();
         }
         foreach (var (sid, gid) in memberMap)

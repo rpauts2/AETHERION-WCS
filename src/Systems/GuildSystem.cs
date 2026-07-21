@@ -36,6 +36,7 @@ public class Guild
     public long BannerXpNeeded => 5000L * BannerLevel * BannerLevel;
     public float GoldBonus => 0.02f * BannerLevel + CraftedGoldBonus();
     public float XpBonus => 0.015f * BannerLevel + CraftedXpBonus();
+    public float BannerXpMultiplier => 1f + CraftedBannerXpBonus();
     public int MaxMembers => 10 + BannerLevel * 2 + CraftedMemberSlots();
 
     private float CraftedGoldBonus()
@@ -80,6 +81,11 @@ public class Guild
         }
         return s;
     }
+
+    private float CraftedBannerXpBonus() => CraftedIds
+        .Select(GuildCraftSystem.GetRecipe)
+        .Where(r => r?.Effect == "banner_xp_boost")
+        .Sum(_ => 0.05f);
 }
 
 public class GuildManager
@@ -111,7 +117,7 @@ public class GuildManager
     public void RestoreMemberMap(Dictionary<ulong, int> map)
     {
         foreach (var (sid, gid) in map)
-            if (!_playerGuild.ContainsKey(sid))
+            if (!_playerGuild.ContainsKey(sid) && _guilds.ContainsKey(gid))
                 _playerGuild[sid] = gid;
     }
 
@@ -172,7 +178,7 @@ public class GuildManager
 
     public void AddBannerXp(Guild g, long xp)
     {
-        g.BannerXp += xp;
+        g.BannerXp += (long)(xp * g.BannerXpMultiplier);
         while (g.BannerXp >= g.BannerXpNeeded) { g.BannerXp -= g.BannerXpNeeded; g.BannerLevel++; }
         NotifyChanged();
     }

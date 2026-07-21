@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using WcsInfinity.Systems;
@@ -445,7 +446,8 @@ public static class EffectLibrary
 
         ["mark"] = v => ctx =>
         {
-            ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, v, 5f);
+            if (ctx.VictimSlot.HasValue)
+                ctx.Combat.Apply(EffectTag.Mark, ctx.VictimSlot.Value, Math.Clamp(v * 0.01f, 0.05f, 0.5f), 5f, 1f, ctx.Slot);
         },
 
         ["ally_shield"] = v => ctx =>
@@ -601,14 +603,19 @@ public static class EffectLibrary
         ["accuracy_debuff"] = v => ctx =>
         {
             if(ctx.VictimSlot.HasValue)
-                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, v*0.3f, 4f);
+                ctx.Engine.Blind(ctx.VictimSlot.Value, Math.Clamp(v * 0.05f, 1f, 4f), 0.5f);
         },
 
         ["parry"] = v => ctx =>
             ctx.Combat.Apply(EffectTag.Reflect, ctx.Slot, v, 5f),
 
         ["revive"] = v => ctx =>
-            ctx.Combat.Apply(EffectTag.Shield, ctx.Slot, 100, 8f),
+        {
+            // A real revive is handled by the respawn pipeline; keep the ability
+            // useful immediately by restoring a capped emergency shield.
+            ctx.Combat.Apply(EffectTag.Shield, ctx.Slot, Math.Max(100, v), 8f);
+            ctx.Engine.AddHealth(ctx.Slot, (int)Math.Max(50, v), 150);
+        },
 
         ["turret"] = v => ctx =>
         {
@@ -872,7 +879,15 @@ public static class EffectLibrary
         },
 
         ["backstab"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + (v*0.01f * ctx.SkillLevel)),
+        {
+            ctx.Engine.SetSpeed(ctx.Slot, 1f + (v * 0.01f * ctx.SkillLevel));
+            if (ctx.VictimSlot.HasValue)
+            {
+                int damage = (int)(v * Math.Max(1, ctx.SkillLevel) * 1.5f);
+                ctx.Engine.SetHealth(ctx.VictimSlot.Value,
+                    Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - damage));
+            }
+        },
 
         ["blinded_bonus"] = v => ctx =>
             ctx.Engine.SetSpeed(ctx.Slot, 1f + (v*0.005f * ctx.SkillLevel)),
@@ -1063,13 +1078,33 @@ public class RaceRuntime
         var ab = def.Abilities.Find(a => a.Index == abilityIndex);
         if (ab == null || string.IsNullOrEmpty(ab.Effect)) return false;
         int lvl = rp.SkillLevels.GetValueOrDefault(ab.Index, 0);
-        if(ab.Type != "Ultimate" && lvl <= 0) return false;
-        if(ab.Type == "Ultimate" && lvl <= 0) return false;
-        if(string.IsNullOrEmpty(ab.Effect)) return false;
+        if (lvl <= 0) return false;
         var eff = EffectLibrary.Resolve(ab.Effect, ab.Value);
         if(eff == null) return false;
         ctx.SkillLevel = Math.Max(1, lvl);
+        if (!ctx.VictimSlot.HasValue && NeedsEnemyTarget(ab.Effect))
+        {
+            var pos = ctx.Engine.GetPosition(ctx.Slot);
+            ctx.VictimSlot = ctx.Combat.EnemiesInRadius(pos.x, pos.y, pos.z, 1000f, ctx.Player.TeamNum)
+                .OrderBy(slot =>
+                {
+                    var target = ctx.Engine.GetPosition(slot);
+                    float dx = target.x - pos.x, dy = target.y - pos.y, dz = target.z - pos.z;
+                    return dx * dx + dy * dy + dz * dz;
+                })
+                .FirstOrDefault(-1);
+            if (ctx.VictimSlot < 0) ctx.VictimSlot = null;
+        }
         eff(ctx);
         return true;
     }
+
+    private static bool NeedsEnemyTarget(string effect) => effect.ToLowerInvariant() switch
+    {
+        "mark" or "backstab" or "backstab_freeze" or "accuracy_debuff" or "projectile" or "silent_projectile"
+            or "projectile_fear" or "slow" or "slow_on_hit" or "ice_bolt" or "smite" or "counter"
+            or "armor_break" or "armor_reduce" or "charge_stun" or "disarm" or "disarm_damage"
+            or "blind_chance" or "freeze_chance" => true,
+        _ => false
+    };
 }

@@ -346,8 +346,26 @@ public sealed class BossSystem
     // ═══════════════════════════════════════════════
     public void OnPlayerHurt(CCSPlayerController? victim, CCSPlayerController? attacker, int damage)
     {
-        // Intentionally empty — boss is a prop, not a player.
-        // Boss damage goes through DealDirectDamage and CheckAoeDamage.
+        // Boss is a prop, not a player — player_hurt events don't fire for prop damage.
+        // Boss damage from weapons goes through OnWeaponFire (proximity check).
+        // Boss damage from abilities goes through DealDirectDamage / CheckAoeDamage / OnUltCast.
+    }
+
+    // Called from EventWeaponFire — checks if the shooter is near the boss and deals damage.
+    public void OnWeaponFire(CCSPlayerController shooter)
+    {
+        if (!_bossActive || shooter == null || !shooter.IsValid || shooter.IsBot) return;
+        if (_bossProp == null || !_bossProp.IsValid || _bossProp.AbsOrigin == null) return;
+        var pawn = shooter.PlayerPawn?.Value;
+        if (pawn?.AbsOrigin == null) return;
+        float dx = _bossProp.AbsOrigin.X - pawn.AbsOrigin.X;
+        float dy = _bossProp.AbsOrigin.Y - pawn.AbsOrigin.Y;
+        float dist = MathF.Sqrt(dx * dx + dy * dy);
+        if (dist > 500f) return; // too far to hit boss
+        // Scaled damage: weapons deal 40-60% to boss (boss is a raid-style enemy)
+        int weaponDmg = _rng.Next(40, 60);
+        DealDirectDamage(shooter, weaponDmg);
+        FlashBoss();
     }
 
     // Called by CombatEffects when AOE damage is dealt — checks if boss is in range

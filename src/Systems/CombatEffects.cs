@@ -213,6 +213,9 @@ public class CombatEffects
     public float EffectValue(int slot, EffectTag tag) =>
         _effects.FirstOrDefault(e => e.Slot == slot && e.Tag == tag)?.Value ?? 0f;
 
+    public float MarkedDamageBonus(int targetSlot, int attackerSlot) =>
+        _effects.FirstOrDefault(e => e.Slot == targetSlot && e.Tag == EffectTag.Mark && e.SourceSlot == attackerSlot)?.Value ?? 0f;
+
     // bypass evasion/proc-assist state изменения
     public void TickEvasion(int slot) { /* marker for expiry lint; handled in TickAll */ }
     // Crit / Уклонение / Мана-щит / Рефлект — упрощённые проверки на момент удара

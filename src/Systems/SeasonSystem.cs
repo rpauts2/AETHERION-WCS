@@ -40,6 +40,7 @@ public class CosmeticDefinition
     public string Color { get; set; } = "";
     public string Rarity { get; set; } = "";
     public int TierLevel { get; set; } = 0;
+    public bool PremiumOnly { get; set; }
 }
 
 public class Season
@@ -121,7 +122,8 @@ public class SeasonSystem
                             LabelEn = c.TryGetProperty("label_en", out var le) ? le.GetString() ?? "" : "",
                             Color = c.TryGetProperty("color", out var co) ? co.GetString() ?? "" : "",
                             Rarity = c.TryGetProperty("rarity", out var ra) ? ra.GetString() ?? "" : "",
-                            TierLevel = c.GetProperty("tier_level").GetInt32()
+                            TierLevel = c.GetProperty("tier_level").GetInt32(),
+                            PremiumOnly = c.TryGetProperty("premium_only", out var premium) && premium.GetBoolean()
                         });
                     }
                 }
@@ -131,7 +133,7 @@ public class SeasonSystem
                     int maxTier = Current.SeasonPass.FreeTierMaxLevel;
                     for (int i = 1; i <= maxTier; i++)
                     {
-                        var cosDef = Current.Cosmetics.FirstOrDefault(c => c.TierLevel == i);
+                        var cosDef = Current.Cosmetics.FirstOrDefault(c => c.TierLevel == i && !c.PremiumOnly);
                         Current.Tiers.Add(new BattlePassTier
                         {
                             Level = i,
@@ -140,6 +142,18 @@ public class SeasonSystem
                             RewardValue = cosDef?.LabelRu ?? $"{50 * i}з",
                             PremiumOnly = false
                         });
+                        var premiumCos = Current.Cosmetics.FirstOrDefault(c => c.TierLevel == i && c.PremiumOnly);
+                        if (premiumCos != null)
+                        {
+                            Current.Tiers.Add(new BattlePassTier
+                            {
+                                Level = i,
+                                XpRequired = XpForTier(i),
+                                Reward = Enum.Parse<RewardType>(premiumCos.Type, true),
+                                RewardValue = premiumCos.LabelRu,
+                                PremiumOnly = true
+                            });
+                        }
                     }
                 }
                 Console.WriteLine($"[SeasonSystem] Loaded season #{season.Id} «{season.Name}» — {Current.Tiers.Count} tiers, {season.Cosmetics.Count} cosmetics");
@@ -195,13 +209,20 @@ public class SeasonSystem
     }
 
     // ── Rewards / claim flow ─────────────────────────────────────────────────
-    public CosmeticDefinition? CosmeticForTier(int tierLevel)
+    public CosmeticDefinition? CosmeticForTier(int tierLevel, bool premium = false)
     {
-        return Current.Cosmetics.FirstOrDefault(c => c.TierLevel == tierLevel);
+        return Current.Cosmetics.FirstOrDefault(c => c.TierLevel == tierLevel && c.PremiumOnly == premium);
     }
+
+    public bool HasPremiumAccess(PlayerData p) =>
+        DateTimeOffset.FromUnixTimeSeconds(p.PremiumPassExpiresUnix) > DateTimeOffset.UtcNow;
 
     public bool TryClaim(PlayerData p, int tierLevel, bool premium)
     {
+        if (!IsActive || tierLevel <= 0 || tierLevel > p.SeasonRank) return false;
+        if (premium && !HasPremiumAccess(p)) return false;
+        var tier = Current.Tiers.FirstOrDefault(t => t.Level == tierLevel && t.PremiumOnly == premium);
+        if (tier == null) return false;
         if (premium)
         {
             if (p.ClaimedPremiumPassTiers.Contains(tierLevel)) return false;
@@ -212,6 +233,10 @@ public class SeasonSystem
             if (p.ClaimedFreePassTiers.Contains(tierLevel)) return false;
             p.ClaimedFreePassTiers.Add(tierLevel);
         }
+        var cosmetic = CosmeticForTier(tierLevel, premium);
+        if (cosmetic != null && !p.OwnedCosmetics.Contains(cosmetic.Id))
+            p.OwnedCosmetics.Add(cosmetic.Id);
+        p.IsDirty = true;
         return true;
     }
 
@@ -235,11 +260,11 @@ public class SeasonSystem
         return (ru ? "До конца сезона: " : "Season ends in: ") + time;
     }
 
-    public string UiProgressFree(PlayerData p) => L("Season_TrackFreeProgress").Replace("{0}", p.SeasonRank.ToString()).Replace("{1}", Current.Tiers.Count.ToString());
+    public string UiProgressFree(PlayerData p) => L("Season_TrackFreeProgress").Replace("{0}", p.SeasonRank.ToString()).Replace("{1}", Current.SeasonPass.FreeTierMaxLevel.ToString());
 
-    public string UiProgressPremium(PlayerData p) => L("Season_TrackPremiumProgress").Replace("{0}", p.SeasonRank.ToString()).Replace("{1}", Current.Tiers.Count.ToString());
+    public string UiProgressPremium(PlayerData p) => L("Season_TrackPremiumProgress").Replace("{0}", p.SeasonRank.ToString()).Replace("{1}", Current.SeasonPass.PremiumTierMaxLevel.ToString());
 
-    public string UiTierLabel(BattlePassTier tier, bool premium) => premium && !tier.PremiumOnly ? tier.RewardValue + " [" + Current.SeasonPass.PremiumTag + "]" : tier.RewardValue;
+    public string UiTierLabel(BattlePassTier tier, bool premium) => premium && tier.PremiumOnly ? tier.RewardValue + " [" + Current.SeasonPass.PremiumTag + "]" : tier.RewardValue;
 
     public string UiSeasonMenuTitle(PlayerData p, bool ru = true) => ru ? LocTool.Format("Season_BattlePass", Current.Name) : Current.NameEn + " Season Podium";
 

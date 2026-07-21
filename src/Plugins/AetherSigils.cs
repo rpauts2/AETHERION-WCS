@@ -42,6 +42,9 @@ public class AetherSigils
         _getEther = getEther; _spendEther = spendEther;
     }
 
+    // External bonus: wisp stage 5 provides sigil_cdr that reduces ether cost.
+    public Func<CCSPlayerController, float>? GetCdrBonus { get; set; }
+
     // Состояние «рисования» печати на игрока
     private class DrawState
     {
@@ -136,8 +139,11 @@ public class AetherSigils
         var match=Sigils.FirstOrDefault(s=>s.Pattern.SequenceEqual(st.Buffer));
         if(match==null){ p.PrintToCenterHtml("<font color='#888'>✗ Печать не распознана</font>"); return; }
         int ether=_getEther(p.SteamID);
-        if(ether<match.EtherCost){ p.PrintToCenterHtml($"<font color='#e06666'>Мало Эфира ({ether}/{match.EtherCost})</font>"); return; }
-        _spendEther(p.SteamID, match.EtherCost);
+        // Apply wisp sigil_cdr bonus: reduces ether cost
+        float cdr = GetCdrBonus?.Invoke(p) ?? 0f;
+        int adjustedCost = (int)(match.EtherCost * (1f - Math.Clamp(cdr, 0f, 0.5f)));
+        if(ether<adjustedCost){ p.PrintToCenterHtml($"<font color='#e06666'>Мало Эфира ({ether}/{adjustedCost})</font>"); return; }
+        _spendEther(p.SteamID, adjustedCost);
         match.Cast?.Invoke(p,_engine);
         OnCast?.Invoke(p, match.Name);   // уведомить Резонанс
     }

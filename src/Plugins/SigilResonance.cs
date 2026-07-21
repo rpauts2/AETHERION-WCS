@@ -26,15 +26,23 @@ public class ResonanceCombo
 
 public class SigilResonance
 {
+    private readonly BasePlugin _plugin;
     private readonly Systems.IEngineApi _engine;
-    public SigilResonance(Systems.IEngineApi engine) { _engine = engine; }
+    public SigilResonance(BasePlugin plugin, Systems.IEngineApi engine)
+    {
+        _plugin = plugin;
+        _engine = engine;
+        Combos = CreateCombos();
+    }
 
     // Последняя печать игрока и время каста (для окна резонанса)
     private readonly Dictionary<int, (string sigil, DateTime at)> _last = new();
     private const double WindowSec = 3.5;
 
     // ── Таблица резонансов (комбо двух печатей) ──
-    public readonly List<ResonanceCombo> Combos = new()
+    public readonly List<ResonanceCombo> Combos;
+
+    private List<ResonanceCombo> CreateCombos() => new()
     {
         new ResonanceCombo{
             SigilA="Эфирный Рывок", SigilB="Громовая Дуга", Glyph="⚡➤",
@@ -61,6 +69,7 @@ public class SigilResonance
             Unleash=(p,e)=>{ var pos=e.GetPosition(p.Slot);
                 e.SetInvisible(p.Slot,true);
                 e.SpawnParticle("particles/aether_phantom.vpcf",pos.x,pos.y,pos.z);
+                _plugin.AddTimer(4f, () => { try { e.SetInvisible(p.Slot, false); } catch { } });
                 p.PrintToCenterHtml("<font color='#b388ff'>➤◐ ФАНТОМНЫЙ ПОБЕГ!</font>"); } },
 
         new ResonanceCombo{

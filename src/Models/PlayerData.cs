@@ -38,9 +38,11 @@ public class PlayerData
     public long SeasonXp { get; set; } = 0;
     public HashSet<int> ClaimedFreePassTiers { get; set; } = new();
     public HashSet<int> ClaimedPremiumPassTiers { get; set; } = new();
+    public long PremiumPassExpiresUnix { get; set; } = 0;
     public List<string> OwnedCosmetics { get; set; } = new();
     public string EquippedTitle { get; set; } = "";
     public string EquippedColor { get; set; } = "";
+    public string EquippedTrail { get; set; } = "";
 
     // Гильдия
     public int GuildId { get; set; } = 0;

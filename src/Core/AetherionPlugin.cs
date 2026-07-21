@@ -135,11 +135,19 @@ public class AetherionPlugin : BasePlugin
         _nexus = new AetherNexus(this);
         _aetherRoulette = new AetherRoulette(this);
         _sigils = new AetherSigils(this, _engine, sid => _ether.GetValueOrDefault(sid, 0), SpendEther);
-        _resonance = new SigilResonance(_engine);
+        _sigils.GetCdrBonus = p =>
+        {
+            var bonuses = _wispCompanion.GetOwnerBonuses(p);
+            return bonuses.GetValueOrDefault("sigil_cdr", 0f);
+        };
+        _resonance = new SigilResonance(this, _engine);
         _sigils.OnCast = (p, name) =>
         {
             _resonance.OnSigilCast(p, name);
             _contracts.OnSigilUsed(p.SteamID);
+            // Track sigil cast for achievements and dailies
+            var d = Data(p.SteamID);
+            _achievements.OnSigilCast(d, p);
         };
         _boss = new BossSystem(this, _engine, sid => Data(sid), pd => SaveData(pd), id => _races.Get(id),
             (sid, amount) => { _ether[sid] = Math.Min(EtherMax, _ether.GetValueOrDefault(sid, 0) + amount); },
@@ -204,6 +212,8 @@ public class AetherionPlugin : BasePlugin
         _mutation = new RaceMutationSystem(_engine, _combat);
         _leaderboard = new LeaderboardSystem(sid => Data(sid), _store);
         _cosmetics = new CosmeticSystem();
+        foreach (var cosmetic in _seasons.Current.Cosmetics)
+            CosmeticCatalog.RegisterSeasonCosmetic(cosmetic.Id, cosmetic.Type, cosmetic.LabelRu, cosmetic.Color, true);
         _achievements.OnRaceUnlockReward = (sid, raceId) =>
         {
             var d = Data(sid);
@@ -219,6 +229,7 @@ public class AetherionPlugin : BasePlugin
         RegisterEventHandler<EventPlayerSpawn>(OnSpawn);
         RegisterEventHandler<EventRoundStart>(OnRoundStart);
         RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
+        RegisterEventHandler<EventWeaponFire>(OnWeaponFire);
 
         // Слушатели
         RegisterListener<Listeners.OnClientDisconnect>(OnClientDisconnect);
@@ -258,6 +269,7 @@ public class AetherionPlugin : BasePlugin
         AddCommand("css_cosmetics", "Косметика", (p, _) => { if (p != null) { var d = Data(p.SteamID); _cosmetics.ShowMenu(p, d); } });
         AddCommand("css_title", "Выбрать титул", CmdTitle);
         AddCommand("css_color", "Выбрать цвет", CmdColor);
+        AddCommand("css_trail", "Выбрать след", CmdTrail);
         AddCommand("css_gt", "Гильдейский турнир", CmdGuildTournament);
         AddCommand("css_use", "Использовать предмет", CmdUse);
         AddCommand("css_inv", "Инвентарь", CmdInventory);
@@ -520,8 +532,9 @@ public class AetherionPlugin : BasePlugin
             _ether[attacker.SteamID] = Math.Min(EtherMax, _ether.GetValueOrDefault(attacker.SteamID, 0) + (int)(baseEther * etherMult));
 
             // Дух Wisp: рост связи
+            int oldWispBond = rp.WispBond;
             rp.WispBond += hs ? 6 : 4;
-            _wispCompanion.NotifyKill(attacker, hs);
+            _wispCompanion.NotifyKill(attacker, oldWispBond);
 
             // Стрик
             _roundKills[attacker.SteamID] = _roundKills.GetValueOrDefault(attacker.SteamID, 0) + 1;
@@ -619,9 +632,30 @@ public class AetherionPlugin : BasePlugin
             // Контракты: урон
             _contracts.OnDamage(attacker.SteamID, ev.DmgHealth);
 
+            float markBonus = _combat.MarkedDamageBonus(victim.Slot, attacker.Slot);
+            if (markBonus > 0 && victim.PlayerPawn?.Value is { Health: > 0 } markedPawn)
+            {
+                int extra = Math.Max(1, (int)(ev.DmgHealth * markBonus));
+                markedPawn.Health = Math.Max(0, markedPawn.Health - extra);
+                Utilities.SetStateChanged(markedPawn, "CBaseEntity", "m_iHealth");
+            }
+
             // Прока пассивок «на удар» — хуки combat (лестник/reflect/etc) обрабатываются в CombatEffects
         }
         catch (Exception ex) { Console.WriteLine($"[AETHERION] OnHurt err: {ex.Message}"); }
+        return HookResult.Continue;
+    }
+
+    private HookResult OnWeaponFire(EventWeaponFire ev, GameEventInfo info)
+    {
+        var shooter = ev.Userid;
+        try
+        {
+            if (shooter == null || !shooter.IsValid || shooter.IsBot) return HookResult.Continue;
+            // Relay weapon fire to boss system — checks proximity and deals scaled damage
+            _boss.OnWeaponFire(shooter);
+        }
+        catch (Exception ex) { Console.WriteLine($"[AETHERION] OnWeaponFire err: {ex.Message}"); }
         return HookResult.Continue;
     }
 
@@ -661,6 +695,19 @@ public class AetherionPlugin : BasePlugin
         _roundKills.Clear();
         _lastKillTime.Clear();
         _firstBlood = false;
+        var healedGuilds = new HashSet<int>();
+        foreach (var p in Utilities.GetPlayers())
+        {
+            if (p == null || !p.IsValid || p.IsBot || !p.PawnIsAlive) continue;
+            var guild = _guilds.Of(p.SteamID);
+            if (guild == null || !healedGuilds.Add(guild.Id)) continue;
+            bool hasHealAura = guild.CraftedIds
+                .Select(GuildCraftSystem.GetRecipe)
+                .Any(recipe => recipe?.Effect == "heal_aura");
+            if (!hasHealAura) continue;
+            _engine.ForAlliesInRadius(p.Slot, 600f, slot => _engine.AddHealth(slot, 15, 150));
+            p.PrintToChat(" \x0B[ГИЛЬДИЯ]\x01 Купол гильдии: союзники рядом получили +15 HP.");
+        }
         return HookResult.Continue;
     }
 
@@ -1012,7 +1059,7 @@ public class AetherionPlugin : BasePlugin
             menu.AddItem($"Внести золото (!guild donate <сумма>)", null);
 
             // Interactive craft menu
-            var tier = (GuildTier)Math.Min(5, g.BannerLevel - 1);
+            var tier = g.Tier;
             var recipes = GuildCraftSystem.ForTier(tier).ToList();
             if (recipes.Count > 0)
             {
@@ -1395,6 +1442,20 @@ public class AetherionPlugin : BasePlugin
         p.PrintToChat($" \x04Цвет ника установлен!");
     }
 
+    private void CmdTrail(CCSPlayerController? p, CommandInfo info)
+    {
+        if (p == null) return;
+        if (info.ArgCount < 2) { p.PrintToChat(" \x07Формат: !trail <id>. Список: !cosmetics"); return; }
+        var d = Data(p.SteamID);
+        if (!_cosmetics.EquipTrail(d, info.GetArg(1)))
+        {
+            p.PrintToChat(" \x07След не найден или ещё не получен.");
+            return;
+        }
+        SaveData(d);
+        p.PrintToChat(" \x04След экипирован!");
+    }
+
     private void CmdUse(CCSPlayerController? p, CommandInfo info)
     {
         if (p == null || !p.PawnIsAlive) return;
@@ -1546,6 +1607,7 @@ public class AetherionPlugin : BasePlugin
         p.PrintToChat(" \x0B═══ ✦ BATTLE PASS ✦ ═══");
         p.PrintToChat($" \x01Сезон: \x06{_seasons.Current.Name}");
         p.PrintToChat($" \x01Ранг: \x04{d.SeasonRank}/{maxTier}\x01 | XP: \x06{d.SeasonXp}/{need}");
+        p.PrintToChat($" \x01Aether+: \x06{(_seasons.HasPremiumAccess(d) ? "активен" : "нет")}");
         if (_seasons.IsActive)
             p.PrintToChat($" \x01Осталось: \x06{_seasons.TimeLeftLabel()}");
         if (info.ArgCount >= 2 && int.TryParse(info.GetArg(1), out int tier))
@@ -1678,6 +1740,7 @@ public class AetherionPlugin : BasePlugin
         {
             case "gold": AdminGold(p, info); break;
             case "vip": AdminVip(p, info); break;
+            case "pass": AdminPass(p, info); break;
             case "lvl": AdminLvl(p, info); break;
             case "boss": AdminBoss(p); break;
             case "storm": AdminStorm(p); break;
@@ -1691,6 +1754,7 @@ public class AetherionPlugin : BasePlugin
         p.PrintToChat(" \x0B═══ АДМИН-МЕНЮ ═══");
         p.PrintToChat(" \x04!admin gold <имя> <сумма> — выдать золото");
         p.PrintToChat(" \x04!admin vip <имя> <дни> — выдать VIP");
+        p.PrintToChat(" \x04!admin pass <имя> <дни> — выдать Aether+ Battle Pass");
         p.PrintToChat(" \x04!admin lvl <имя> <уровни> — выдать уровни расы");
         p.PrintToChat(" \x04!admin boss — призвать босса (голосование)");
         p.PrintToChat(" \x04!admin storm — запустить Эфирную Бурю");
@@ -1747,6 +1811,20 @@ public class AetherionPlugin : BasePlugin
         target.PrintToChat($" \x06[ADMIN] Тебе выдан VIP на {days} дней.");
     }
 
+    private void AdminPass(CCSPlayerController p, CommandInfo info)
+    {
+        if (info.ArgCount < 4) { p.PrintToChat(" \x04!admin pass <имя> <дни>"); return; }
+        var target = FindPlayer(info.GetArg(2));
+        if (target == null) { p.PrintToChat(" \x07Игрок не найден."); return; }
+        if (!int.TryParse(info.GetArg(3), out int days) || days <= 0) { p.PrintToChat(" \x07Неверное кол-во дней."); return; }
+        var d = Data(target.SteamID);
+        long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        d.PremiumPassExpiresUnix = Math.Max(d.PremiumPassExpiresUnix, now) + days * 86400L;
+        SaveData(d);
+        p.PrintToChat($" \x04[ADMIN] Aether+ +{days}д\x01 выдан \x06{target.PlayerName}");
+        target.PrintToChat($" \x06[ADMIN] Тебе выдан Aether+ Battle Pass на {days} дней.");
+    }
+
     private void AdminLvl(CCSPlayerController p, CommandInfo info)
     {
         if (info.ArgCount < 4) { p.PrintToChat(" \x04!admin lvl <имя> <уровни>"); return; }
@@ -1794,9 +1872,8 @@ public class AetherionPlugin : BasePlugin
             case "setname": AdminRaceSetName(p, info); break;
             case "reload": _races.Reload(); p.PrintToChat($" \x04[WORKSHOP] Перезагружено {_races.Count} рас."); break;
             case "save":
-                var cfgDir = Path.Combine(ModuleDirectory, "..", "..", "configs");
-                if (_races.SaveToFile(Path.Combine(cfgDir, "races.json")))
-                    p.PrintToChat(" \x04[WORKSHOP] Расы сохранены в races.json");
+                if (_races.SaveLoadedFiles())
+                    p.PrintToChat(" \x04[WORKSHOP] Расы сохранены в исходные JSON-файлы");
                 else p.PrintToChat(" \x07[WORKSHOP] Ошибка сохранения!");
                 break;
             default: p.PrintToChat(" \x04Неизвестная команда. list|info|setdiv|settier|setcd|setval|setmax|setname|reload|save"); break;
@@ -1890,7 +1967,7 @@ public class AetherionPlugin : BasePlugin
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    //  АЧИВКИ (заглушка под AchievementSystem — ФАЗА 2)
+    //  АЧИВКИ — делегирование в AchievementSystem
     // ═══════════════════════════════════════════════════════════════════════
     private void TrackAchievements(PlayerData d, CCSPlayerController killer, CCSPlayerController victim, bool hs)
     {

@@ -28,6 +28,7 @@ public class CosmeticDef
     public int RequiredDivision;
     public string RequiredAchievement = "";  // achievement ID
     public bool RequiredGuild;  // must be in a guild
+    public bool MustBeOwned;
 }
 
 public static class CosmeticCatalog
@@ -63,6 +64,25 @@ public static class CosmeticCatalog
     };
 
     public static CosmeticDef? Get(string id) => Cosmetics.FirstOrDefault(c => c.Id == id);
+
+    public static void RegisterSeasonCosmetic(string id, string type, string name, string value, bool ownedOnly)
+    {
+        if (Get(id) != null) return;
+        var cosmeticType = type.Equals("Title", StringComparison.OrdinalIgnoreCase)
+            ? CosmeticType.Title
+            : type.Equals("NameColor", StringComparison.OrdinalIgnoreCase) || type.Equals("SkillTrailColor", StringComparison.OrdinalIgnoreCase)
+                ? CosmeticType.NameColor
+                : CosmeticType.Trail;
+        string displayValue = cosmeticType == CosmeticType.Title ? name : value;
+        Cosmetics.Add(new CosmeticDef
+        {
+            Id = id,
+            Type = cosmeticType,
+            Name = name,
+            Value = displayValue,
+            MustBeOwned = ownedOnly
+        });
+    }
 }
 
 public class CosmeticSystem
@@ -74,8 +94,9 @@ public class CosmeticSystem
         if (def.RequiredDivision > 0 && d.Division < def.RequiredDivision) return false;
         if (def.RequiredGuild && d.GuildId == 0) return false;
         if (!string.IsNullOrEmpty(def.RequiredAchievement) && !d.Achievements.Contains(def.RequiredAchievement)) return false;
+        if (def.MustBeOwned && !d.OwnedCosmetics.Contains(def.Id)) return false;
         // Auto-add to owned when requirements are met
-        if (!d.OwnedCosmetics.Contains(def.Id))
+        if (!def.MustBeOwned && !d.OwnedCosmetics.Contains(def.Id))
             d.OwnedCosmetics.Add(def.Id);
         return true;
     }
@@ -94,6 +115,14 @@ public class CosmeticSystem
         if (def == null || def.Type != CosmeticType.NameColor) return;
         if (!CanEquip(d, def)) return;
         d.EquippedColor = colorId;
+    }
+
+    public bool EquipTrail(PlayerData d, string trailId)
+    {
+        var def = CosmeticCatalog.Get(trailId);
+        if (def == null || def.Type != CosmeticType.Trail || !CanEquip(d, def)) return false;
+        d.EquippedTrail = trailId;
+        return true;
     }
 
     public string GetTitleDisplay(PlayerData d)
@@ -145,6 +174,14 @@ public class CosmeticSystem
             bool owned = CanEquip(d, b);
             string status = owned ? " \x04[доступен]" : " \x07[locked]";
             p.PrintToChat($" {b.Value} {b.Name}{status}");
+        }
+
+        var trails = CosmeticCatalog.Cosmetics.Where(c => c.Type == CosmeticType.Trail).ToList();
+        if (trails.Count > 0)
+        {
+            p.PrintToChat(" \x06СЕЗОННЫЕ НАГРАДЫ:");
+            foreach (var t in trails)
+                p.PrintToChat($" {t.Name}{(d.OwnedCosmetics.Contains(t.Id) ? " \x08[получено]" : " \x07[locked]")}");
         }
     }
 }
