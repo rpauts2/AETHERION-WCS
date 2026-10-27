@@ -558,7 +558,7 @@ public static class EffectLibrary
             ctx.Engine.SetSpeed(ctx.Slot, 1f + v * 0.01f * ctx.SkillLevel),
 
         ["haste"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + v * 0.01f * ctx.SkillLevel),
+            ctx.Combat.Apply(EffectTag.Haste, ctx.Slot, Math.Clamp(v * 0.01f * ctx.SkillLevel, 0.05f, 0.35f), 4f),
 
         ["ice_bolt"] = v => ctx =>
         {
@@ -900,7 +900,7 @@ public static class EffectLibrary
             var enemies = ctx.Combat.EnemiesInRadius(p.x, p.y, p.z, radius, team).ToList();
             foreach (var enemy in enemies)
             {
-                ctx.Combat.Apply(EffectTag.Slow, enemy, Math.Clamp(v, 5f, 45f), 3f, 1f, ctx.Slot);
+                ctx.Combat.Apply(EffectTag.Slow, enemy, Math.Clamp(v * 0.01f, 0.05f, 0.45f), 3f, 1f, ctx.Slot);
                 var ep = ctx.Engine.GetPosition(enemy);
                 ctx.Engine.Beam(p.x, p.y, p.z + 35, ep.x, ep.y, ep.z + 35, 105, 95, 255, 0.35f);
             }
@@ -914,11 +914,11 @@ public static class EffectLibrary
             // gain a short shield. A true position/death rewind requires server-side history.
             int heal = Math.Clamp((int)(v * Math.Max(1, ctx.SkillLevel)), 1, 100);
             ctx.Engine.AddHealth(ctx.Slot, heal, 200);
-            ctx.Combat.Apply(EffectTag.Shield, ctx.Slot, 20f + 10f * ctx.SkillLevel, 4f);
+            ctx.Combat.Apply(EffectTag.Haste, ctx.Slot, Math.Clamp(0.08f + 0.025f * ctx.SkillLevel, 0.08f, 0.2f), 4f);
             var p = ctx.Engine.GetPosition(ctx.Slot);
             ctx.Engine.SpawnParticle("particles/aether_recall.vpcf", p.x, p.y, p.z);
             ctx.Engine.Beam(p.x - 55, p.y, p.z + 20, p.x + 55, p.y, p.z + 20, 125, 110, 255, 0.45f);
-            ctx.Engine.PrintToCenter(ctx.Slot, $"⌛ Петля времени: +{heal} HP");
+            ctx.Engine.PrintToCenter(ctx.Slot, $"⌛ Петля времени: +{heal} HP, ускорение");
         },
 
         ["time_stop_ult"] = v => ctx =>
