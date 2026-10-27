@@ -993,7 +993,9 @@ public class AetherionPlugin : BasePlugin
         var d = Data(p.SteamID);
         var menu = new WasdMenu("🎨 Внешний вид", this) { MenuTime = 30, ExitButton = true };
         menu.AddItem($"Твой дивизион: D{d.Division}", null);
-        menu.AddItem($"🏷 Титул: {_cosmetics.GetTitleDisplay(d) is { Length: > 0 } title ? title : "нет"}",
+        var currentTitle = _cosmetics.GetTitleDisplay(d);
+        if (string.IsNullOrWhiteSpace(currentTitle)) currentTitle = "нет";
+        menu.AddItem($"🏷 Титул: {currentTitle}",
             (pl, _) => OpenCosmeticCategory(pl, CosmeticType.Title));
         menu.AddItem($"🌈 Цвет ника: {_cosmetics.GetColorDisplay(d)}",
             (pl, _) => OpenCosmeticCategory(pl, CosmeticType.NameColor));
