@@ -107,4 +107,16 @@ public sealed class EconomyAndProgressionTests
         Assert.InRange(race.Level, 2, 1000);
         Assert.True(race.Xp >= 0);
     }
+
+    [Fact]
+    public void AddXp_CorruptParagonBalanceDoesNotCreateUnboundedLoop()
+    {
+        var player = new PlayerData { XpBoostMultiplier = 1.0, Division = 8 };
+        var race = new RaceProgress { Level = 1000, Xp = long.MaxValue };
+
+        LevelSystem.AddXp(player, race, RaceTier.T1_Spark, 1);
+
+        Assert.Equal(1000, race.ParagonLevel);
+        Assert.True(race.Xp > 0);
+    }
 }
