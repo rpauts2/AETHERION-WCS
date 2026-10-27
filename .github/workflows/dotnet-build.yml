@@ -37,8 +37,11 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
-      - name: Restore dependencies
+      - name: Restore plugin dependencies
         run: dotnet restore AetherionWcs.csproj
+
+      - name: Run economy and progression unit tests
+        run: dotnet test tests/AetherionWcs.Tests/AetherionWcs.Tests.csproj --configuration Release
 
       - name: Build Release
         run: dotnet build AetherionWcs.csproj --configuration Release --no-restore
