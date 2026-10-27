@@ -85,11 +85,15 @@ public static class LevelSystem
         if (rp.Level >= max)
         {
             long paragonNeed = (long)(XpForLevel(rp.Level, tier, 8) * (1 + rp.ParagonLevel * 0.10));
-            while (rp.Xp >= paragonNeed)
+            int paragonSteps = 0;
+            // Bound work per event if a legacy/corrupt profile contains an enormous XP balance.
+            while (rp.Xp >= paragonNeed && paragonSteps < 1000)
             {
                 rp.Xp -= paragonNeed;
                 rp.ParagonLevel++;
-                paragonNeed = (long)(XpForLevel(rp.Level, tier, 8) * (1 + rp.ParagonLevel * 0.10));
+                paragonSteps++;
+                double nextNeed = XpForLevel(rp.Level, tier, 8) * (1 + rp.ParagonLevel * 0.10);
+                paragonNeed = nextNeed >= long.MaxValue ? long.MaxValue : Math.Max(1L, (long)nextNeed);
             }
         }
         return gained;
