@@ -94,4 +94,17 @@ public sealed class EconomyAndProgressionTests
         Assert.Equal(0, levels);
         Assert.Equal(25, race.Xp);
     }
+
+    [Fact]
+    public void AddXp_PathologicalRewardIsCappedAndDoesNotOverflow()
+    {
+        var player = new PlayerData { XpBoostMultiplier = 1.0, Division = 1 };
+        var race = new RaceProgress { Level = 1, Xp = 0 };
+
+        var levels = LevelSystem.AddXp(player, race, RaceTier.T1_Spark, long.MaxValue);
+
+        Assert.InRange(levels, 1, 999);
+        Assert.InRange(race.Level, 2, 1000);
+        Assert.True(race.Xp >= 0);
+    }
 }
