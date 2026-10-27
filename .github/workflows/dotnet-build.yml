@@ -1,0 +1,44 @@
+name: AETHERION build and config checks
+
+on:
+  push:
+    branches:
+      - main
+      - "improve/**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate race and visual configuration
+        run: python scripts/validate_visual_assets.py
+
+      - name: Run validator unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore AetherionWcs.csproj
+
+      - name: Build Release
+        run: dotnet build AetherionWcs.csproj --configuration Release --no-restore
