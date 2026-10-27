@@ -2,6 +2,13 @@
 
 > Status: proposal based on the public README and declared feature surface. This is a prioritization guide, not a claim that the listed safeguards are currently missing. Verify each item against the implementation before changing code.
 
+## Implementation status (2026-10-27)
+
+- **M0a complete:** GitHub Actions now validates the main, core, and boss race catalogs, runs six validator unit tests, restores .NET 8 dependencies, and builds the plugin in Release mode on pushes and pull requests.
+- **Verified:** the first workflow run passed all validation, test, restore, and build steps. The workflow now publishes `AetherionWcs.dll` as a 14-day artifact for private-server smoke testing.
+- **Still open:** core gameplay calculation tests, live CS2 plugin load/unload testing, database migration/idempotency coverage, and runtime balance telemetry. CI success is not a substitute for an in-game smoke test.
+- **Next implementation target:** audit persistence and economy actions for duplicate reward claims, transaction boundaries, and safe SQLite contention handling before expanding progression systems.
+
 ## Product direction
 
 Make AETHERION WCS feel like a persistent, fair, season-based RPG layered onto CS2: fast to understand in a live match, deep enough to retain long-term players, configurable for server owners, and safe to update without losing player progress.
