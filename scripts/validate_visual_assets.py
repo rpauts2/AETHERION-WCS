@@ -107,21 +107,30 @@ def validate_races(path: Path, model_ids: set[int]) -> tuple[list[str], list[str
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--models", type=Path, default=Path("configs/assets/models.json"))
-    parser.add_argument("--races", type=Path, default=Path("configs/races.json"))
+    parser.add_argument(
+        "--races", type=Path, action="append", default=None,
+        help="Race JSON file to validate (repeatable). Defaults to the main, core, and boss race catalogs.",
+    )
     args = parser.parse_args()
 
     errors: list[str] = []
     warnings: list[str] = []
+    race_paths = args.races or [
+        Path("configs/races.json"),
+        Path("configs/races/races_core.json"),
+        Path("configs/races/boss_races.json"),
+    ]
     try:
         model_errors, model_warnings, model_ids = validate_models(args.models)
         errors.extend(model_errors)
         warnings.extend(model_warnings)
-        if args.races.exists():
-            race_errors, race_warnings = validate_races(args.races, model_ids)
-            errors.extend(race_errors)
-            warnings.extend(race_warnings)
-        else:
-            warnings.append(f"race file not found, skipped: {args.races}")
+        for race_path in race_paths:
+            if race_path.exists():
+                race_errors, race_warnings = validate_races(race_path, model_ids)
+                errors.extend(race_errors)
+                warnings.extend(race_warnings)
+            else:
+                warnings.append(f"race file not found, skipped: {race_path}")
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
