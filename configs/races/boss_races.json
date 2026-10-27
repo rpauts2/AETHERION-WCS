@@ -1,0 +1,47 @@
+[
+  {
+    "id": 3000,
+    "name": "Аватар Бездны",
+    "tier": 5,
+    "division": 1,
+    "unlock_level": 0,
+    "archetype": "tank",
+    "boss": true,
+    "lore": "Временная boss-раса: выдерживает удар и отвечает взрывом.",
+    "abilities": [
+      { "n": "Панцирь Бездны", "t": "Passive", "max": 5, "d": "+25 HP за уровень", "effect": "bonus_hp", "value": 25 },
+      { "n": "Разлом", "t": "Active", "max": 5, "d": "Удар по ближайшему врагу", "effect": "aoe_damage", "value": 80, "cd": 8, "ether": 10 },
+      { "n": "Падение Титана", "t": "Ultimate", "max": 1, "d": "Массовый удар и оглушение", "effect": "stun_aoe", "value": 100, "cd": 25, "ether": 30 }
+    ]
+  },
+  {
+    "id": 3001,
+    "name": "Штормовой Архонт",
+    "tier": 5,
+    "division": 1,
+    "unlock_level": 0,
+    "archetype": "mage",
+    "boss": true,
+    "lore": "Временная boss-раса: цепная молния и контроль зоны.",
+    "abilities": [
+      { "n": "Эфирный Поток", "t": "Passive", "max": 5, "d": "+10% скорости", "effect": "speed_buff", "value": 0.02 },
+      { "n": "Громовая Цепь", "t": "Active", "max": 5, "d": "Цепная молния", "effect": "chain_lightning", "value": 75, "cd": 7, "ether": 12 },
+      { "n": "Око Бури", "t": "Ultimate", "max": 1, "d": "Молния по зоне", "effect": "lightning_strike", "value": 150, "cd": 28, "ether": 35 }
+    ]
+  },
+  {
+    "id": 3002,
+    "name": "Кровавый Жнец",
+    "tier": 5,
+    "division": 1,
+    "unlock_level": 0,
+    "archetype": "assassin",
+    "boss": true,
+    "lore": "Временная boss-раса: мобильность, казнь и вампиризм.",
+    "abilities": [
+      { "n": "Жажда", "t": "Passive", "max": 5, "d": "Вампиризм", "effect": "lifesteal", "value": 0.1 },
+      { "n": "Рывок Жнеца", "t": "Active", "max": 5, "d": "Рывок и удар", "effect": "dash_damage", "value": 90, "cd": 6, "ether": 10 },
+      { "n": "Последний Вздох", "t": "Ultimate", "max": 1, "d": "Казнь слабой цели", "effect": "execute_bonus", "value": 40, "cd": 24, "ether": 30 }
+    ]
+  }
+]

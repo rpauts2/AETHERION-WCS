@@ -79,6 +79,7 @@ public sealed class BossSystem
     public Action? OnBossDeath;
     public Action? OnVoteStart;
     public Action<ulong>? OnPlayerBossKill;
+    public Action? OnBossMapCompleted;
 
     public BossSystem(BasePlugin plugin, IEngineApi engine,
         Func<ulong, WcsInfinity.Models.PlayerData> dataFn,
@@ -97,6 +98,11 @@ public sealed class BossSystem
     }
 
     public bool IsBossActive => _bossActive;
+
+    public void StartRaid()
+    {
+        if (!_bossActive) TriggerBoss();
+    }
 
     // ═══════════════════════════════════════════════
     //  ГОЛОСОВАНИЕ
@@ -278,6 +284,7 @@ public sealed class BossSystem
         {
             Server.PrintToChatAll(@" \x06[AETHERION] Босс исчез: время вышло.");
             Stop();
+            try { OnBossMapCompleted?.Invoke(); } catch (Exception ex) { Console.WriteLine($"[Boss] map timeout err: {ex.Message}"); }
             return;
         }
         if (_lifetime <= 10f && _lifetime > 9.5f)
@@ -542,6 +549,7 @@ public sealed class BossSystem
         }
 
         Stop();
+        try { OnBossMapCompleted?.Invoke(); } catch (Exception ex) { Console.WriteLine($"[Boss] map completion err: {ex.Message}"); }
     }
 
     // ═══════════════════════════════════════════════

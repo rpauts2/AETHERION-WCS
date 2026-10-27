@@ -44,6 +44,7 @@ public class RaceDefinition
     [JsonPropertyName("division")]  public int Division { get; set; } = 1;
     [JsonPropertyName("unlock_level")] public int RequiredLevelToUnlock { get; set; } = 0;
     [JsonPropertyName("guild")]     public bool IsGuildRace { get; set; } = false;
+    [JsonPropertyName("boss")]      public bool IsBossRace { get; set; } = false;
     [JsonPropertyName("abilities")] public List<AbilityDef> Abilities { get; set; } = new();
 
     public RaceTier TierEnum => (RaceTier)Tier;

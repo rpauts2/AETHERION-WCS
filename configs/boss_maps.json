@@ -1,0 +1,26 @@
+[
+  {
+    "map": "coop_dungeon",
+    "workshop_id": "3164831232",
+    "name": "Coop Dungeon",
+    "enabled": false
+  },
+  {
+    "map": "serpentis_temple",
+    "workshop_id": "3574579115",
+    "name": "Serpentis Temple Coop",
+    "enabled": false
+  },
+  {
+    "map": "coop_labs",
+    "workshop_id": "3354588000",
+    "name": "Coop Labs",
+    "enabled": false
+  },
+  {
+    "map": "arena",
+    "workshop_id": "2967532521",
+    "name": "Arena",
+    "enabled": false
+  }
+]

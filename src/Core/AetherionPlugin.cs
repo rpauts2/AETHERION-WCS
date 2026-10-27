@@ -31,11 +31,14 @@ public class AetherionPlugin : BasePlugin
     public override string ModuleAuthor => "AETHERION Team";
 
     public static AetherionPlugin? Instance { get; private set; }
+    public bool IsBossMode => _bossMap?.IsBossMode == true
+        && string.Equals(Server.MapName, _bossMap.CurrentMap, StringComparison.OrdinalIgnoreCase);
 
     public static ILocalizationReader Loc { get; private set; } = null!;
 
     // — Подсистемы —
     private readonly RaceManager _races = new();
+    private BossMapSystem _bossMap = null!;
     private readonly ModelManager _models = new();
     private readonly AudioManager _audio = new();
     private readonly AuraManager _auras = new();
@@ -104,6 +107,7 @@ public class AetherionPlugin : BasePlugin
         var cfgDir = Path.Combine(ModuleDirectory, "..", "..", "configs");
         _races.LoadFromFile(Path.Combine(cfgDir, "races.json"));
         _races.LoadFromFile(Path.Combine(cfgDir, "races", "races_core.json"));
+        _bossMap = new BossMapSystem(this, _races, sid => Data(sid), pd => SaveData(pd));
         // индексируем способности
         foreach (var r in _races.Races.Values) r.IndexAbilities();
         _models.Load(cfgDir);
@@ -159,7 +163,9 @@ public class AetherionPlugin : BasePlugin
                 var pick = eligible[Random.Shared.Next(eligible.Count)];
                 d.UnlockedRaces.Add(pick.Id);
                 return pick.Id;
-            });
+             });
+        _boss.OnBossMapCompleted = _bossMap.CompleteBossMap;
+        _bossMap.OnPluginReady(_boss.StartRaid);
         _boss.OnBossSpawn = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossAwaken(pl); };
         _boss.OnBossAttack = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossEnrage(pl); };
         _boss.OnBossDeath = () => { foreach (var pl in Utilities.GetPlayers()) if (pl != null && pl.IsValid && !pl.IsBot) _audio.PlayBossDeath(pl); };
@@ -251,8 +257,11 @@ public class AetherionPlugin : BasePlugin
         AddCommand("css_shop", "Магазин", (p, _) => { if (p != null) OpenShopMenu(p); });
         AddCommand("css_buy", "Купить предмет", CmdBuy);
         AddCommand("css_daily", "Ежедневная награда", (p, _) => { if (p != null) TryClaimDaily(p); });
-        AddCommand("css_yes", "Да (голосование)", (p, _) => { if (p != null) _boss.VoteYes(p); });
-        AddCommand("css_no", "Нет (голосование)", (p, _) => { if (p != null) _boss.VoteNo(p); });
+        AddCommand("css_yes", "Да (голосование)", (p, _) => { if (p != null) { _boss.VoteYes(p); _bossMap.VoteYes(p); } });
+        AddCommand("css_no", "Нет (голосование)", (p, _) => { if (p != null) { _boss.VoteNo(p); _bossMap.VoteNo(p); } });
+        AddCommand("css_bossmap", "Голосование за boss-карту", (p, _) => { if (p != null) _bossMap.StartVote(p); });
+        AddCommand("css_bossmap_yes", "Да за boss-карту", (p, _) => { if (p != null) _bossMap.VoteYes(p); });
+        AddCommand("css_bossmap_no", "Нет за boss-карту", (p, _) => { if (p != null) _bossMap.VoteNo(p); });
         AddCommand("css_top", "Топ игроков", CmdTop);
         AddCommand("css_ach", "Ачивки и дейлики", (p, _) => { if (p != null) OpenAchievementsMenu(p); });
         AddCommand("css_wisp", "Дух-компаньон (статус)", (p, _) => { if (p != null) OpenWispMenu(p); });
@@ -378,6 +387,7 @@ public class AetherionPlugin : BasePlugin
         try
         {
             var d = Data(p.SteamID);
+            _bossMap.ApplyPlayerMode(p);
             var rp = d.GetRace(d.CurrentRaceId);
             var def = _races.Get(d.CurrentRaceId);
 
@@ -974,6 +984,11 @@ public class AetherionPlugin : BasePlugin
     private void OpenRaceMenu(CCSPlayerController p)
     {
         var d = Data(p.SteamID);
+        if (_bossMap.IsBossMode)
+        {
+            OpenBossRaceMenu(p, d);
+            return;
+        }
         var list = DynamicRaceSystem.Filter(_races, p, d.Division).Take(9).ToList();
         var menu = new WasdMenu("⚔ Расы и навыки", this);
         menu.MenuTime = 30;
@@ -1009,6 +1024,26 @@ public class AetherionPlugin : BasePlugin
                     menu.AddItem($"  {t} {ab.Name} {lvl}/{ab.MaxLevel} — {ab.Description}", null);
                 }
             }
+        }
+        menu.Display(p, 30);
+    }
+
+    private void OpenBossRaceMenu(CCSPlayerController p, PlayerData d)
+    {
+        var menu = new WasdMenu("👹 Boss-расы", this) { MenuTime = 30 };
+        menu.AddItem("Обычные расы закрыты до конца boss-карты", null);
+        foreach (var id in _bossMap.BossRaceIds)
+        {
+            var race = _races.Get(id);
+            if (race == null) continue;
+            int rid = id;
+            menu.AddItem($"{(d.CurrentRaceId == rid ? "▶" : "  ")} {race.Name}", (pl, _) =>
+            {
+                var pd = Data(pl.SteamID);
+                if (!_bossMap.SelectBossRace(pd, rid)) { pl.PrintToChat(" \\x07Boss-раса недоступна."); return; }
+                SaveData(pd);
+                pl.PrintToChat($" \\x06Boss-раса: {race.Name}");
+            });
         }
         menu.Display(p, 30);
     }
@@ -1098,6 +1133,7 @@ public class AetherionPlugin : BasePlugin
             menu.AddItem("⚔ БОСС АКТИВЕН! Используй !ult для урона!", null);
         else
             menu.AddItem("Вызвать босса (!boss → !yes/!no)", (pl, _) => _boss.StartVote(pl));
+        menu.AddItem("Boss-карта (!bossmap → !yes/!no)", (pl, _) => _bossMap.StartVote(pl));
         menu.AddItem("Нужно минимум 2 голоса за 20 секунд", null);
         menu.AddItem("Боссы: Скиталец / Ледяной Титан / Штормовой Лорд", null);
         menu.AddItem("Повелитель Чумы / Ифрит Разрушения", null);
@@ -1108,6 +1144,22 @@ public class AetherionPlugin : BasePlugin
     {
         if (p == null) return;
         var d = Data(p.SteamID);
+        if (_bossMap.IsBossMode)
+        {
+            if (info.ArgCount > 1 && int.TryParse(info.GetArg(1), out var bossRid))
+            {
+                if (_bossMap.SelectBossRace(d, bossRid)) { SaveData(d); p.PrintToChat($" \\x06Boss-раса выбрана: {_races.Get(bossRid)?.Name}"); }
+                else p.PrintToChat(" \\x07Можно выбрать только boss-расу.");
+            }
+            else
+            {
+                p.PrintToChat(" \\x0B═══ BOSS-РАСЫ ═══");
+                foreach (var id in _bossMap.BossRaceIds)
+                    if (_races.Get(id) is { } bossRace) p.PrintToChat($" \\x06#{id}\\x01 {bossRace.Name}");
+                p.PrintToChat(" \\x01Выбор: \\x04!races <boss-race-id>");
+            }
+            return;
+        }
         var list = _races.RacesForDivision(d.Division).Take(15).ToList();
         p.PrintToChat($" \x0B═══ РАСЫ ДИВИЗИОНА {d.Division} ═══");
         foreach (var r in list)

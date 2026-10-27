@@ -42,8 +42,14 @@ public class RaceManager
 
     public RaceDefinition? Get(int id) => _races.TryGetValue(id, out var r) ? r : null;
 
+    public void AddOrReplace(RaceDefinition race)
+    {
+        race.IndexAbilities();
+        _races[race.Id] = race;
+    }
+
     public IEnumerable<RaceDefinition> RacesForDivision(int division) =>
-        _races.Values.Where(r => r.Division <= division).OrderBy(r => r.Id);
+        _races.Values.Where(r => !r.IsBossRace && r.Division <= division).OrderBy(r => r.Id);
 
     public int Count => _races.Count;
 

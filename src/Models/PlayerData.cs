@@ -16,6 +16,9 @@ public class PlayerData
 
     // Текущая активная раса
     public int CurrentRaceId { get; set; } = 1;
+    public int BossSavedRaceId { get; set; } = 0;
+    public int BossActiveRaceId { get; set; } = 0;
+    public bool BossRaceActive { get; set; } = false;
 
     // Прогресс по каждой расе: raceId -> RaceProgress
     public Dictionary<int, RaceProgress> Races { get; set; } = new();
