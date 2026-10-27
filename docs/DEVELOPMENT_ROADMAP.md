@@ -6,8 +6,9 @@
 
 - **M0a complete:** GitHub Actions now validates the main, core, and boss race catalogs, runs six validator unit tests, restores .NET 8 dependencies, and builds the plugin in Release mode on pushes and pull requests.
 - **Verified:** the first workflow run passed all validation, test, restore, and build steps. The workflow now publishes `AetherionWcs.dll` as a 14-day artifact for private-server smoke testing.
-- **Still open:** core gameplay calculation tests, live CS2 plugin load/unload testing, database migration/idempotency coverage, and runtime balance telemetry. CI success is not a substitute for an in-game smoke test.
-- **Next implementation target:** audit persistence and economy actions for duplicate reward claims, transaction boundaries, and safe SQLite contention handling before expanding progression systems.
+- **Implemented in this branch:** daily contract selections, progress, and claimed state are now stored in the player profile. Claim state and its gold/XP reward are saved together, preventing a server restart from rerolling the same day's contracts and re-awarding a claimed contract. Progress sync reuses snapshots to avoid per-hit allocations.
+- **Still open:** core gameplay calculation tests, live CS2 plugin load/unload testing, broader database migration/idempotency coverage, and runtime balance telemetry. CI success is not a substitute for an in-game smoke test.
+- **Next implementation target:** audit other economy/reward paths for duplicate claims and transaction boundaries, then add database busy-timeout/backup guidance before expanding progression systems.
 
 ## Product direction
 
