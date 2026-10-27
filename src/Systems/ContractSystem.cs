@@ -71,16 +71,62 @@ public class ContractSystem
         _contractDay.Clear();
     }
 
+    private static int DayKey(DateTime date) => date.Year * 10000 + date.Month * 100 + date.Day;
+
+    private void SyncContracts(ulong steamId, List<PlayerContract> contracts)
+    {
+        var data = _dataFn(steamId);
+        data.DailyContractDayKey = DayKey(DateTime.UtcNow.Date);
+        data.DailyContracts = contracts.Select(c => new Models.DailyContractState
+        {
+            Type = (int)c.Def.Type,
+            Name = c.Def.Name,
+            Desc = c.Def.Desc,
+            Target = c.Def.Target,
+            GoldReward = c.Def.GoldReward,
+            XpReward = c.Def.XpReward,
+            BonusGoldOnStreak = c.Def.BonusGoldOnStreak,
+            Progress = c.Progress,
+            Claimed = c.Claimed
+        }).ToList();
+        data.IsDirty = true;
+    }
+
     private List<PlayerContract> GetContracts(ulong steamId)
     {
         var today = DateTime.UtcNow.Date;
+        var dayKey = DayKey(today);
         if (_contracts.TryGetValue(steamId, out var list) && _contractDay.GetValueOrDefault(steamId) == today)
             return list;
 
-        list = new List<PlayerContract>();
-        var available = _templates.OrderBy(_ => _rng.Next()).Take(3).ToList();
-        foreach (var def in available)
-            list.Add(new PlayerContract { Def = def, Progress = 0, Claimed = false });
+        var data = _dataFn(steamId);
+        if (data.DailyContractDayKey == dayKey && data.DailyContracts.Count > 0)
+        {
+            list = data.DailyContracts.Select(saved => new PlayerContract
+            {
+                Def = new ContractDef
+                {
+                    Type = Enum.IsDefined(typeof(ContractType), saved.Type) ? (ContractType)saved.Type : ContractType.KillEnemies,
+                    Name = saved.Name ?? "",
+                    Desc = saved.Desc ?? "",
+                    Target = Math.Max(1, saved.Target),
+                    GoldReward = Math.Max(0, saved.GoldReward),
+                    XpReward = Math.Max(0, saved.XpReward),
+                    BonusGoldOnStreak = Math.Max(0, saved.BonusGoldOnStreak)
+                },
+                Progress = Math.Clamp(saved.Progress, 0, Math.Max(1, saved.Target)),
+                Claimed = saved.Claimed
+            }).ToList();
+        }
+        else
+        {
+            list = _templates.OrderBy(_ => _rng.Next()).Take(3)
+                .Select(def => new PlayerContract { Def = def, Progress = 0, Claimed = false })
+                .ToList();
+            SyncContracts(steamId, list);
+            _saveFn(data);
+        }
+
         _contracts[steamId] = list;
         _contractDay[steamId] = today;
         return list;
@@ -92,13 +138,15 @@ public class ContractSystem
         streak++;
         _killStreak[steamId] = streak;
 
-        foreach (var c in GetContracts(steamId))
+        var contracts = GetContracts(steamId);
+        foreach (var c in contracts)
         {
             if (c.Def.Type == ContractType.KillEnemies && !c.Claimed)
                 c.Progress = Math.Min(c.Def.Target, c.Progress + 1);
             if (c.Def.Type == ContractType.GetKillsNoDeath && !c.Claimed)
                 c.Progress = Math.Min(c.Def.Target, Math.Max(c.Progress, streak));
         }
+        SyncContracts(steamId, contracts);
     }
 
     public void OnDeath(ulong steamId)
@@ -108,44 +156,59 @@ public class ContractSystem
 
     public void OnRoundWin(ulong steamId)
     {
-        foreach (var c in GetContracts(steamId))
+        var contracts = GetContracts(steamId);
+        foreach (var c in contracts)
             if (c.Def.Type == ContractType.WinRounds && !c.Claimed)
                 c.Progress = Math.Min(c.Def.Target, c.Progress + 1);
+        SyncContracts(steamId, contracts);
     }
 
     public void OnUltUsed(ulong steamId)
     {
-        foreach (var c in GetContracts(steamId))
+        var contracts = GetContracts(steamId);
+        foreach (var c in contracts)
             if (c.Def.Type == ContractType.UseUlt && !c.Claimed)
                 c.Progress = Math.Min(c.Def.Target, c.Progress + 1);
+        SyncContracts(steamId, contracts);
     }
 
     public void OnDamage(ulong steamId, int amount)
     {
-        foreach (var c in GetContracts(steamId))
+        if (amount <= 0) return;
+        var contracts = GetContracts(steamId);
+        foreach (var c in contracts)
             if (c.Def.Type == ContractType.DealDamage && !c.Claimed)
                 c.Progress = Math.Min(c.Def.Target, c.Progress + amount);
+        SyncContracts(steamId, contracts);
     }
 
     public void OnHeadshot(ulong steamId)
     {
-        foreach (var c in GetContracts(steamId))
+        var contracts = GetContracts(steamId);
+        foreach (var c in contracts)
             if (c.Def.Type == ContractType.GetHeadshots && !c.Claimed)
                 c.Progress = Math.Min(c.Def.Target, c.Progress + 1);
+        SyncContracts(steamId, contracts);
     }
 
     public void OnPlayTime(ulong steamId, float seconds)
     {
-        foreach (var c in GetContracts(steamId))
+        int elapsed = (int)seconds;
+        if (elapsed <= 0) return;
+        var contracts = GetContracts(steamId);
+        foreach (var c in contracts)
             if (c.Def.Type == ContractType.PlayMinutes && !c.Claimed)
-                c.Progress = Math.Min(c.Def.Target, c.Progress + (int)seconds);
+                c.Progress = Math.Min(c.Def.Target, c.Progress + elapsed);
+        SyncContracts(steamId, contracts);
     }
 
     public void OnSigilUsed(ulong steamId)
     {
-        foreach (var c in GetContracts(steamId))
+        var contracts = GetContracts(steamId);
+        foreach (var c in contracts)
             if (c.Def.Type == ContractType.UseSigils && !c.Claimed)
                 c.Progress = Math.Min(c.Def.Target, c.Progress + 1);
+        SyncContracts(steamId, contracts);
     }
 
     public bool Claim(CCSPlayerController p, int index)
@@ -159,6 +222,7 @@ public class ContractSystem
         var d = _dataFn(p.SteamID);
         int streak = _killStreak.GetValueOrDefault(p.SteamID);
         int totalGold = c.Def.GoldReward + (streak >= 3 ? c.Def.BonusGoldOnStreak : 0);
+        SyncContracts(p.SteamID, contracts);
         EconomySystem.AddGold(d, totalGold);
         var raceDef = _raceDefFn?.Invoke(d.CurrentRaceId);
         LevelSystem.AddXp(d, d.GetRace(d.CurrentRaceId), raceDef?.TierEnum ?? RaceTier.T1_Spark, c.Def.XpReward);
