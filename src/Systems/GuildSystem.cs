@@ -158,7 +158,12 @@ public class GuildManager
             var heir = g.Officers.FirstOrDefault(x => x != sid);
             if (heir == 0) heir = g.Members.FirstOrDefault(x => x != sid);
             if (heir == 0) { _guilds.Remove(gid); g.Members.Clear(); g.Officers.Clear(); DisbandedGuildIds.Add(gid); }
-            else g.LeaderSteamId = heir;
+            else
+            {
+                g.LeaderSteamId = heir;
+                // A promoted leader must not remain listed as an officer.
+                g.Officers.Remove(heir);
+            }
         }
 
         g.Members.Remove(sid); g.Officers.Remove(sid);
