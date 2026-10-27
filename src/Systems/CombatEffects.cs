@@ -48,7 +48,18 @@ public class CombatEffects
         tickInterval = Math.Max(0.1f, tickInterval);
         var now = DateTime.UtcNow;
         var ex = _effects.FirstOrDefault(e => e.Tag == tag && e.Slot == slot);
-        if (ex != null) { ex.Value = value; ex.ExpiresUtc = now.AddSeconds(durationSec); return; }
+        if (ex != null)
+        {
+            ex.Value = value;
+            ex.ExpiresUtc = now.AddSeconds(durationSec);
+            ex.TickInterval = tickInterval;
+            ex.NextTickUtc = now.AddSeconds(tickInterval);
+            ex.SourceSlot = source;
+            RefreshMovementState(slot);
+            RefreshControlState(slot);
+            RefreshVisibilityState(slot);
+            return;
+        }
         _effects.Add(new ActiveEffect {
             Tag = tag, Slot = slot, Value = value,
             ExpiresUtc = now.AddSeconds(durationSec),
@@ -61,27 +72,29 @@ public class CombatEffects
     {
         switch (tag)
         {
-            case EffectTag.Invisible: _engine.SetInvisible(slot, true); break;
-            case EffectTag.SpeedBuff: _engine.SetSpeed(slot, 1f + value); break;
-            case EffectTag.Slow:      _engine.SetSpeed(slot, Math.Max(0.2f, 1f - value)); break;
+            case EffectTag.Invisible: RefreshVisibilityState(slot); break;
+            case EffectTag.SpeedBuff:
+            case EffectTag.Slow:
+                RefreshMovementState(slot);
+                break;
             // — CC —
             case EffectTag.Freeze:
             case EffectTag.Stun:
-                _engine.SetFrozen(slot, true);
+                RefreshControlState(slot);
                 _engine.Blind(slot, dur, dur * 0.6f);
                 break;
             case EffectTag.Root:
-                _engine.SetSpeed(slot, 0.05f);          // прикован, но может целиться
+                RefreshMovementState(slot); // прикован, но может целиться
                 break;
             case EffectTag.Fear:
                 _engine.Blind(slot, dur, dur * 0.5f);   // дезориентация
-                _engine.SetSpeed(slot, 0.6f);
+                RefreshMovementState(slot);
                 break;
             case EffectTag.Shield:
                 _engine.AddArmor(slot, (int)value, 200);
                 break;
             case EffectTag.Berserk:
-                _engine.SetSpeed(slot, 1f + value);
+                RefreshMovementState(slot);
                 break;
             case EffectTag.Reflect:
             case EffectTag.ManaShield:
@@ -95,17 +108,58 @@ public class CombatEffects
 
     private void OnExpire(ActiveEffect e)
     {
-        switch (e.Tag)
+        // Recompute from remaining effects instead of blindly resetting state.
+        // This prevents an expired effect from cancelling a newer effect.
+        RefreshMovementState(e.Slot);
+        RefreshControlState(e.Slot);
+        RefreshVisibilityState(e.Slot);
+    }
+
+    private void RefreshMovementState(int slot)
+    {
+        var active = _effects.Where(e => e.Slot == slot && e.ExpiresUtc > DateTime.UtcNow).ToList();
+        if (active.Any(e => e.Tag == EffectTag.Root))
         {
-            case EffectTag.Invisible: _engine.SetInvisible(e.Slot, false); break;
-            case EffectTag.SpeedBuff:
-            case EffectTag.Slow:
-            case EffectTag.Root:
-            case EffectTag.Fear:
-            case EffectTag.Berserk:  _engine.SetSpeed(e.Slot, 1f); break;
-            case EffectTag.Freeze:
-            case EffectTag.Stun:      _engine.SetFrozen(e.Slot, false); break;
+            _engine.SetSpeed(slot, 0.05f);
+            return;
         }
+
+        var modifiers = active
+            .Where(e => e.Tag == EffectTag.SpeedBuff || e.Tag == EffectTag.Berserk ||
+                        e.Tag == EffectTag.Haste || e.Tag == EffectTag.Slow || e.Tag == EffectTag.Fear)
+            .Select(e => e.Tag switch
+            {
+                EffectTag.SpeedBuff or EffectTag.Berserk or EffectTag.Haste => 1f + e.Value,
+                EffectTag.Slow => Math.Max(0.2f, 1f - e.Value),
+                EffectTag.Fear => 0.6f,
+                _ => 1f
+            });
+
+        _engine.SetSpeed(slot, modifiers.DefaultIfEmpty(1f).Max());
+    }
+
+    private void RefreshControlState(int slot)
+    {
+        bool controlled = _effects.Any(e => e.Slot == slot && e.ExpiresUtc > DateTime.UtcNow &&
+            (e.Tag == EffectTag.Freeze || e.Tag == EffectTag.Stun));
+        _engine.SetFrozen(slot, controlled);
+    }
+
+    private void RefreshVisibilityState(int slot)
+    {
+        bool invisible = _effects.Any(e => e.Slot == slot && e.ExpiresUtc > DateTime.UtcNow &&
+            e.Tag == EffectTag.Invisible);
+        _engine.SetInvisible(slot, invisible);
+    }
+
+    // Remove transient effects when a player disconnects or is otherwise invalidated.
+    public void ClearSlot(int slot)
+    {
+        if (slot < 0) return;
+        _effects.RemoveAll(e => e.Slot == slot || e.SourceSlot == slot);
+        try { _engine.SetSpeed(slot, 1f); } catch { }
+        try { _engine.SetFrozen(slot, false); } catch { }
+        try { _engine.SetInvisible(slot, false); } catch { }
     }
 
     public void TickAll()
