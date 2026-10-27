@@ -76,19 +76,31 @@ public class ContractSystem
     private void SyncContracts(ulong steamId, List<PlayerContract> contracts)
     {
         var data = _dataFn(steamId);
-        data.DailyContractDayKey = DayKey(DateTime.UtcNow.Date);
-        data.DailyContracts = contracts.Select(c => new Models.DailyContractState
+        var dayKey = DayKey(DateTime.UtcNow.Date);
+        var snapshots = data.DailyContracts;
+
+        // Rebuild only when the date or shape changes; damage events can arrive frequently.
+        if (snapshots == null || data.DailyContractDayKey != dayKey || snapshots.Count != contracts.Count)
+            snapshots = new List<Models.DailyContractState>(contracts.Count);
+
+        for (int i = 0; i < contracts.Count; i++)
         {
-            Type = (int)c.Def.Type,
-            Name = c.Def.Name,
-            Desc = c.Def.Desc,
-            Target = c.Def.Target,
-            GoldReward = c.Def.GoldReward,
-            XpReward = c.Def.XpReward,
-            BonusGoldOnStreak = c.Def.BonusGoldOnStreak,
-            Progress = c.Progress,
-            Claimed = c.Claimed
-        }).ToList();
+            var c = contracts[i];
+            var state = i < snapshots.Count ? snapshots[i] : new Models.DailyContractState();
+            state.Type = (int)c.Def.Type;
+            state.Name = c.Def.Name;
+            state.Desc = c.Def.Desc;
+            state.Target = c.Def.Target;
+            state.GoldReward = c.Def.GoldReward;
+            state.XpReward = c.Def.XpReward;
+            state.BonusGoldOnStreak = c.Def.BonusGoldOnStreak;
+            state.Progress = c.Progress;
+            state.Claimed = c.Claimed;
+            if (i >= snapshots.Count) snapshots.Add(state);
+        }
+
+        data.DailyContractDayKey = dayKey;
+        data.DailyContracts = snapshots;
         data.IsDirty = true;
     }
 
