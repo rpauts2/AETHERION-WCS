@@ -15,6 +15,7 @@ public static class LevelSystem
     public const long XpBombPlant = 25;
     public const long XpBombDefuse = 25;
     public const long XpRoundWin = 15;
+    private const long MaxXpGrantPerCall = 100_000;
 
     // Базовая стоимость уровня зависит от дивизиона расы (твоя кривая 20-30 / 30-35 / 40-60)
     // Возвращает сколько XP нужно для перехода с level -> level+1
@@ -61,8 +62,12 @@ public static class LevelSystem
         double multiplier = p.XpBoostMultiplier;
         if (!double.IsFinite(multiplier) || multiplier <= 0) return 0;
 
+        // A corrupted profile or malformed reward must not trigger millions of level/paragon
+        // iterations in one game tick. Normal gameplay rewards are far below this defensive cap.
         double boostedAmount = amount * multiplier;
-        long grant = boostedAmount >= long.MaxValue ? long.MaxValue : (long)boostedAmount;
+        long grant = !double.IsFinite(boostedAmount) || boostedAmount >= MaxXpGrantPerCall
+            ? MaxXpGrantPerCall
+            : Math.Max(0, (long)boostedAmount);
         // Saturate the XP accumulator rather than allowing signed integer overflow.
         rp.Xp = rp.Xp > long.MaxValue - grant ? long.MaxValue : rp.Xp + grant;
         p.IsDirty = true;
