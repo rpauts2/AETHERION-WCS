@@ -42,3 +42,11 @@ jobs:
 
       - name: Build Release
         run: dotnet build AetherionWcs.csproj --configuration Release --no-restore
+
+      - name: Upload plugin build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AetherionWcs-net8
+          path: bin/Release/net8.0/AetherionWcs.dll
+          if-no-files-found: error
+          retention-days: 14
