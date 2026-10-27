@@ -8,6 +8,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import validate_visual_assets as validator
+import race_balance_report as balance_report
 
 
 class VisualAssetValidatorTests(unittest.TestCase):
@@ -68,6 +69,26 @@ class VisualAssetValidatorTests(unittest.TestCase):
         path.write_text('{"race": ', encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "invalid JSON"):
             validator.load_json(path)
+
+
+    def test_balance_report_counts_duplicate_ids_across_catalogs(self) -> None:
+        first = self.write_json("first.json", [{
+            "id": 2000, "name": "Test One", "tier": 1, "division": 1,
+            "abilities": [{"n": "Hit", "t": "Active", "effect": "aoe_damage", "value": 25, "cd": 2, "max": 5}]
+        }])
+        second = self.write_json("second.json", [{
+            "id": 2000, "name": "Test Two", "tier": 2, "division": 3,
+            "abilities": [{"n": "Guard", "t": "Passive", "effect": "shield", "value": 2, "cd": 0, "max": 3}]
+        }])
+        report = balance_report.build_report([first, second])
+        self.assertIn("Race definitions scanned: **2**", report)
+        self.assertIn("Duplicate IDs across catalogs: **1**", report)
+        self.assertIn("`aoe_damage`", report)
+
+    def test_balance_report_flags_races_without_abilities(self) -> None:
+        path = self.write_json("empty.json", [{"id": 3000, "name": "Empty", "abilities": []}])
+        report = balance_report.build_report([path])
+        self.assertIn("Races with no abilities: **1**", report)
 
 
 if __name__ == "__main__":
