@@ -56,8 +56,15 @@ public static class LevelSystem
 
     private static int AddXpInternal(PlayerData p, RaceProgress rp, RaceTier tier, int max, long amount, int division)
     {
-        amount = (long)(amount * p.XpBoostMultiplier);
-        rp.Xp += amount;
+        if (amount <= 0) return 0;
+
+        double multiplier = p.XpBoostMultiplier;
+        if (!double.IsFinite(multiplier) || multiplier <= 0) return 0;
+
+        double boostedAmount = amount * multiplier;
+        long grant = boostedAmount >= long.MaxValue ? long.MaxValue : (long)boostedAmount;
+        // Saturate the XP accumulator rather than allowing signed integer overflow.
+        rp.Xp = rp.Xp > long.MaxValue - grant ? long.MaxValue : rp.Xp + grant;
         p.IsDirty = true;
         int gained = 0;
         while (rp.Level < max)
