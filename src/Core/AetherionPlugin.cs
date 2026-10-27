@@ -394,7 +394,13 @@ public class AetherionPlugin : BasePlugin
             // Применить модель + корона (аура) + пассивки
             _models.ApplyModel(p, d.CurrentRaceId);
             _models.ApplyTint(_engine, p.Slot, d.CurrentRaceId);
+            _models.ApplySpawnFx(_engine, p, d.CurrentRaceId);
             _auras.Attach(p, d.Division);
+            _auras.AttachRaceAura(p, _models.GetAura(d.CurrentRaceId));
+            _auras.RemoveAcc(p.Slot);
+            var raceAccessory = _models.GetAccessory(d.CurrentRaceId);
+            if (!string.IsNullOrWhiteSpace(raceAccessory))
+                _auras.AttachAccessory(p, raceAccessory);
 
             // Звук спавна
             _audio.PlaySpawn(p, d.CurrentRaceId);
@@ -769,7 +775,9 @@ public class AetherionPlugin : BasePlugin
         try { _wispCompanion.CleanupSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] wisp cleanup err: {ex.Message}"); }
         try { _customWeapons.CleanupSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] weapon cleanup err: {ex.Message}"); }
         try { _auras.Remove(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] aura remove err: {ex.Message}"); }
+        try { _auras.RemoveRaceAura(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] race aura remove err: {ex.Message}"); }
         try { _auras.RemoveAcc(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] aura acc remove err: {ex.Message}"); }
+        try { _combat.ClearSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] combat effect cleanup err: {ex.Message}"); }
         try { _sigils.CleanupSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] sigil cleanup err: {ex.Message}"); }
         try { _resonance.ClearPlayer(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] resonance cleanup err: {ex.Message}"); }
         // Clean up SteamID-keyed caches
