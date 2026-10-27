@@ -156,7 +156,22 @@ public class CombatEffects
     public void ClearSlot(int slot)
     {
         if (slot < 0) return;
+        var affectedSlots = _effects
+            .Where(e => e.Slot == slot || e.SourceSlot == slot)
+            .Select(e => e.Slot)
+            .Distinct()
+            .ToList();
+
         _effects.RemoveAll(e => e.Slot == slot || e.SourceSlot == slot);
+
+        foreach (var affected in affectedSlots)
+        {
+            if (affected == slot) continue;
+            try { RefreshMovementState(affected); } catch { }
+            try { RefreshControlState(affected); } catch { }
+            try { RefreshVisibilityState(affected); } catch { }
+        }
+
         try { _engine.SetSpeed(slot, 1f); } catch { }
         try { _engine.SetFrozen(slot, false); } catch { }
         try { _engine.SetInvisible(slot, false); } catch { }
