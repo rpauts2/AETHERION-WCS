@@ -12,7 +12,7 @@ public sealed class EconomyAndProgressionTests
     {
         var player = new PlayerData { Gold = 999_990 };
         EconomySystem.AddGold(player, 100);
-        Assert.Equal(999_999, player.Gold);
+        Assert.Equal(999_999L, player.Gold);
         Assert.True(player.IsDirty);
     }
 
@@ -29,7 +29,7 @@ public sealed class EconomyAndProgressionTests
     {
         var player = new PlayerData { Gold = 123 };
         EconomySystem.AddGold(player, -50);
-        Assert.Equal(123, player.Gold);
+        Assert.Equal(123L, player.Gold);
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public sealed class EconomyAndProgressionTests
         Assert.False(EconomySystem.SpendGold(player, 0));
         Assert.False(EconomySystem.SpendGold(player, -1));
         Assert.False(EconomySystem.SpendGold(player, 101));
-        Assert.Equal(100, player.Gold);
+        Assert.Equal(100L, player.Gold);
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public sealed class EconomyAndProgressionTests
     {
         var player = new PlayerData { Gold = 100 };
         Assert.True(EconomySystem.SpendGold(player, 40));
-        Assert.Equal(60, player.Gold);
+        Assert.Equal(60L, player.Gold);
         Assert.True(player.IsDirty);
     }
 
@@ -71,7 +71,7 @@ public sealed class EconomyAndProgressionTests
 
         Assert.Equal(1, levels);
         Assert.Equal(2, race.Level);
-        Assert.Equal(0, race.Xp);
+        Assert.Equal(0L, race.Xp);
         Assert.Equal(1, race.UnspentPoints);
     }
 
@@ -82,7 +82,7 @@ public sealed class EconomyAndProgressionTests
         var race = new RaceProgress { Level = 1, Xp = 25 };
         var levels = LevelSystem.AddXp(player, race, RaceTier.T1_Spark, -500);
         Assert.Equal(0, levels);
-        Assert.Equal(25, race.Xp);
+        Assert.Equal(25L, race.Xp);
     }
 
     [Fact]
