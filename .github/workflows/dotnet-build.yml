@@ -1,0 +1,66 @@
+name: AETHERION build and config checks
+
+on:
+  push:
+    branches:
+      - main
+      - "improve/**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate race and visual configuration
+        run: python scripts/validate_visual_assets.py
+
+      - name: Generate static race balance report
+        run: python scripts/race_balance_report.py --output race-balance-report.md
+
+      - name: Run validator unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore plugin dependencies
+        run: dotnet restore AetherionWcs.csproj
+
+      - name: Run economy and progression unit tests
+        run: dotnet test tests/AetherionWcs.Tests/AetherionWcs.Tests.csproj --configuration Release
+
+      - name: Build Release
+        run: dotnet build AetherionWcs.csproj --configuration Release --no-restore
+
+      - name: Upload plugin build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AetherionWcs-net8
+          path: bin/Release/net8.0/AetherionWcs.dll
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload static race balance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: AetherionWcs-race-balance-report
+          path: race-balance-report.md
+          if-no-files-found: error
+          retention-days: 14

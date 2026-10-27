@@ -62,6 +62,20 @@ public class ModelManager
     }
 
     public string? GetFx(int raceId) => _map.TryGetValue(raceId, out var e) ? e.fx : null;
+    public string? GetAura(int raceId) => _map.TryGetValue(raceId, out var e) ? e.aura : null;
+
+    // One-shot spawn burst configured per race. Persistent particle controllers should
+    // use a dedicated lifecycle-managed entity rather than being recreated every tick.
+    public void ApplySpawnFx(IEngineApi engine, CCSPlayerController player, int raceId)
+    {
+        if (player?.PlayerPawn?.Value?.AbsOrigin == null) return;
+        var fx = GetFx(raceId);
+        if (string.IsNullOrWhiteSpace(fx)) return;
+        var pos = player.PlayerPawn.Value.AbsOrigin;
+        try { engine.SpawnParticle(fx, pos.X, pos.Y, pos.Z + 8f); }
+        catch (Exception ex) { Console.WriteLine($"[AETHERION] spawn FX failed race={raceId}: {ex.Message}"); }
+    }
+
     public void ApplyTint(IEngineApi engine, int slot, int raceId)
     {
         if (_map.TryGetValue(raceId, out var e) && e.tint != null && e.tint.Length == 3)

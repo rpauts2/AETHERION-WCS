@@ -275,7 +275,7 @@ public class AetherionPlugin : BasePlugin
         AddCommand("css_lb_kills", "Лидерборд убийств", (p, _) => { if (p != null) _leaderboard.ShowLeaderboard(p, "kills"); });
         AddCommand("css_lb_level", "Лидерборд уровней", (p, _) => { if (p != null) _leaderboard.ShowLeaderboard(p, "level"); });
         AddCommand("css_lb_gold", "Лидерборд золота", (p, _) => { if (p != null) _leaderboard.ShowLeaderboard(p, "gold"); });
-        AddCommand("css_cosmetics", "Косметика", (p, _) => { if (p != null) { var d = Data(p.SteamID); _cosmetics.ShowMenu(p, d); } });
+        AddCommand("css_cosmetics", "Косметика", (p, _) => { if (p != null) OpenCosmeticsMenu(p); });
         AddCommand("css_title", "Выбрать титул", CmdTitle);
         AddCommand("css_color", "Выбрать цвет", CmdColor);
         AddCommand("css_trail", "Выбрать след", CmdTrail);
@@ -394,7 +394,13 @@ public class AetherionPlugin : BasePlugin
             // Применить модель + корона (аура) + пассивки
             _models.ApplyModel(p, d.CurrentRaceId);
             _models.ApplyTint(_engine, p.Slot, d.CurrentRaceId);
+            _models.ApplySpawnFx(_engine, p, d.CurrentRaceId);
             _auras.Attach(p, d.Division);
+            _auras.AttachRaceAura(p, _models.GetAura(d.CurrentRaceId));
+            _auras.RemoveAcc(p.Slot);
+            var raceAccessory = _models.GetAccessory(d.CurrentRaceId);
+            if (!string.IsNullOrWhiteSpace(raceAccessory))
+                _auras.AttachAccessory(p, raceAccessory);
 
             // Звук спавна
             _audio.PlaySpawn(p, d.CurrentRaceId);
@@ -769,7 +775,9 @@ public class AetherionPlugin : BasePlugin
         try { _wispCompanion.CleanupSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] wisp cleanup err: {ex.Message}"); }
         try { _customWeapons.CleanupSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] weapon cleanup err: {ex.Message}"); }
         try { _auras.Remove(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] aura remove err: {ex.Message}"); }
+        try { _auras.RemoveRaceAura(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] race aura remove err: {ex.Message}"); }
         try { _auras.RemoveAcc(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] aura acc remove err: {ex.Message}"); }
+        try { _combat.ClearSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] combat effect cleanup err: {ex.Message}"); }
         try { _sigils.CleanupSlot(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] sigil cleanup err: {ex.Message}"); }
         try { _resonance.ClearPlayer(slot); } catch (Exception ex) { Console.WriteLine($"[AETHERION] resonance cleanup err: {ex.Message}"); }
         // Clean up SteamID-keyed caches
@@ -962,6 +970,7 @@ public class AetherionPlugin : BasePlugin
         menu.AddItem("⚔ Расы и навыки", (pl, _) => OpenRaceMenu(pl));
         menu.AddItem("📊 Профиль и ранг", (pl, _) => OpenProfileMenu(pl));
         menu.AddItem("🛒 Магазин Эфира", (pl, _) => OpenShopMenu(pl));
+        menu.AddItem("🎨 Внешний вид", (pl, _) => OpenCosmeticsMenu(pl));
         menu.AddItem("🎰 Рулетка", (pl, _) => CmdSpin(pl, null));
         menu.AddItem("🏆 Ачивки и дейлики", (pl, _) => OpenAchievementsMenu(pl));
         menu.AddItem("🛡 Гильдия", (pl, _) => OpenGuildMenu(pl));
@@ -975,6 +984,79 @@ public class AetherionPlugin : BasePlugin
         menu.AddItem("🌐 Nexus 3D", (pl, _) => _nexus.Open(pl, NexusSector.Hub));
         menu.AddItem("📋 Рейтинг", (pl, _) => CmdTop(pl, null));
 
+        menu.Display(p, 30);
+    }
+
+    // Косметика в полноценном WASD-меню вместо длинного списка в чате.
+    private void OpenCosmeticsMenu(CCSPlayerController p)
+    {
+        var d = Data(p.SteamID);
+        var menu = new WasdMenu("🎨 Внешний вид", this) { MenuTime = 30, ExitButton = true };
+        menu.AddItem($"Твой дивизион: D{d.Division}", null);
+        var currentTitle = _cosmetics.GetTitleDisplay(d);
+        if (string.IsNullOrWhiteSpace(currentTitle)) currentTitle = "нет";
+        menu.AddItem($"🏷 Титул: {currentTitle}",
+            (pl, _) => OpenCosmeticCategory(pl, CosmeticType.Title));
+        menu.AddItem($"🌈 Цвет ника: {_cosmetics.GetColorDisplay(d)}",
+            (pl, _) => OpenCosmeticCategory(pl, CosmeticType.NameColor));
+        menu.AddItem("✨ Сезонные следы", (pl, _) => OpenCosmeticCategory(pl, CosmeticType.Trail));
+        menu.AddItem("ℹ️ Как открыть косметику", (pl, _) =>
+        {
+            pl.PrintToChat(" \x04[AETHERION]\x01 Титулы и цвета открываются уровнями, дивизионами, достижениями и гильдиями.");
+            pl.PrintToChat(" \x04[AETHERION]\x01 Сезонные следы выдаются через награды сезона и Battle Pass.");
+        });
+        menu.Display(p, 30);
+    }
+
+    private void OpenCosmeticCategory(CCSPlayerController p, CosmeticType type)
+    {
+        var d = Data(p.SteamID);
+        var entries = CosmeticCatalog.Cosmetics.Where(c => c.Type == type).ToList();
+        string title = type switch
+        {
+            CosmeticType.Title => "🏷 Выбор титула",
+            CosmeticType.NameColor => "🌈 Цвет ника",
+            _ => "✨ Сезонные следы"
+        };
+        var menu = new WasdMenu(title, this) { MenuTime = 30, ExitButton = true };
+        menu.AddItem("← Внешний вид", (pl, _) => OpenCosmeticsMenu(pl));
+        foreach (var cosmetic in entries)
+        {
+            var item = cosmetic;
+            bool equipped = type switch
+            {
+                CosmeticType.Title => d.EquippedTitle == item.Id,
+                CosmeticType.NameColor => d.EquippedColor == item.Id,
+                CosmeticType.Trail => d.EquippedTrail == item.Id,
+                _ => false
+            };
+            bool available = _cosmetics.CanEquip(d, item);
+            string state = equipped ? " ✓ надето" : available ? " • доступно" : $" • нужно ур.{item.RequiredLevel}" ;
+            string label = type == CosmeticType.Title ? item.Value : item.Name;
+            menu.AddItem($"{(equipped ? "▶" : available ? "◇" : "🔒")} {label}{state}", (pl, _) =>
+            {
+                var playerData = Data(pl.SteamID);
+                if (!_cosmetics.CanEquip(playerData, item))
+                {
+                    pl.PrintToChat($" \x07[AETHERION]\x01 Пока недоступно: {item.Name}. Проверь уровень, дивизион, достижение или гильдию.");
+                    return;
+                }
+
+                if (item.Type == CosmeticType.Title) _cosmetics.EquipTitle(playerData, item.Id);
+                else if (item.Type == CosmeticType.NameColor) _cosmetics.EquipColor(playerData, item.Id);
+                else if (item.Type == CosmeticType.Trail && !_cosmetics.EquipTrail(playerData, item.Id))
+                {
+                    pl.PrintToChat(" \x07[AETHERION]\x01 Этот след ещё не получен.");
+                    return;
+                }
+
+                SaveData(playerData);
+                var race = _races.Get(playerData.CurrentRaceId);
+                RefreshNameplate(pl, playerData, playerData.GetRace(playerData.CurrentRaceId), race);
+                pl.PrintToChat($" \x04[AETHERION]\x01 Экипировано: {item.Name}");
+                OpenCosmeticCategory(pl, type);
+            });
+        }
         menu.Display(p, 30);
     }
 

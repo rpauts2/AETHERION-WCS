@@ -13,7 +13,11 @@ public static class EconomySystem
 
     public static void AddGold(PlayerData p, long amount)
     {
-        p.Gold = Math.Min(999999, p.Gold + Math.Max(0, amount));
+        // Saturating addition prevents a very large grant from overflowing long and
+        // accidentally turning the player's balance negative.
+        long current = Math.Clamp(p.Gold, 0, 999999);
+        long grant = Math.Max(0, amount);
+        p.Gold = grant >= 999999 - current ? 999999 : current + grant;
         p.IsDirty = true;
     }
 
