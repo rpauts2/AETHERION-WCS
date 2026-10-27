@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text.Json;
@@ -12,12 +13,29 @@ namespace WcsInfinity.Database;
 public class SqlitePlayerStore : IPlayerStore
 {
     private readonly string _connStr;
-    public SqlitePlayerStore(string dbPath) => _connStr = $"Data Source={dbPath}";
+
+    public SqlitePlayerStore(string dbPath)
+    {
+        // DefaultTimeout is in seconds and becomes SQLite's busy timeout.
+        _connStr = new SqliteConnectionStringBuilder
+        {
+            DataSource = dbPath,
+            DefaultTimeout = 5,
+            Pooling = true
+        }.ToString();
+    }
 
     public void Init()
     {
         using var con = new SqliteConnection(_connStr);
         con.Open();
+
+        // WAL lets readers continue while a writer commits; the mode persists in the database.
+        using (var pragma = con.CreateCommand())
+        {
+            pragma.CommandText = "PRAGMA journal_mode=WAL;";
+            pragma.ExecuteNonQuery();
+        }
 
         string[] creates = {
             @"CREATE TABLE IF NOT EXISTS players (
@@ -49,9 +67,28 @@ public class SqlitePlayerStore : IPlayerStore
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();
         }
-        using var migration = con.CreateCommand();
-        migration.CommandText = "ALTER TABLE guilds ADD COLUMN crafted_ids TEXT NOT NULL DEFAULT '[]'";
-        try { migration.ExecuteNonQuery(); } catch { }
+        // Idempotent schema upgrade: inspect the schema rather than swallowing every SQL error.
+        bool hasCraftedIds = false;
+        using (var columns = con.CreateCommand())
+        {
+            columns.CommandText = "PRAGMA table_info(guilds);";
+            using var reader = columns.ExecuteReader();
+            while (reader.Read())
+            {
+                if (string.Equals(reader.GetString(1), "crafted_ids", StringComparison.OrdinalIgnoreCase))
+                {
+                    hasCraftedIds = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hasCraftedIds)
+        {
+            using var migration = con.CreateCommand();
+            migration.CommandText = "ALTER TABLE guilds ADD COLUMN crafted_ids TEXT NOT NULL DEFAULT '[]'";
+            migration.ExecuteNonQuery();
+        }
     }
 
     public PlayerData? Load(ulong steamId)
