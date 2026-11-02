@@ -75,6 +75,7 @@ public class CombatEffects
             case EffectTag.Invisible: RefreshVisibilityState(slot); break;
             case EffectTag.SpeedBuff:
             case EffectTag.Slow:
+            case EffectTag.Haste:
                 RefreshMovementState(slot);
                 break;
             // — CC —
@@ -124,18 +125,25 @@ public class CombatEffects
             return;
         }
 
-        var modifiers = active
-            .Where(e => e.Tag == EffectTag.SpeedBuff || e.Tag == EffectTag.Berserk ||
-                        e.Tag == EffectTag.Haste || e.Tag == EffectTag.Slow || e.Tag == EffectTag.Fear)
-            .Select(e => e.Tag switch
+        // Compose independent effects instead of selecting only the strongest one.
+        // Otherwise a haste buff completely cancels a slow field (and vice versa).
+        float multiplier = 1f;
+        foreach (var effect in active)
+        {
+            float factor = effect.Tag switch
             {
-                EffectTag.SpeedBuff or EffectTag.Berserk or EffectTag.Haste => 1f + e.Value,
-                EffectTag.Slow => Math.Max(0.2f, 1f - e.Value),
+                EffectTag.SpeedBuff or EffectTag.Berserk or EffectTag.Haste =>
+                    Math.Clamp(1f + effect.Value, 0.2f, 2.5f),
+                EffectTag.Slow => Math.Clamp(1f - effect.Value, 0.2f, 1f),
                 EffectTag.Fear => 0.6f,
                 _ => 1f
-            });
+            };
 
-        _engine.SetSpeed(slot, modifiers.DefaultIfEmpty(1f).Max());
+            multiplier *= factor;
+        }
+
+        // Keep malformed/stacked effects from producing unusable movement values.
+        _engine.SetSpeed(slot, Math.Clamp(multiplier, 0.05f, 3f));
     }
 
     private void RefreshControlState(int slot)
