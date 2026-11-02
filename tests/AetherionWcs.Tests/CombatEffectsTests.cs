@@ -30,6 +30,30 @@ public sealed class CombatEffectsTests
         Assert.Equal(0.72f, engine.LastSpeed, 3);
     }
 
+    [Fact]
+    public void ClearPlayer_RemovesMovementModifiersAndRestoresBaseSpeed()
+    {
+        var engine = new RecordingEngine();
+        var effects = new CombatEffects(engine);
+        effects.Apply(EffectTag.Haste, slot: 1, value: 0.2f, durationSec: 4f);
+
+        effects.ClearPlayer(1);
+
+        Assert.Equal(1f, engine.LastSpeed, 3);
+    }
+
+    [Fact]
+    public void RemoveEffect_RecomputesMovementAfterRemovingTheTag()
+    {
+        var engine = new RecordingEngine();
+        var effects = new CombatEffects(engine);
+        effects.Apply(EffectTag.Slow, slot: 1, value: 0.5f, durationSec: 4f);
+
+        effects.RemoveEffect(1, EffectTag.Slow);
+
+        Assert.Equal(1f, engine.LastSpeed, 3);
+    }
+
     private sealed class RecordingEngine : IEngineApi
     {
         public float LastSpeed { get; private set; } = 1f;
