@@ -336,8 +336,13 @@ public class CombatEffects
 
     public void ClearPlayer(int slot)
     {
-        foreach (var e in _effects.Where(e => e.Slot == slot).ToList()) OnExpire(e);
         _effects.RemoveAll(e => e.Slot == slot);
+
+        // Recompute after removal. Calling OnExpire before removing a live effect
+        // sees that effect as active and leaves its movement/CC/visibility behind.
+        RefreshMovementState(slot);
+        RefreshControlState(slot);
+        RefreshVisibilityState(slot);
     }
 
     /// <summary>
@@ -347,7 +352,12 @@ public class CombatEffects
     /// </summary>
     public void RemoveEffect(int slot, EffectTag tag)
     {
-        foreach (var e in _effects.Where(e => e.Slot == slot && e.Tag == tag).ToList()) OnExpire(e);
-        _effects.RemoveAll(e => e.Slot == slot && e.Tag == tag);
+        int removed = _effects.RemoveAll(e => e.Slot == slot && e.Tag == tag);
+        if (removed == 0) return;
+
+        // Recompute only after the requested tag is no longer in the active set.
+        RefreshMovementState(slot);
+        RefreshControlState(slot);
+        RefreshVisibilityState(slot);
     }
 }
