@@ -437,7 +437,7 @@ public class AetherionPlugin : BasePlugin
             }
             float shopSpeed = shopFx.GetValueOrDefault("speed", 0f);
             if (shopSpeed > 0)
-                _engine.SetSpeed(p.Slot, 1f + shopSpeed);
+                _combat.SetPersistentSpeedModifier(p.Slot, "shop-speed", 1f + shopSpeed);
 
             // Стартовый эфир
             _ether[p.SteamID] = Math.Min(EtherMax, 50);
