@@ -29,6 +29,9 @@ jobs:
       - name: Validate race and visual configuration
         run: python scripts/validate_visual_assets.py
 
+      - name: Audit AETHERION-owned particle references
+        run: python scripts/audit_asset_references.py --output asset-reference-audit.md
+
       - name: Generate static race balance report
         run: python scripts/race_balance_report.py --output race-balance-report.md
 
@@ -54,6 +57,14 @@ jobs:
         with:
           name: AetherionWcs-net8
           path: bin/Release/net8.0/AetherionWcs.dll
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload visual asset reference audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: Aetherion-visual-asset-audit
+          path: asset-reference-audit.md
           if-no-files-found: error
           retention-days: 14
 
