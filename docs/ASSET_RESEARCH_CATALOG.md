@@ -509,3 +509,6 @@ The CS2 runtime path must be validated against actual compiled resources. Counte
 4. **VFX proof:** build one smoke or fire VPCF from the CC0 Kenney source textures; do not treat a sprite sheet as an already-authored Source 2 particle system.
 
 All entries above are candidates, not installed resources.
+
+
+**KinemIQ download-scope clarification:** the source page distinguishes the 460-clip browser library from the small downloadable CC0 bundle currently listed on the page. The downloadable FBX and GLB archives are advertised as **35 CC0 clips** (2.4 MB and 2.1 MB respectively). The broader library's license breakdown lists 175 CC0 clips, 170 CC BY 4.0 clips and 115 CC BY 3.0 clips. These are not interchangeable numbers: start with the 35-clip package, and treat access to the broader 175-clip CC0 subset as a separate export workflow. Do not pull in CC BY clips without preserving the required attribution.
