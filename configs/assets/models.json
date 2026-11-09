@@ -424,75 +424,75 @@
     "glow": 5
   },
   "2035": {
-    "race": "Yidhari (Zenless Zone Zero)",
-    "division": 5,
-    "baseModel": "characters/models/ctm_swat/ctm_swat.vmdl",
-    "customModel": "models/custom/yidhari_zzz.vmdl",
-    "tint": [
-      180,
-      140,
-      255
-    ],
-    "glow": 5,
-    "gb": 690671
-  },
-  "2036": {
-    "race": "Master Chief",
+    "race": "Крио-клинок",
     "division": 5,
     "baseModel": "characters/models/ctm_st6/ctm_st6.vmdl",
-    "customModel": "models/custom/master_chief.vmdl",
+    "customModel": "",
+    "fx": "particles/frost/frost_fall.vpcf",
     "tint": [
-      50,
-      180,
-      80
+      105,
+      190,
+      255
     ],
-    "glow": 5,
-    "gb": 464875
+    "glow": 5
+  },
+  "2036": {
+    "race": "Авангард",
+    "division": 5,
+    "baseModel": "characters/models/ctm_swat/ctm_swat.vmdl",
+    "customModel": "",
+    "fx": "particles/electrical_fx/emp_main_zap.vpcf",
+    "tint": [
+      80,
+      190,
+      125
+    ],
+    "glow": 5
   },
   "2037": {
-    "race": "Deadpool",
+    "race": "Алый фантом",
     "division": 5,
     "baseModel": "characters/models/tm_phoenix/tm_phoenix.vmdl",
-    "customModel": "models/custom/deadpool.vmdl",
+    "customModel": "",
+    "fx": "particles/burning_fx/env_fire_small.vpcf",
     "tint": [
-      220,
-      20,
-      20
+      230,
+      45,
+      55
     ],
-    "glow": 5,
-    "gb": 483043
+    "glow": 5
   },
   "2038": {
-    "race": "Yoru (Valorant)",
+    "race": "Разломник",
     "division": 5,
-    "baseModel": "characters/models/tm_leet/ctm_leet.vmdl",
-    "customModel": "models/custom/yoru_valorant.vmdl",
+    "baseModel": "characters/models/tm_professional/tm_professional.vmdl",
+    "customModel": "",
+    "fx": "particles/aether_dash.vpcf",
     "tint": [
-      80,
-      80,
-      120
+      145,
+      100,
+      255
     ],
-    "glow": 5,
-    "gb": 465393
+    "glow": 5
   },
   "2039": {
-    "race": "Metrocop (HL:Alyx)",
+    "race": "Секторный подавитель",
     "division": 5,
     "baseModel": "characters/models/ctm_sas/ctm_sas.vmdl",
-    "customModel": "models/custom/metrocop_hla.vmdl",
+    "customModel": "",
+    "fx": "particles/halloween/halloween_smoke.vpcf",
     "tint": [
-      120,
-      140,
-      160
+      145,
+      165,
+      180
     ],
-    "glow": 5,
-    "gb": 470173
+    "glow": 5
   },
   "_meta": {
-    "description": "AETHERION WCS — карта моделей рас. baseModel = стандарт CS2 (.vmdl). customModel = путь к .vmdl после скачивания мода с GameBanana (поле gb = ID мода). Если customModel пуст/не найден — используется baseModel.",
+    "description": "AETHERION WCS — race visual map. Base models use stock CS2 player models; customModel is empty unless a separately licensed and installed Source 2 player model is verified.",
     "gamebanana_base_url": "https://gamebanana.com/mods/",
     "gamebanana_category": "Server-Side Players (CS2) = 25415",
-    "install": "1. Скачай мод с GameBanana по ID. 2. Распакуй .vmdl в models/custom/. 3. Перезапусти сервер.",
-    "fallback": "Все baseModel — стандартные CS2 модели, работают на чистом сервере без модов."
+    "install": "Stock CS2 models require no extra model download. External player models must be separately license-checked, compiled/packaged for Source 2, installed for server and clients, and tested before setting customModel.",
+    "fallback": "Every race entry has a stock CS2 baseModel fallback. FX paths are referenced by the current runtime or existing visual configuration; validate them on a private CS2 server before release."
   }
 }
