@@ -130,6 +130,15 @@ public class CombatEffects
         RefreshMovementState(slot);
     }
 
+    public void RemovePersistentSpeedModifier(int slot, string source)
+    {
+        if (slot < 0 || string.IsNullOrWhiteSpace(source)) return;
+        if (!_persistentSpeedModifiers.TryGetValue(slot, out var modifiers)) return;
+        if (!modifiers.Remove(source)) return;
+        if (modifiers.Count == 0) _persistentSpeedModifiers.Remove(slot);
+        RefreshMovementState(slot);
+    }
+
     private void RefreshMovementState(int slot)
     {
         var active = _effects.Where(e => e.Slot == slot && e.ExpiresUtc > DateTime.UtcNow).ToList();
