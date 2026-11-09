@@ -95,6 +95,7 @@ def scan(root: Path):
     audio = {
         "configured_entries": len(audio_entries),
         "unique_paths": len(audio_paths),
+        "paths": audio_paths,
         "missing_paths": missing_audio,
         "legacy_paths": legacy_audio_paths,
     }
@@ -130,9 +131,9 @@ def render(particle_refs, missing_particles, counts, audio):
     lines.extend(("", "## Custom audio references", ""))
     if not audio["unique_paths"]:
         lines.append("No non-empty customSound paths found.")
-    for path in audio["unique_paths"] if "unique_paths" in audio else []:
-        pass
-    # The caller supplies the complete path list in missing_paths and legacy_paths.
+    for path in audio["paths"]:
+        status = "MISSING" if path in audio["missing_paths"] else "present"
+        lines.append(f"- **{status}** {path}")
     if audio["legacy_paths"]:
         lines.append(f"- **{len(audio['legacy_paths'])}** paths use a source-style .wav or singular sound/ path. Review their runtime form before enabling.")
     for path in audio["missing_paths"]:
