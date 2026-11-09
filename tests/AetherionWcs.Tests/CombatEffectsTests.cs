@@ -1,11 +1,21 @@
 using System;
 using WcsInfinity.Systems;
+using WcsInfinity.Races;
 using Xunit;
 
 namespace AetherionWcs.Tests;
 
 public sealed class CombatEffectsTests
 {
+    [Theory]
+    [InlineData(35f, 0.35f)]
+    [InlineData(15f, 0.15f)]
+    [InlineData(0.4f, 0.4f)]
+    public void NormalizeSlowValue_AcceptsPercentAndFractionInputs(float value, float expected)
+    {
+        Assert.Equal(expected, EffectLibrary.NormalizeSlowValue(value), 3);
+    }
+
     [Fact]
     public void Haste_IsAppliedImmediately()
     {
