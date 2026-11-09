@@ -29,6 +29,13 @@ public delegate void AbilityEffect(AbilityContext ctx);
 // ── БИБЛИОТЕКА ЭФФЕКТОВ ПО ТЕГАМ ──
 public static class EffectLibrary
 {
+    // Configs normally express slow as percentages (15 = 15%), while some runtime callers already use fractions (0.4 = 40%).
+    public static float NormalizeSlowValue(float value)
+    {
+        float fraction = value > 1f ? value * 0.01f : value;
+        return Math.Clamp(fraction, 0.05f, 0.45f);
+    }
+
     public static readonly Dictionary<string, Func<float, AbilityEffect>> Effects = new()
     {
         ["bonus_hp"] = v => ctx =>
@@ -189,7 +196,7 @@ public static class EffectLibrary
         {
             var p = ctx.Engine.GetPosition(ctx.Slot);
             int team = ctx.Player.TeamNum;
-            ctx.Combat.AoeApply(p.x,p.y,p.z, 220f+10f*ctx.SkillLevel, team, EffectTag.Slow, 0.5f, 3f, (int)(v*0.5f), ctx.Slot);
+            ctx.Combat.AoeApply(p.x,p.y,p.z, 220f+10f*ctx.SkillLevel, team, EffectTag.Slow, NormalizeSlowValue(v), 3f, (int)(v*0.5f), ctx.Slot);
             ctx.Engine.SpawnParticle("particles/frost/frost_fall.vpcf", p.x, p.y, p.z + 20);
         },
 
@@ -344,7 +351,7 @@ public static class EffectLibrary
             if(ctx.VictimSlot.HasValue)
             {
                 ctx.Engine.SetHealth(ctx.VictimSlot.Value, Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - (int)v));
-                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, 35, 3f);
+                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, NormalizeSlowValue(35f), 3f);
             }
         },
 
@@ -385,7 +392,7 @@ public static class EffectLibrary
         ["slow_on_hit"] = v => ctx =>
         {
             if(ctx.VictimSlot.HasValue)
-                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, v, 3f);
+                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, NormalizeSlowValue(v), 3f);
         },
 
         ["self_shield"] = v => ctx =>
@@ -551,7 +558,7 @@ public static class EffectLibrary
         ["slow"] = v => ctx =>
         {
             if(ctx.VictimSlot.HasValue)
-                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, v, 3f);
+                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, NormalizeSlowValue(v), 3f);
         },
 
         ["movement_speed"] = v => ctx =>
@@ -900,7 +907,7 @@ public static class EffectLibrary
             var enemies = ctx.Combat.EnemiesInRadius(p.x, p.y, p.z, radius, team).ToList();
             foreach (var enemy in enemies)
             {
-                ctx.Combat.Apply(EffectTag.Slow, enemy, Math.Clamp(v * 0.01f, 0.05f, 0.45f), 3f, 1f, ctx.Slot);
+                ctx.Combat.Apply(EffectTag.Slow, enemy, NormalizeSlowValue(v), 3f, 1f, ctx.Slot);
                 var ep = ctx.Engine.GetPosition(enemy);
                 ctx.Engine.Beam(p.x, p.y, p.z + 35, ep.x, ep.y, ep.z + 35, 105, 95, 255, 0.35f);
             }
@@ -1006,7 +1013,7 @@ public static class EffectLibrary
             {
                 int target = ctx.VictimSlot ?? -1;
                 if (target < 0) return;
-                ctx.Combat.Apply(EffectTag.Slow, target, v, 3f);
+                ctx.Combat.Apply(EffectTag.Slow, target, NormalizeSlowValue(v), 3f);
             };
         // Телепорт / blink / dash
         if (e.Contains("blink") || e.Contains("teleport") || e.Contains("dash") || e.Contains("leap") || e.Contains("charge"))
