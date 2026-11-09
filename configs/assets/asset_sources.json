@@ -155,8 +155,13 @@
       "name": "KinemIQ free game animations",
       "source_page": "https://kinemiq.itch.io/free-game-animations",
       "license": "175 CC0 clips; an additional 170 clips require CC BY 4.0 and 115 require CC BY 3.0",
-      "inventory": "460 clips on one humanoid skeleton; FBX, GLB/glTF or BVH export. Use only the 175 CC0 subset unless credits for other datasets are tracked.",
-      "status": "candidate_requires_manual_export_and_rig_test"
+      "inventory": "The complete browser library lists 460 clips on one humanoid skeleton; 175 from Quaternius are CC0, 170 require CC BY 4.0 and 115 require CC BY 3.0. The standalone downloadable CC0 pack currently advertised on the asset page contains 35 clips and is offered as 2.4 MB FBX and 2.1 MB GLB archives.",
+      "status": "candidate_requires_manual_export_and_rig_test",
+      "technical_notes": "Use only the 35-clip stand-alone CC0 pack for straightforward import. The larger 175-clip CC0 collection is advertised in the full browser library; do not assume it is identical to the 35-clip ZIP or that non-CC0 clips are included without attribution obligations.",
+      "download_formats": [
+        "FBX",
+        "GLB"
+      ]
     },
     {
       "id": "autosprite-free-assets",
