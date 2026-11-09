@@ -55,3 +55,17 @@ This audit checks repository file presence only. It does not prove that a VPCF c
 ## Current execution blocker
 
 This work environment has GitHub text-file access but no local AETHERION checkout, no Counter-Strike 2 Workshop Tools/resourcecompiler, no Blender, and no installed game-dev asset CLI. Binary source archives cannot be downloaded into this session or compiled here. The fetch script is committed for execution on the Windows machine that has the repository and game tools.
+
+
+## Additional audio gap found
+
+The sounds.json configuration contains 175 records. Of these, 71 records set customSound and they resolve to 68 unique paths. Every unique path currently uses the source-looking form sound/...wav. The tracked repository contains no WAV/MP3/OGG/FLAC sources and no compiled VSND_C audio assets.
+
+AudioManager.Execute passes the selected string directly to the client's play command. The CounterStrikeSharp upstream TestPlugin sample uses a Source 2 resource path such as sounds/ui/counter_beep.vsnd. Source 2 Viewer documents compiled audio resources as VSND_C under sounds/ or sound/ directories. That means the existing customSound entries need a deliberate source-to-runtime path review and actual audio packages; simply downloading WAVs will not complete the feature.
+
+Reference implementation and format notes:
+- CounterStrikeSharp sample: https://github.com/roflmuffin/CounterStrikeSharp/blob/main/managed/TestPlugin/TestPlugin.cs (css_sound command)
+- Source 2 audio resources: https://s2v.app/ValveResourceFormat/guides/exporting-sounds.html
+- Source 2 sound-event editor: https://www.source2.wiki/ExternalTools/Hammer5Tools/editors/sound-editor
+
+No sound paths were bulk-rewritten because there are no compiled custom sounds to test against the running client. The expanded CI audit now reports both missing custom audio and missing custom particle resources.
