@@ -446,3 +446,66 @@ Grab3D currently lists eight free CC0 dragon models, with formats varying by mod
 - docs/ASSET_IMPORT_AUDIT.md: records the repository inventory and the real import gate.
 
 The source-fetch script is prepared but has not been run in this environment. No binaries were imported, no VPCFs were generated, and no Workshop Tools compile or game-server visual test has been claimed.
+
+
+---
+
+## Animation, sound and effect research: second pass (2026-11-10)
+
+### Humanoid animation retargeting
+
+**SupaVoxel animation library** offers 160 CC0 humanoid animation clips. It takes an already-rigged humanoid GLB/FBX and exports an animated GLB with one clip or a set. This is particularly useful for AETHERION's existing humanoid rigs: first retarget locomotion, idle, attack, hit and death to a single test agent, then decide whether the clip quality and skeleton mapping are worth integrating.
+
+- Source: https://supavoxel.com/tools/animate-3d-model
+- Treat exported GLB as source material, not a ready Source 2 model.
+
+**KinemIQ Free Game Animations** offers 460 clips on one humanoid skeleton, with FBX, GLB/glTF and BVH export. The license split matters:
+- 175 clips from Quaternius Universal Animation Library are CC0.
+- 170 clips from the 100STYLE dataset require CC BY 4.0 attribution.
+- 115 clips from Open Motion Project / ACCAD / Ohio State require CC BY 3.0 attribution.
+
+For a low-friction AETHERION import pipeline, use only the 175 CC0 subset unless we intentionally add and preserve the attribution records for the rest. The listed CC0 archives are small: 2.4 MB FBX and 2.1 MB GLB.
+
+- Source: https://kinemiq.itch.io/free-game-animations
+- CC0 download instructions and provenance list: https://kinemiq.app/sources
+
+### Sound library shortlist
+
+**SpritePilot Sound Effects** offers 78 CC0 effects, 48 kHz mono, supplied in WAV, OGG and MP3. The pack covers explosions, impacts, sword swing/clash, footsteps, dash whoosh, UI, creature roars/growls, spell cast, fireball, ice, lightning, heal, teleport, portal and eight ambient loops. Full pack is listed at 24.5 MB; OGG-only at 2.5 MB. Strong first source for the 68 unique missing custom sound paths already configured in AETHERION, but every selected sound still requires a Source 2 VSND_C compile and in-game playback validation.
+
+- Source and CC0 terms: https://spritepilot.com/free-game-assets/sound-effects
+
+**Kaino SFX Library** offers 1,397 CC0 sound effects in 21 categories. Relevant category sizes include 44 creature effects, 57 explosions/weapons, 90 fantasy/RPG, 81 impacts and 123 UI effects. Good reserve library for filling gaps after the smaller SpritePilot set.
+
+- Source and CC0 terms: https://kaino.dev/library/sfx
+
+**SpritePilot Pixel Art Effects** offers 82 CC0 pixel-art sprites/sheets overall, including 7 animated general effects, 9 combat effects, 9 spell/projectile effects, weather and ambient details. Examples include explosion, smoke puff, landing dust, hit spark, sword slash, claw slash, fireball, ice shard, energy orb and lightning strike. These are 2D sprite sheets, not 3D particles; they can serve HUD/menu/2D icon use or as source textures for a deliberately authored billboard VPCF.
+
+- Source and CC0 terms: https://spritepilot.com/free-game-assets
+
+### More character/prop discovery
+
+**AutoSprite Free Assets** advertises 20 3D GLB models, 13 animated 2D character sheets and 50 2D prop/effect sheets under CC0. The 3D entries need per-model inspection for rigging and polygon count; 2D sheets are useful for UI and icons but do not replace 3D CS2 agents.
+
+- Source: https://www.autosprite.io/free
+
+**SpriteCanvas CC0 Monster Sprites** provides small 2D enemies such as slime, mushroom, goblin and stone golem with idle/walk/attack/hurt/death animation sets. Useful for menus, HUD illustrations and icons only, not as Source 2 player models.
+
+- Source: https://spritecanvas.itch.io/free-cc0-monster-sprites
+
+### Audio implementation note for this repository
+
+The CS2 runtime path must be validated against actual compiled resources. CounterStrikeSharp's upstream TestPlugin example invokes play sounds/ui/counter_beep.vsnd; Source 2 stores compiled audio resources as VSND_C and sound events as VSNDEVT_C. The current sounds.json paths use sound/...wav, which are source-like paths, not a verified client runtime resource path. Do not flip the current 68 paths until a small test sound is compiled, precached/delivered and played successfully on the dedicated server/client.
+
+- CounterStrikeSharp sample: https://github.com/roflmuffin/CounterStrikeSharp/blob/main/managed/TestPlugin/TestPlugin.cs
+- Source 2 audio resource reference: https://s2v.app/ValveResourceFormat/guides/exporting-sounds.html
+- Sound-event editor: https://www.source2.wiki/ExternalTools/Hammer5Tools/editors/sound-editor
+
+### Integration priority after research
+
+1. **Humanoid animation proof:** take one current rig, export 3-5 CC0 locomotion/attack/hit/death clips, confirm skeleton mapping and retarget in Blender, then compile and test one agent in CS2.
+2. **Audio proof:** choose one UI click and one ability sound from SpritePilot, convert to VSND_C, use a test SoundEvent or validated play sounds/... path, verify on a real client, then expand the sound map.
+3. **3D creature proof:** prefer the 26-creature fantasy bundle / Gobkit before trying large static dragon catalogues; test a single dragon with one idle and one attack clip first.
+4. **VFX proof:** build one smoke or fire VPCF from the CC0 Kenney source textures; do not treat a sprite sheet as an already-authored Source 2 particle system.
+
+All entries above are candidates, not installed resources.
