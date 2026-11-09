@@ -35,7 +35,7 @@ public static class EffectLibrary
             ctx.Engine.AddHealth(ctx.Slot, (int)(v * ctx.SkillLevel), 100 + (int)(v * ctx.SkillLevel)),
 
         ["speed_buff"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + v * ctx.SkillLevel),
+            ctx.Combat.SetPersistentSpeedModifier(ctx.Slot, "speed_buff", 1f + v * ctx.SkillLevel),
 
         ["low_gravity"] = v => ctx =>
             ctx.Engine.SetGravity(ctx.Slot, Math.Max(0.3f, 1f - v * ctx.SkillLevel)),
@@ -252,7 +252,7 @@ public static class EffectLibrary
         ["berserk"] = v => ctx =>
         {
             ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, Math.Min(v * 0.01f, 0.5f), 5f);
-            ctx.Engine.SetSpeed(ctx.Slot, 1.1f + Math.Min(v * 0.01f, 0.2f));
+            ctx.Combat.SetPersistentSpeedModifier(ctx.Slot, "berserk", 1.1f + Math.Min(v * 0.01f, 0.2f));
         },
 
         ["death_save"] = v => ctx =>
@@ -337,7 +337,7 @@ public static class EffectLibrary
         },
 
         ["chase_speed"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + v*0.01f * ctx.SkillLevel),
+            ctx.Combat.SetPersistentSpeedModifier(ctx.Slot, "chase_speed", 1f + v*0.01f * ctx.SkillLevel),
 
         ["execute_ult"] = v => ctx =>
         {
@@ -555,7 +555,7 @@ public static class EffectLibrary
         },
 
         ["movement_speed"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + v * 0.01f * ctx.SkillLevel),
+            ctx.Combat.Apply(EffectTag.SpeedBuff, ctx.Slot, v * 0.01f * ctx.SkillLevel, 4f),
 
         ["haste"] = v => ctx =>
             ctx.Combat.Apply(EffectTag.Haste, ctx.Slot, Math.Clamp(v * 0.01f * ctx.SkillLevel, 0.05f, 0.35f), 4f),
@@ -697,7 +697,7 @@ public static class EffectLibrary
         },
 
         ["speed_boost"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + v*0.01f * ctx.SkillLevel),
+            ctx.Combat.SetPersistentSpeedModifier(ctx.Slot, "speed_boost", 1f + v*0.01f * ctx.SkillLevel),
 
         ["dash_damage"] = v => ctx =>
         {
@@ -787,7 +787,7 @@ public static class EffectLibrary
         ["berserk_self"] = v => ctx =>
         {
             ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, Math.Min(v * 0.01f, 0.5f), 6f);
-            ctx.Engine.SetSpeed(ctx.Slot, 1.15f + Math.Min(v * 0.01f, 0.25f));
+            ctx.Combat.Apply(EffectTag.SpeedBuff, ctx.Slot, 0.15f + Math.Min(v * 0.01f, 0.25f), 6f);
         },
 
         ["hp_cost_aoe"] = v => ctx =>
@@ -880,7 +880,7 @@ public static class EffectLibrary
 
         ["backstab"] = v => ctx =>
         {
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + (v * 0.01f * ctx.SkillLevel));
+            ctx.Combat.SetPersistentSpeedModifier(ctx.Slot, "backstab", 1f + (v * 0.01f * ctx.SkillLevel));
             if (ctx.VictimSlot.HasValue)
             {
                 int damage = (int)(v * Math.Max(1, ctx.SkillLevel) * 1.5f);
@@ -890,7 +890,7 @@ public static class EffectLibrary
         },
 
         ["blinded_bonus"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + (v*0.005f * ctx.SkillLevel)),
+            ctx.Combat.SetPersistentSpeedModifier(ctx.Slot, "blinded_bonus", 1f + (v*0.005f * ctx.SkillLevel)),
 
         ["time_dilation"] = v => ctx =>
         {
@@ -1057,7 +1057,8 @@ public static class EffectLibrary
             };
         // Ускорение / haste
         if (e.Contains("speed") || e.Contains("haste") || e.Contains("frenzy"))
-            return ctx => { ctx.Engine.SetSpeed(ctx.Slot, 1f + v * 0.01f * ctx.SkillLevel); };
+            return ctx => ctx.Combat.Apply(EffectTag.Haste, ctx.Slot,
+                Math.Clamp(v * 0.01f * ctx.SkillLevel, 0.05f, 0.35f), 4f);
         // Отражение / parry
         if (e.Contains("parry") || e.Contains("reflect") || e.Contains("mirror"))
             return ctx => { ctx.Combat.Apply(EffectTag.Reflect, ctx.Slot, v, 5f); };
