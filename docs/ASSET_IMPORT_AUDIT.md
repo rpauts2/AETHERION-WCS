@@ -69,3 +69,18 @@ Reference implementation and format notes:
 - Source 2 sound-event editor: https://www.source2.wiki/ExternalTools/Hammer5Tools/editors/sound-editor
 
 No sound paths were bulk-rewritten because there are no compiled custom sounds to test against the running client. The expanded CI audit now reports both missing custom audio and missing custom particle resources.
+
+
+## Gobkit intake has been made dynamic
+
+The Windows source-intake script now reads the official no-auth JSON manifest instead of hard-coding only two Gobkit ZIP addresses. It:
+- snapshots the manifest used for that download run;
+- accepts only packs whose manifest license string explicitly contains CC0 1.0;
+- accepts ZIP URLs only over HTTPS from the gobkit.com host;
+- records pack metadata (kind, GLB format, count, rigged flag, FPS and animation names);
+- preserves the raw ZIP and a SHA-256 receipt;
+- uses a path-traversal-safe ZIP extractor and never overwrites an existing extracted package.
+
+Important freshness caveat: the API snapshot currently advertises version 2026-07-23 and enumerates Minion, Animal, Animal Vol. 2 and Nature Kit packages. The current freebies landing page describes a newer 79-model count and the creator devlog mentions additional later packs. The intake script downloads only the packs present in the live API response at execution time; it does not claim the API fully mirrors every newer page/devlog item.
+
+The script is still source intake only. It does not place GLB files in the CS2 game directory, retarget skeletons, compile models or run a server test.
