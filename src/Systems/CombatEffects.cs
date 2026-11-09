@@ -35,6 +35,8 @@ public class CombatEffects
 {
     private readonly IEngineApi _engine;
     private readonly List<ActiveEffect> _effects = new();
+    // Passive movement bonuses must survive recomputation when temporary effects expire.
+    private readonly Dictionary<int, Dictionary<string, float>> _persistentSpeedModifiers = new();
 
     // Callback for AOE damage — allows systems like BossSystem to react
     public Action<float, float, float, float, int>? OnAoeDamage { get; set; }
@@ -116,6 +118,18 @@ public class CombatEffects
         RefreshVisibilityState(e.Slot);
     }
 
+    public void SetPersistentSpeedModifier(int slot, string source, float multiplier)
+    {
+        if (slot < 0 || string.IsNullOrWhiteSpace(source)) return;
+        if (!_persistentSpeedModifiers.TryGetValue(slot, out var modifiers))
+        {
+            modifiers = new Dictionary<string, float>(StringComparer.Ordinal);
+            _persistentSpeedModifiers[slot] = modifiers;
+        }
+        modifiers[source] = Math.Clamp(multiplier, 0.2f, 2.5f);
+        RefreshMovementState(slot);
+    }
+
     private void RefreshMovementState(int slot)
     {
         var active = _effects.Where(e => e.Slot == slot && e.ExpiresUtc > DateTime.UtcNow).ToList();
@@ -128,6 +142,11 @@ public class CombatEffects
         // Compose independent effects instead of selecting only the strongest one.
         // Otherwise a haste buff completely cancels a slow field (and vice versa).
         float multiplier = 1f;
+        if (_persistentSpeedModifiers.TryGetValue(slot, out var persistent))
+        {
+            foreach (var factor in persistent.Values)
+                multiplier = Math.Clamp(multiplier * factor, 0.05f, 3f);
+        }
         foreach (var effect in active)
         {
             float factor = effect.Tag switch
@@ -171,6 +190,7 @@ public class CombatEffects
             .ToList();
 
         _effects.RemoveAll(e => e.Slot == slot || e.SourceSlot == slot);
+        _persistentSpeedModifiers.Remove(slot);
 
         foreach (var affected in affectedSlots)
         {
@@ -337,6 +357,7 @@ public class CombatEffects
     public void ClearPlayer(int slot)
     {
         _effects.RemoveAll(e => e.Slot == slot);
+        _persistentSpeedModifiers.Remove(slot);
 
         // Recompute after removal. Calling OnExpire before removing a live effect
         // sees that effect as active and leaves its movement/CC/visibility behind.
