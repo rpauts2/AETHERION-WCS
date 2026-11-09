@@ -41,6 +41,19 @@ public sealed class CombatEffectsTests
     }
 
     [Fact]
+    public void RemovingOnePersistentModifierPreservesOtherBonuses()
+    {
+        var engine = new RecordingEngine();
+        var effects = new CombatEffects(engine);
+        effects.SetPersistentSpeedModifier(1, "race-passive", 1.2f);
+        effects.SetPersistentSpeedModifier(1, "global-mutation-speed", 1.5f);
+
+        effects.RemovePersistentSpeedModifier(1, "global-mutation-speed");
+
+        Assert.Equal(1.2f, engine.LastSpeed, 3);
+    }
+
+    [Fact]
     public void PersistentSpeedModifier_SurvivesTemporarySlowRemoval()
     {
         var engine = new RecordingEngine();
