@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "purpose": "External source registry for candidate assets. Entries are not installed game resources.",
+  "last_researched": "2026-11-10",
+  "policy": {
+    "preferred_license": "CC0-1.0",
+    "incoming_directory": "assets/incoming/cc0",
+    "compiled_content_directory": "content/csgo_addons/aetherion",
+    "promotion_requirements": [
+      "creator and source provenance",
+      "license evidence captured with the package",
+      "download SHA-256",
+      "static format, topology, material, skeleton and animation inspection",
+      "Source 2 compile and in-game client/server verification"
+    ]
+  },
+  "sources": [
+    {
+      "id": "cethiel-dragon-3d",
+      "name": "Cethiel's Dragon 3D",
+      "category": "creature",
+      "license": "CC0-1.0",
+      "license_evidence": "https://opengameart.org/content/cethiels-dragon-3d",
+      "source_page": "https://opengameart.org/content/cethiels-dragon-3d",
+      "download_url": "https://opengameart.org/sites/default/files/dragon_oga.zip",
+      "archive_name": "dragon_oga.zip",
+      "destination": "cethiels_dragon",
+      "status": "candidate_not_downloaded",
+      "use": "Dragon character or summoned-creature candidate; inspect exact archive contents, rig, skeleton, animations, scale and textures before porting.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "gobkit-animal-pack",
+      "name": "Gobkit Free Animal Pack",
+      "category": "creature",
+      "license": "CC0-1.0",
+      "license_evidence": "https://gobkit.com/freebies",
+      "source_page": "https://gobkit.com/freebies",
+      "manifest_url": "https://gobkit.com/api/free",
+      "download_url": "https://gobkit.com/freebies/animal/gobkit-animal-pack.zip",
+      "archive_name": "gobkit-animal-pack.zip",
+      "destination": "gobkit_animal_pack",
+      "status": "candidate_not_downloaded",
+      "format": ["GLB"],
+      "inventory": "10 rigged animated creatures; idle, attack, dead and walk timeline segments at 24 FPS.",
+      "technical_notes": "One master animation timeline per GLB. Split actions using the exact frame ranges in the manifest. Local +Z is forward, +Y is up, units are metres.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "gobkit-minion-pack",
+      "name": "Gobkit Free Minion Pack",
+      "category": "creature",
+      "license": "CC0-1.0",
+      "license_evidence": "https://gobkit.com/freebies",
+      "source_page": "https://gobkit.com/freebies",
+      "manifest_url": "https://gobkit.com/api/free",
+      "download_url": "https://gobkit.com/freebies/gobkit-free-pack.zip",
+      "archive_name": "gobkit-free-pack.zip",
+      "destination": "gobkit_minion_pack",
+      "status": "candidate_not_downloaded",
+      "format": ["GLB"],
+      "inventory": "8 rigged low-poly enemies; idle, attack and dead timeline segments at 24 FPS.",
+      "technical_notes": "One master animation timeline per GLB. Split actions using the exact frame ranges in the manifest.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "kenney-particle-pack",
+      "name": "Kenney Particle Pack",
+      "category": "vfx-textures",
+      "license": "CC0-1.0",
+      "license_evidence": "https://kenney.nl/assets/particle-pack",
+      "source_page": "https://kenney.nl/assets/particle-pack",
+      "download_url": "https://opengameart.org/sites/default/files/kenney_particlePack.zip",
+      "archive_name": "kenney_particlePack.zip",
+      "destination": "kenney_particle_pack",
+      "status": "candidate_not_downloaded",
+      "format": ["PNG", "tilesheets", "vector files", "Unity sample effects"],
+      "inventory": "80 particle, light-cookie and shader sprites; sample effects cover fire, smoke, magic, hearts, sparks and electricity.",
+      "use": "Texture source for custom Source 2 particles. This is not itself a VPCF particle effect.",
+      "cs2_readiness": "texture_source_only"
+    },
+    {
+      "id": "kenney-smoke-particles",
+      "name": "Kenney Smoke Particles",
+      "category": "vfx-textures",
+      "license": "CC0-1.0",
+      "license_evidence": "https://opengameart.org/content/smoke-particle-assets",
+      "source_page": "https://opengameart.org/content/smoke-particle-assets",
+      "download_url": "https://opengameart.org/sites/default/files/smokeParticleAssets.zip",
+      "archive_name": "smokeParticleAssets.zip",
+      "destination": "kenney_smoke_particles",
+      "status": "candidate_not_downloaded",
+      "format": ["PNG"],
+      "inventory": "77 sprite files across five styles: black smoke, explosion, fart, flash and white puff.",
+      "use": "Texture source for smoke, impact and blast VPCFs. This is not a ready-made CS2 effect.",
+      "cs2_readiness": "texture_source_only"
+    }
+  ],
+  "additional_research_candidates": [
+    {
+      "id": "fantasy-creatures-26",
+      "name": "Fantasy Creatures: 26 rigged and animated",
+      "source_page": "https://algumacoisaqq.itch.io/fantasy-creatures-wolf-giant-rat-spider-wasp-centipede",
+      "license": "CC0-1.0",
+      "inventory": "26 creatures. The dragon has 14 clips including idle, locomotion, bite, claw, tail sweep, roar, fire breath, takeoff, fly, glide, land, hit and death. The hydra has three heads and nine clips.",
+      "status": "candidate_requires_manual_download"
+    },
+    {
+      "id": "fantasy-forge-144",
+      "name": "Fantasy Forge",
+      "source_page": "https://isatern.itch.io/fantasy-forge-animated-fantasy-assets",
+      "license": "CC0-1.0",
+      "inventory": "144 models and 479 named animation clips; original GLB, two LOD tiers and Blender source files.",
+      "status": "candidate_requires_manual_download"
+    },
+    {
+      "id": "kaino-sfx-library",
+      "name": "Kaino SFX Library",
+      "source_page": "https://kaino.dev/library/sfx",
+      "license": "CC0-1.0",
+      "inventory": "1397 sound effects across 21 categories, including creatures, fantasy/RPG, magic, spell, impacts, fire and whoosh.",
+      "status": "candidate_requires_audio_audition"
+    },
+    {
+      "id": "grab3d-dragon-index",
+      "name": "Grab3D Dragon catalogue",
+      "source_page": "https://grab3d.com/free-3d-models/dragon/",
+      "license": "CC0-1.0",
+      "inventory": "8 dragon entries, 6k to 800k triangles, GLB/FBX/BLEND/USDZ/OBJ.",
+      "status": "candidate_requires_per_model_triage",
+      "risk": "Some high-detail entries are very heavy or static; do not select for a live CS2 server without checking polygon budget and rigging."
+    }
+  ]
+}
