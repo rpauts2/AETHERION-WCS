@@ -398,3 +398,51 @@
 - [ ] Запись в asset manifest с SHA256 и license receipt.
 - [ ] Не включать ассет в публичный релиз до прохождения всех пунктов.
 
+
+
+---
+
+## Fresh intake update — 2026-11-10
+
+### Gobkit: machine-readable CC0 creature source
+
+The official free-assets page currently describes a CC0 1.0 collection of 79 GLB assets, including rigged/animated creatures and static nature props. The open JSON manifest at https://gobkit.com/api/free includes direct file URLs, license text, rig flags, FPS and frame ranges.
+
+Important import detail: a rigged Gobkit GLB contains one master timeline rather than separate idle/attack/death animation clips. Split actions by the manifest's exact frame ranges at 24 FPS. The manifest documents +Z forward, +Y up and metre units. Do not add a guessed 180-degree rotation or assume animation clips are already separated.
+
+The currently documented animal pack contains 10 animated creatures; the minion pack contains 8 rigged enemy models. Both are CC0 1.0. The intake manifest in configs/assets/asset_sources.json and the Windows fetcher in scripts/fetch_cc0_assets.ps1 now include those two packs.
+
+Sources:
+- Official pack page and license: https://gobkit.com/freebies
+- Open manifest and exact file/frame metadata: https://gobkit.com/api/free
+- Public source mirror and technical notes: https://github.com/Ariescar/gobkit-free-assets
+
+### Particle source textures
+
+Two low-risk CC0 texture sets have been added to the intake plan:
+- Kenney Particle Pack: 80 particle/light/shader sprites; the official page declares CC0.
+- Kenney Smoke Particles: 77 separate PNGs in five styles; OpenGameArt declares CC0.
+
+These are textures, not CS2 particle definitions. They must be assembled into VPCF resources in the CS2 Particle Editor and compiled by Workshop Tools.
+
+Sources:
+- https://kenney.nl/assets/particle-pack
+- https://opengameart.org/content/particle-pack-80-sprites
+- https://opengameart.org/content/smoke-particle-assets
+
+### Additional creature discovery
+
+Grab3D currently lists eight free CC0 dragon models, with formats varying by model. The category spans roughly 6k to 800k triangles. Treat it as a discovery index, not an automatic import list: reject high-poly or static models for live server use unless a reduction/rigging plan is validated. The Griffin entry, for example, is described as 800k triangles and static, so it is not a good first player-agent candidate.
+
+- https://grab3d.com/free-3d-models/dragon/
+- https://grab3d.com/models/creatures/griffin/
+
+### Repository-side guardrails added
+
+- configs/assets/asset_sources.json: machine-readable source registry with license evidence, archive URLs, formats and CS2-readiness status.
+- scripts/fetch_cc0_assets.ps1: downloads five CC0 source archives to assets/incoming/cc0, retains ZIPs, writes SHA-256 receipts, prevents overwrite and rejects ZIP path traversal.
+- scripts/audit_asset_references.py: scans only AETHERION-owned particle namespaces and distinguishes missing custom resources from stock CS2 resources.
+- tests/test_audit_asset_references.py: tests the reference scan, compiled-resource lookup and quarantined model warning.
+- docs/ASSET_IMPORT_AUDIT.md: records the repository inventory and the real import gate.
+
+The source-fetch script is prepared but has not been run in this environment. No binaries were imported, no VPCFs were generated, and no Workshop Tools compile or game-server visual test has been claimed.
