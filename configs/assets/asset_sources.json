@@ -41,7 +41,9 @@
       "archive_name": "gobkit-animal-pack.zip",
       "destination": "gobkit_animal_pack",
       "status": "candidate_not_downloaded",
-      "format": ["GLB"],
+      "format": [
+        "GLB"
+      ],
       "inventory": "10 rigged animated creatures; idle, attack, dead and walk timeline segments at 24 FPS.",
       "technical_notes": "One master animation timeline per GLB. Split actions using the exact frame ranges in the manifest. Local +Z is forward, +Y is up, units are metres.",
       "cs2_readiness": "source_asset_only"
@@ -58,7 +60,9 @@
       "archive_name": "gobkit-free-pack.zip",
       "destination": "gobkit_minion_pack",
       "status": "candidate_not_downloaded",
-      "format": ["GLB"],
+      "format": [
+        "GLB"
+      ],
       "inventory": "8 rigged low-poly enemies; idle, attack and dead timeline segments at 24 FPS.",
       "technical_notes": "One master animation timeline per GLB. Split actions using the exact frame ranges in the manifest.",
       "cs2_readiness": "source_asset_only"
@@ -74,7 +78,12 @@
       "archive_name": "kenney_particlePack.zip",
       "destination": "kenney_particle_pack",
       "status": "candidate_not_downloaded",
-      "format": ["PNG", "tilesheets", "vector files", "Unity sample effects"],
+      "format": [
+        "PNG",
+        "tilesheets",
+        "vector files",
+        "Unity sample effects"
+      ],
       "inventory": "80 particle, light-cookie and shader sprites; sample effects cover fire, smoke, magic, hearts, sparks and electricity.",
       "use": "Texture source for custom Source 2 particles. This is not itself a VPCF particle effect.",
       "cs2_readiness": "texture_source_only"
@@ -90,7 +99,9 @@
       "archive_name": "smokeParticleAssets.zip",
       "destination": "kenney_smoke_particles",
       "status": "candidate_not_downloaded",
-      "format": ["PNG"],
+      "format": [
+        "PNG"
+      ],
       "inventory": "77 sprite files across five styles: black smoke, explosion, fart, flash and white puff.",
       "use": "Texture source for smoke, impact and blast VPCFs. This is not a ready-made CS2 effect.",
       "cs2_readiness": "texture_source_only"
@@ -129,6 +140,40 @@
       "inventory": "8 dragon entries, 6k to 800k triangles, GLB/FBX/BLEND/USDZ/OBJ.",
       "status": "candidate_requires_per_model_triage",
       "risk": "Some high-detail entries are very heavy or static; do not select for a live CS2 server without checking polygon budget and rigging."
+    },
+    {
+      "id": "supaVoxel-160-cc0-animations",
+      "name": "SupaVoxel humanoid animation tool",
+      "source_page": "https://supavoxel.com/tools/animate-3d-model",
+      "license": "160 CC0 animation clips",
+      "inventory": "Accepts an already-rigged humanoid GLB/FBX and offers 160 CC0 clips; exports animated GLB with one clip or a set.",
+      "status": "candidate_requires_rig_compatibility_test",
+      "use": "Retarget locomotion, attack, hit and death animation to existing humanoid player-agent rigs."
+    },
+    {
+      "id": "kinemiq-free-game-animations",
+      "name": "KinemIQ free game animations",
+      "source_page": "https://kinemiq.itch.io/free-game-animations",
+      "license": "175 CC0 clips; an additional 170 clips require CC BY 4.0 and 115 require CC BY 3.0",
+      "inventory": "460 clips on one humanoid skeleton; FBX, GLB/glTF or BVH export. Use only the 175 CC0 subset unless credits for other datasets are tracked.",
+      "status": "candidate_requires_manual_export_and_rig_test"
+    },
+    {
+      "id": "autosprite-free-assets",
+      "name": "AutoSprite Free Game Assets",
+      "source_page": "https://www.autosprite.io/free",
+      "license": "CC0",
+      "inventory": "20 3D GLB models, 13 animated 2D character sheets and 50 2D prop/effect sheets.",
+      "status": "candidate_requires_per_model_triage",
+      "risk": "The 2D sheets are useful for menus/icons but cannot replace a rigged 3D CS2 player agent."
+    },
+    {
+      "id": "spritepilot-sfx-78",
+      "name": "SpritePilot Sound Effects",
+      "source_page": "https://spritepilot.com/free-game-assets/sound-effects",
+      "license": "CC0",
+      "inventory": "78 WAV/OGG/MP3 sound effects covering impacts, combat, magic, creatures, UI and ambience.",
+      "status": "candidate_requires_audio_audition_and_source2_compile"
     }
   ]
 }
