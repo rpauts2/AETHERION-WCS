@@ -184,7 +184,7 @@ public static class EffectLibrary
         },
 
         ["team_speed"] = v => ctx =>
-            ctx.Engine.ForAlliesInRadius(ctx.Slot, 350f, s => ctx.Engine.SetSpeed(s, 1.0f + 0.05f * ctx.SkillLevel + 0.15f)),
+            ctx.Engine.ForAlliesInRadius(ctx.Slot, 350f, s => ctx.Combat.Apply(EffectTag.SpeedBuff, s, 0.2f + 0.05f * ctx.SkillLevel, 5f)),
 
         ["shield"] = v => ctx =>
         {
@@ -640,7 +640,7 @@ public static class EffectLibrary
             if(ctx.VictimSlot.HasValue)
             {
                 ctx.Engine.Blind(ctx.VictimSlot.Value, 0.1f, 0.1f);
-                ctx.Engine.SetSpeed(ctx.VictimSlot.Value, 0.75f);
+                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, 0.25f, 0.1f);
             }
         },
 
@@ -867,7 +867,7 @@ public static class EffectLibrary
             foreach(var s in ctx.Combat.EnemiesInRadius(p.x, p.y, p.z, 220f, team))
             {
                 ctx.Engine.Blind(s, 2.0f, 1.5f);
-                ctx.Engine.SetSpeed(s, 0.6f);
+                ctx.Combat.Apply(EffectTag.Slow, s, 0.4f, 2f);
             }
             ctx.Engine.PrintToCenter(ctx.Slot, "🔊 Оглушение!");
         },
