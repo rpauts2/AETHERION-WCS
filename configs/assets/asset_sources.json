@@ -202,6 +202,66 @@
       "status": "candidate_for_ui_only",
       "inventory": "Slime, mushroom, goblin and stone golem sprite sheets with idle/walk/attack/hurt/death animation sets.",
       "cs2_readiness": "2d_ui_asset_only"
+    },
+    {
+      "id": "gobkit-animal-pack-vol-2",
+      "name": "Gobkit Free Animal Pack Vol. 2",
+      "category": "creature",
+      "license": "CC0-1.0",
+      "license_evidence": "https://gobkit.itch.io/gobkit-free-animal-pack-vol-2",
+      "source_page": "https://gobkit.itch.io/gobkit-free-animal-pack-vol-2",
+      "download_url": "https://gobkit.com/freebies/animalB/gobkit-animalB-pack.zip",
+      "status": "candidate_in_dynamic_gobkit_api",
+      "format": [
+        "GLB"
+      ],
+      "inventory": "10 rigged low-poly animals: Bee, Blue, Boar, Fugu, Goat, Marmot, Owl, Rat, Seal and Whale. Idle, attack, dead and walk at 24 FPS.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "gobkit-nature-kit",
+      "name": "Gobkit Nature Kit",
+      "category": "environment-props",
+      "license": "CC0-1.0",
+      "license_evidence": "https://gobkit.com/freebies",
+      "source_page": "https://gobkit.com/freebies",
+      "download_url": "https://gobkit.com/freebies/environment/gobkit-nature-kit.zip",
+      "status": "candidate_in_dynamic_gobkit_api",
+      "format": [
+        "GLB"
+      ],
+      "inventory": "Nature kit pack: trees, rocks, cliffs and props; API snapshot count 42 including an assembled scene.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "rollpoly-generator",
+      "name": "Rollpoly low-poly character & prop generator",
+      "category": "procedural-3d",
+      "license": "CC0-1.0",
+      "license_evidence": "https://rollpoly.tsuyatt.com/",
+      "source_page": "https://rollpoly.tsuyatt.com/",
+      "status": "candidate_for_original_placeholders",
+      "format": [
+        "GLB",
+        "FBX",
+        "glTF",
+        "Unity package"
+      ],
+      "inventory": "Browser-based generator for humanoids, monsters and props; example output 566 triangles, 23 bones and 2 morph targets. Generation runs in browser, no account.",
+      "technical_notes": "Generated assets vary by seed and selected options; inspect each exported model. Useful for rapid placeholder races, props and basic monster silhouettes, not finished art.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "3dvalley-rigged-cc0-index",
+      "name": "3D Valley rigged CC0 model index",
+      "category": "asset-index",
+      "license": "CC0 per indexed source item; verify on each original source page",
+      "license_evidence": "https://3dvalley.com/3d-models/rigged",
+      "source_page": "https://3dvalley.com/3d-models/rigged",
+      "status": "research_index_not_bulk_download",
+      "inventory": "Catalogue states 705 CC0 rigged models, 681 animated. Includes many Gobkit animals and other creators.",
+      "technical_notes": "Aggregator, not blanket permission for every file. Verify original creator, exact CC0 evidence, skeleton, animation clips and download URL for each candidate before import.",
+      "cs2_readiness": "index_only"
     }
   ]
 }
