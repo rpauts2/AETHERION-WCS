@@ -31,10 +31,26 @@ public sealed class CombatEffectsTests
     }
 
     [Fact]
-    public void ClearPlayer_RemovesMovementModifiersAndRestoresBaseSpeed()
+    public void PersistentSpeedModifier_SurvivesTemporarySlowRemoval()
     {
         var engine = new RecordingEngine();
         var effects = new CombatEffects(engine);
+        effects.SetPersistentSpeedModifier(1, "race-passive", 1.2f);
+        effects.Apply(EffectTag.Slow, slot: 1, value: 0.4f, durationSec: 4f);
+
+        Assert.Equal(0.72f, engine.LastSpeed, 3);
+
+        effects.RemoveEffect(1, EffectTag.Slow);
+
+        Assert.Equal(1.2f, engine.LastSpeed, 3);
+    }
+
+    [Fact]
+    public void ClearPlayer_RemovesPersistentAndTemporaryMovementModifiers()
+        {
+        var engine = new RecordingEngine();
+        var effects = new CombatEffects(engine);
+        effects.SetPersistentSpeedModifier(1, "race-passive", 1.2f);
         effects.Apply(EffectTag.Haste, slot: 1, value: 0.2f, durationSec: 4f);
 
         effects.ClearPlayer(1);
