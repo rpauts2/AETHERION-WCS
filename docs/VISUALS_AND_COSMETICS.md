@@ -81,3 +81,22 @@ The in-game entry point is `!wcs` → **Внешний вид**, or `!cosmetics`
 3. Add preview and ownership status to the cosmetic menu.
 4. Add an asset validator that checks configured model paths and referenced particle files before release.
 5. Add server-side visual-effect rate limits and a global maximum for attached props.
+
+
+## AETHERION race visual pack (2035–2039)
+
+The five former third-party character slots are now original AETHERION race identities using stock CS2 player-agent models, race tint, and effects already referenced by the plugin runtime. No third-party character mesh is copied into this repository.
+
+| Race ID | Race | Stock model | Spawn effect | Visual identity |
+|---|---|---|---|---|
+| 2035 | Крио-клинок | CT Arctic agent | Frost fall | Ice-blue tint, freeze and blink kit |
+| 2036 | Авангард | CT SWAT agent | EMP zap | Green tactical armor identity, shield and stun |
+| 2037 | Алый фантом | T Phoenix agent | Small fire | Crimson tint, lifesteal and haste |
+| 2038 | Разломник | T Professional agent | Aether dash | Violet tint, blink and time-stop ultimate |
+| 2039 | Секторный подавитель | CT SAS agent | Halloween smoke | Steel-blue tint, control and area damage |
+
+These are ready-to-configure stock-game model references, not newly downloaded or redistributed custom model files. The five race kits use effect keys present in `RaceRuntime.EffectLibrary`. Their actual visual appearance and particle availability still require a private-server smoke test.
+
+### External model policy
+
+The previous GameBanana references for Yidhari, Master Chief, Deadpool, Yoru, and Metrocop are not bundled as assets. Public download availability is not the same as permission to redistribute. For example, the Master Chief and Metrocop pages identify CC BY-NC-ND 4.0 terms. Do not ship those files in a public or commercial server package without separate rights clearance.
