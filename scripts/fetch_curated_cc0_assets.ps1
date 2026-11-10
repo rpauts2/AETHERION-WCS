@@ -58,6 +58,10 @@ function Expand-SafeZip {
 function Get-ItchFileUrl {
     param([string]$Source,[string]$UploadId)
     $session=New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $sourcePage=Invoke-WebRequest -Uri $Source -WebSession $session -UseBasicParsing
+    if ($sourcePage.Content -notmatch "(?i)CC0|Creative Commons Zero") {
+        throw "The current itch.io source page does not explicitly declare CC0: $Source"
+    }
     $purchase=Invoke-WebRequest -Uri "$Source/purchase" -WebSession $session -UseBasicParsing
     $csrf=[regex]::Match($purchase.Content,'<meta name="csrf_token" value="([^"]+)"').Groups[1].Value
     if ([string]::IsNullOrWhiteSpace($csrf)) { throw "itch.io CSRF token missing: $Source" }
@@ -103,6 +107,12 @@ foreach ($pack in $packs) {
                     throw "The current official KayKit README no longer explicitly declares CC0: $($pack.License)"
                 }
             }
+            elseif ($pack.Source -like "https://kenney.nl/*") {
+                $sourceText=(Invoke-WebRequest -Uri $pack.Source -UseBasicParsing).Content
+                if ($sourceText -notmatch "(?i)Creative Commons CC0|CC0 1\.0") {
+                    throw "The current official Kenney asset page no longer explicitly declares CC0: $($pack.Source)"
+                }
+            }
             Invoke-WebRequest -Uri $pack.Url -OutFile $temporary -UseBasicParsing
         }
 
@@ -145,11 +155,23 @@ This is an original CC0 source package. It has not been imported into CS2, compi
         Set-Content -LiteralPath (Join-Path $destination "SOURCE-RECEIPT.md") -Value $readme -Encoding UTF8
     }
 
+    $extractedPath = $null
+    if ($SkipExtraction) {
+        $itemStatus = "downloaded_source_only"
+    }
+    elseif ($alreadyExtracted) {
+        $extractedPath = $destination
+        $itemStatus = "existing_extraction_verified"
+    }
+    else {
+        $extractedPath = $destination
+        $itemStatus = "downloaded_and_safely_extracted_source_only"
+    }
+
     $receipt += [pscustomobject]@{
         id=$pack.Id; name=$pack.Name; source=$pack.Source; license_evidence=$pack.License
         archive=$archive; bytes=$actualBytes; sha256=$actualHash
-        extracted_to=if($SkipExtraction){$null}else{$destination}
-        status=if($SkipExtraction){"downloaded_source_only"}elseif($alreadyExtracted){"existing_extraction_verified"}else{"downloaded_and_safely_extracted_source_only"}
+        extracted_to=$extractedPath; status=$itemStatus
     }
     $receipt | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $incoming "download-receipt.json") -Encoding UTF8
     Write-Host "Verified: $($pack.Name) ($actualBytes bytes)"
