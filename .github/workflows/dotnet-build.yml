@@ -32,6 +32,9 @@ jobs:
       - name: Audit AETHERION-owned particle references
         run: python scripts/audit_asset_references.py --output asset-reference-audit.md
 
+      - name: Audit configured custom audio files
+        run: python scripts/audit_audio_assets.py --output audio-asset-audit.md
+
       - name: Generate static race balance report
         run: python scripts/race_balance_report.py --output race-balance-report.md
 
@@ -65,6 +68,14 @@ jobs:
         with:
           name: Aetherion-visual-asset-audit
           path: asset-reference-audit.md
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload custom audio asset audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: Aetherion-custom-audio-audit
+          path: audio-asset-audit.md
           if-no-files-found: error
           retention-days: 14
 
