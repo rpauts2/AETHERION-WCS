@@ -20,7 +20,7 @@ class AudioAssetAuditTests(unittest.TestCase):
         config.write_text(json.dumps(entries), encoding="utf-8")
         return config
 
-    def test_finds_missing_custom_audio_paths(self):
+    def test_disabled_custom_path_is_planned_not_active_missing(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             config = self._write_config(root, {
@@ -31,13 +31,26 @@ class AudioAssetAuditTests(unittest.TestCase):
             result = MODULE.audit(config, root)
             self.assertEqual(result["entries"], 3)
             self.assertEqual(result["empty"], 1)
+            self.assertEqual(result["missing"], [])
+            self.assertEqual(result["planned"]["sounds/ui/click.vsnd"], ["10", "11"])
+            self.assertEqual(result["active"], {})
+
+    def test_active_custom_path_checks_source_and_compiled_files(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            config = self._write_config(root, {
+                "10": {"customSound": "sounds/ui/click.vsnd", "customSoundEnabled": True},
+            })
+            result = MODULE.audit(config, root)
             self.assertEqual(result["missing"], ["sounds/ui/click.vsnd"])
-            self.assertEqual(result["references"]["sounds/ui/click.vsnd"], ["10", "11"])
+            self.assertIn("sounds/ui/click.vsnd", result["active"])
 
     def test_recognizes_source_wav_in_addon_content_tree(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            config = self._write_config(root, {"1": {"customSound": "sounds/ui/click.vsnd"}})
+            config = self._write_config(root, {
+                "1": {"customSound": "sounds/ui/click.vsnd", "customSoundEnabled": True},
+            })
             source = root / "content" / "csgo_addons" / "aetherion" / "sounds" / "ui" / "click.wav"
             source.parent.mkdir(parents=True)
             source.write_bytes(b"RIFF-test")
@@ -48,7 +61,9 @@ class AudioAssetAuditTests(unittest.TestCase):
     def test_recognizes_compiled_vsnd_c_file(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            config = self._write_config(root, {"1": {"customSound": "sounds/ui/click.vsnd"}})
+            config = self._write_config(root, {
+                "1": {"customSound": "sounds/ui/click.vsnd", "customSoundEnabled": True},
+            })
             compiled = root / "game" / "csgo_addons" / "aetherion" / "sounds" / "ui" / "click.vsnd_c"
             compiled.parent.mkdir(parents=True)
             compiled.write_bytes(b"compiled-placeholder")
@@ -70,12 +85,16 @@ class AudioAssetAuditTests(unittest.TestCase):
             self.assertTrue(any("must start with sounds/" in message for message in result["malformed"]))
             self.assertTrue(any("must end in .vsnd" in message for message in result["malformed"]))
 
-    def test_render_calls_out_that_playback_is_not_proven(self):
+    def test_render_calls_out_pending_vs_active(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            config = self._write_config(root, {"1": {"customSound": "sounds/ui/click.vsnd"}})
+            config = self._write_config(root, {
+                "1": {"customSound": "sounds/ui/click.vsnd"},
+                "2": {"customSound": "sounds/race/installed.vsnd", "customSoundEnabled": True},
+            })
             report = MODULE.render(MODULE.audit(config, root))
-            self.assertIn("does not prove", report)
+            self.assertIn("Planned disabled paths", report)
+            self.assertIn("Active missing resources", report)
             self.assertIn("MISSING", report)
 
 
