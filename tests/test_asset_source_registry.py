@@ -29,7 +29,22 @@ class AssetSourceRegistryTests(unittest.TestCase):
             "gobkit-dinosaur-pack",
             "gobkit-animal-pack-vol-5",
             "polyyai-low-poly-guns-25",
+            "kenney-animated-characters-protagonists",
+            "kenney-animated-characters-retro",
+            "kenney-animated-characters-survivors",
+            "quaternius-universal-animation-library",
+            "quaternius-ultimate-animated-character-pack",
+            "quaternius-rpg-character-pack",
+            "quaternius-modular-weapons-pack",
         }.issubset(ids))
+
+    def test_universal_animation_library_free_tier_is_not_overstated(self):
+        item = next(
+            item for item in self.data["additional_research_candidates"]
+            if item["id"] == "quaternius-universal-animation-library"
+        )
+        self.assertIn("60-70%", item["inventory"])
+        self.assertEqual(item["license"], "CC0-1.0")
 
 
 if __name__ == "__main__":
