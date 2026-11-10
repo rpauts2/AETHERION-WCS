@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
@@ -19,6 +20,11 @@ public class AudioManager
         public string ult { get; set; } = string.Empty;
         public string sound { get; set; } = string.Empty;
         public string customSound { get; set; } = string.Empty;
+        // Planned asset paths stay disabled until their source and .vsnd_c are installed.
+        public bool customSoundEnabled { get; set; } = false;
+        [JsonPropertyName("event")] public string eventType { get; set; } = string.Empty;
+        public string category { get; set; } = string.Empty;
+        public string? event_category { get; set; }
         public string? levelUp { get; set; }
         public string? castActive { get; set; }
         public string? castUltimate { get; set; }
@@ -92,7 +98,7 @@ public class AudioManager
         foreach (var kv in raw)
         {
             if (!int.TryParse(kv.Key, out var id)) continue;
-            if (kv.Value.event_category != null)
+            if (IsSystemEntry(kv.Value))
                 _system[id] = kv.Value;
             else
                 _races[id] = kv.Value;
@@ -101,11 +107,16 @@ public class AudioManager
         Console.WriteLine($"[AETHERION] AudioManager: загружено {_races.Count} рас + {_system.Count} системных звуков");
     }
 
+    private static bool IsSystemEntry(Entry entry) =>
+        !string.IsNullOrWhiteSpace(entry.eventType) ||
+        !string.IsNullOrWhiteSpace(entry.category) ||
+        !string.IsNullOrWhiteSpace(entry.event_category);
+
     // ── Race events ──────────────────────────────────────────────────
     public void PlayUlt(CCSPlayerController player, int raceId)
     {
         if (player == null || !_races.TryGetValue(raceId, out var entry)) return;
-        var sound = Resolve(entry.castUltimate, entry.sound, entry.customSound);
+        var sound = Resolve(entry.castUltimate, entry.sound, entry.customSound, entry.customSoundEnabled);
         Execute(player, sound);
     }
 
@@ -117,7 +128,7 @@ public class AudioManager
             Execute(player, entry.levelUp);
             return;
         }
-        Execute(player, "UIPanorama.round_report_match_won");
+        Execute(player, "ui.rankup");
     }
 
     public void PlayCastActive(CCSPlayerController player, int? raceId)
@@ -128,7 +139,7 @@ public class AudioManager
             Execute(player, entry.castActive);
             return;
         }
-        Execute(player, "weapons/hegrenade/beep.wav");
+        Execute(player, "ui.countdown");
     }
 
     public void PlayCastUltimate(CCSPlayerController player, int raceId)
@@ -144,7 +155,7 @@ public class AudioManager
             Execute(player, entry.deathEnemy);
             return;
         }
-        Execute(player, "player/death1.wav");
+        Execute(player, "player.died");
     }
 
     public void PlaySpawn(CCSPlayerController player, int raceId)
@@ -155,7 +166,7 @@ public class AudioManager
             Execute(player, entry.spawn);
             return;
         }
-        Execute(player, "player/spawn.wav");
+        Execute(player, "player.spawn");
     }
 
     public void PlayAbility(CCSPlayerController player, int raceId, string abilityKey)
@@ -219,25 +230,25 @@ public class AudioManager
     public void PlayBossAwaken(CCSPlayerController? player)
     {
         if (player == null) return;
-        PlaySystemForPlayer(player, 3000, "UIPanorama.round_report_match_won");
+        PlaySystemForPlayer(player, 3000, "ui.beacon");
     }
 
     public void PlayBossEnrage(CCSPlayerController? player)
     {
         if (player == null) return;
-        PlaySystemForPlayer(player, 3001, "UIPanorama.round_report_round_won");
+        PlaySystemForPlayer(player, 3001, "ui.tech_alarm");
     }
 
     public void PlayBossDeath(CCSPlayerController? player)
     {
         if (player == null) return;
-        PlaySystemForPlayer(player, 3002, "player/kill.wav");
+        PlaySystemForPlayer(player, 3002, "player.kill");
     }
 
     public void PlayBossHurt(CCSPlayerController? player)
     {
         if (player == null) return;
-        PlaySystemForPlayer(player, 3003, "player/damage.wav");
+        PlaySystemForPlayer(player, 3003, "player.damage");
     }
 
     public void PlayBossVoteStart(CCSPlayerController? player = null)
@@ -500,15 +511,19 @@ public class AudioManager
 
     public string? GetSound(int raceId) =>
         _races.TryGetValue(raceId, out var entry)
-            ? (string.IsNullOrEmpty(entry.customSound) ? entry.sound : entry.customSound)
+            ? (entry.customSoundEnabled && !string.IsNullOrWhiteSpace(entry.customSound)
+                ? entry.customSound
+                : entry.sound)
             : null;
 
     // ── Helpers ──────────────────────────────────────────────────────
     // Explicit custom assets must override stock defaults. Otherwise the customSound
     // field is silently ignored whenever a built-in sound or event fallback exists.
-    private static string? Resolve(string? primary, string? fallback, string? custom)
+    private static string? Resolve(string? primary, string? fallback, string? custom, bool customEnabled)
     {
-        if (!string.IsNullOrWhiteSpace(custom)) return custom;
+        // customSound is a planned path until the asset installer verifies .vsnd_c.
+        // Never silence a working stock event just because a future file is listed.
+        if (customEnabled && !string.IsNullOrWhiteSpace(custom)) return custom;
         if (!string.IsNullOrWhiteSpace(primary)) return primary;
         if (!string.IsNullOrWhiteSpace(fallback)) return fallback;
         return null;
@@ -517,13 +532,65 @@ public class AudioManager
     // Remap custom sound paths loaded from sounds.json to built-in CS2 sounds
     private static readonly Dictionary<string, string> SoundRemap = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["aether/resonance_blade"] = "weapons/smg_ssg08/fire1.wav",
-        ["aether/apocalypse"] = "weapons/rifle_ak47/fire1.wav",
-        ["race/pudge_pull"] = "weapons/shotgun_xm1014/fire1.wav",
-        ["boss/boss_awaken"] = "UIPanorama.round_report_match_won",
-        ["boss/boss_death"] = "player/death1.wav",
-        ["ambient/menu_loop"] = "ui.button_click",
-        ["ambient/storm_loop"] = "ui.button_hover",
+        // Legacy aliases from earlier config revisions.
+        ["aether/resonance_blade"] = "weapons.ssg08.fire",
+        ["aether/apocalypse"] = "weapons.ak47.fire",
+        ["race/pudge_pull"] = "weapons.xm1014.fire",
+        ["boss/boss_awaken"] = "ui.beacon",
+        ["boss/boss_death"] = "player.died",
+        ["ambient/menu_loop"] = "campaigns.any.theme",
+        ["ambient/storm_loop"] = "grenade.smoke.explode",
+
+        // System sound aliases are not installed soundevents; route them to known game events.
+        ["aetherion.boss.awaken"] = "ui.beacon",
+        ["aetherion.boss.enrage"] = "ui.tech_alarm",
+        ["aetherion.boss.death"] = "player.kill",
+        ["aetherion.boss.hurt"] = "player.damage",
+        ["aetherion.boss.vote_start"] = "ui.countdown",
+        ["aetherion.boss.vote_pass"] = "ui.rankup",
+        ["aetherion.boss.vote_fail"] = "ui.deny",
+        ["aetherion.ambient.menu"] = "campaigns.any.theme",
+        ["aetherion.ambient.lobby"] = "campaigns.any.theme",
+        ["aetherion.ambient.storm"] = "grenade.smoke.explode",
+        ["aetherion.ambient.rift"] = "grenade.smoke.explode",
+        ["aetherion.ambient.map_desert"] = "campaigns.any.theme",
+        ["aetherion.ambient.map_arctic"] = "campaigns.any.theme",
+        ["aetherion.ambient.map_cyber"] = "campaigns.any.theme",
+        ["aetherion.ambient.map_void"] = "campaigns.any.theme",
+        ["aetherion.round.start"] = "ui.countdown",
+        ["aetherion.round.end_win"] = "ui.rankup",
+        ["aetherion.round.end_lose"] = "ui.deny",
+        ["aetherion.round.firstblood"] = "gamerules.firstblood",
+        ["aetherion.round.bomb_plant"] = "ui.beacon",
+        ["aetherion.round.bomb_defuse"] = "ui.success",
+        ["aetherion.milestone.level10"] = "ui.rankup",
+        ["aetherion.milestone.level25"] = "ui.rankup",
+        ["aetherion.milestone.level50"] = "ui.rankup",
+        ["aetherion.milestone.division_up"] = "ui.rankup",
+        ["aetherion.milestone.ace"] = "player.headshot",
+        ["aetherion.milestone.mvp"] = "player.kill",
+        ["aetherion.milestone.duel_win"] = "ui.success",
+        ["aetherion.milestone.duel_start"] = "ui.countdown",
+        ["aetherion.milestone.guild_war"] = "ui.beacon",
+        ["aetherion.storm.start"] = "grenade.smoke.explode",
+        ["aetherion.storm.x2xp"] = "ui.rankup",
+        ["aetherion.storm.x3xp"] = "ui.beacon",
+        ["aetherion.rift.open"] = "grenade.smoke.explode",
+        ["aetherion.rift.collect"] = "player.heal",
+        ["aetherion.rift.detonate"] = "grenade.frag.explode",
+        ["aetherion.economy.gold_gain"] = "ui.success",
+        ["aetherion.economy.gold_spend"] = "ui.menu_select",
+        ["aetherion.ability.miss"] = "weapons.knife.hitwall",
+        ["aetherion.ability.hit"] = "weapons.knife.hit",
+        ["aetherion.ability.low_mana"] = "ui.deny",
+        ["aetherion.ability.cooldown"] = "ui.countdown",
+        ["aetherion.daily.login"] = "ui.rankup",
+        ["aetherion.daily.reward"] = "ui.success",
+        ["aetherion.wisp.bond"] = "player.heal",
+        ["aetherion.wisp.evolve"] = "ui.rankup",
+        ["aetherion.guild.join"] = "ui.success",
+        ["aetherion.guild.war_start"] = "ui.beacon",
+        ["aetherion.guild.banner"] = "ui.rankup",
     };
 
     // Direct addon assets are compiled from WAV/MP3 into .vsnd_c and addressed
@@ -532,10 +599,41 @@ public class AudioManager
         sound.StartsWith("sounds/", StringComparison.OrdinalIgnoreCase) &&
         string.Equals(Path.GetExtension(sound), ".vsnd", StringComparison.OrdinalIgnoreCase);
 
+    private static string ResolveSoundEvent(string sound)
+    {
+        if (SoundRemap.TryGetValue(sound, out var remap)) return remap;
+
+        // Race-specific event names are placeholders until the addon event file and
+        // bespoke samples exist. Provide a safe, audible stock-event fallback by family.
+        if (sound.StartsWith("aetherion.ult.", StringComparison.OrdinalIgnoreCase))
+            return "grenade.frag.explode";
+
+        if (sound.StartsWith("aetherion.abi.", StringComparison.OrdinalIgnoreCase))
+        {
+            if (ContainsAny(sound, "heal", "cleanse", "shield", "armor", "bond", "evolve"))
+                return "player.heal";
+            if (ContainsAny(sound, "fire", "thunder", "quake", "laser", "disin", "deton", "blast"))
+                return "grenade.frag.explode";
+            if (ContainsAny(sound, "hook", "pull", "blade", "backstab", "arrow", "parry", "riposte", "frenzy"))
+                return "weapons.knife.slash";
+            return "ui.beacon";
+        }
+
+        return sound;
+    }
+
+    private static bool ContainsAny(string value, params string[] fragments)
+    {
+        foreach (var fragment in fragments)
+            if (value.Contains(fragment, StringComparison.OrdinalIgnoreCase))
+                return true;
+        return false;
+    }
+
     private static void Execute(CCSPlayerController player, string? sound)
     {
         if (player == null || string.IsNullOrWhiteSpace(sound)) return;
-        string resolved = SoundRemap.TryGetValue(sound, out var remap) ? remap : sound;
+        string resolved = ResolveSoundEvent(sound);
         try
         {
             if (IsDirectSoundAsset(resolved))
@@ -554,7 +652,7 @@ public class AudioManager
         if (player == null) return;
         if (_system.TryGetValue(id, out var entry))
         {
-            var sound = Resolve(entry.sound, fallback, entry.customSound);
+            var sound = Resolve(entry.sound, fallback, entry.customSound, entry.customSoundEnabled);
             Execute(player, sound);
         }
         else if (!string.IsNullOrEmpty(fallback))
@@ -563,12 +661,16 @@ public class AudioManager
         }
     }
 
-    private static void BroadcastSystem(int id, string fallback = "")
+    private void BroadcastSystem(int id, string fallback = "")
     {
+        var sound = _system.TryGetValue(id, out var entry)
+            ? Resolve(entry.sound, fallback, entry.customSound, entry.customSoundEnabled)
+            : fallback;
+
         foreach (var p in Utilities.GetPlayers())
         {
             if (p == null || !p.IsValid || p.IsBot) continue;
-            Execute(p, fallback);
+            Execute(p, sound);
         }
     }
 }
