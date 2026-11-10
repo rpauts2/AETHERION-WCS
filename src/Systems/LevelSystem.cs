@@ -15,6 +15,7 @@ public static class LevelSystem
     public const long XpBombPlant = 25;
     public const long XpBombDefuse = 25;
     public const long XpRoundWin = 15;
+    private const long MaxXpGrantPerCall = 100_000;
 
     // Базовая стоимость уровня зависит от дивизиона расы (твоя кривая 20-30 / 30-35 / 40-60)
     // Возвращает сколько XP нужно для перехода с level -> level+1
@@ -56,8 +57,19 @@ public static class LevelSystem
 
     private static int AddXpInternal(PlayerData p, RaceProgress rp, RaceTier tier, int max, long amount, int division)
     {
-        amount = (long)(amount * p.XpBoostMultiplier);
-        rp.Xp += amount;
+        if (amount <= 0) return 0;
+
+        double multiplier = p.XpBoostMultiplier;
+        if (!double.IsFinite(multiplier) || multiplier <= 0) return 0;
+
+        // A corrupted profile or malformed reward must not trigger millions of level/paragon
+        // iterations in one game tick. Normal gameplay rewards are far below this defensive cap.
+        double boostedAmount = amount * multiplier;
+        long grant = !double.IsFinite(boostedAmount) || boostedAmount >= MaxXpGrantPerCall
+            ? MaxXpGrantPerCall
+            : Math.Max(0, (long)boostedAmount);
+        // Saturate the XP accumulator rather than allowing signed integer overflow.
+        rp.Xp = rp.Xp > long.MaxValue - grant ? long.MaxValue : rp.Xp + grant;
         p.IsDirty = true;
         int gained = 0;
         while (rp.Level < max)
@@ -73,11 +85,15 @@ public static class LevelSystem
         if (rp.Level >= max)
         {
             long paragonNeed = (long)(XpForLevel(rp.Level, tier, 8) * (1 + rp.ParagonLevel * 0.10));
-            while (rp.Xp >= paragonNeed)
+            int paragonSteps = 0;
+            // Bound work per event if a legacy/corrupt profile contains an enormous XP balance.
+            while (rp.Xp >= paragonNeed && paragonSteps < 1000)
             {
                 rp.Xp -= paragonNeed;
                 rp.ParagonLevel++;
-                paragonNeed = (long)(XpForLevel(rp.Level, tier, 8) * (1 + rp.ParagonLevel * 0.10));
+                paragonSteps++;
+                double nextNeed = XpForLevel(rp.Level, tier, 8) * (1 + rp.ParagonLevel * 0.10);
+                paragonNeed = nextNeed >= long.MaxValue ? long.MaxValue : Math.Max(1L, (long)nextNeed);
             }
         }
         return gained;

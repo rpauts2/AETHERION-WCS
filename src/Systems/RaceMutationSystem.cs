@@ -88,7 +88,7 @@ public class RaceMutationSystem
             switch (_activeMutation.Type)
             {
                 case MutationType.SpeedBoost:
-                    _engine.SetSpeed(p.Slot, 1.5f);
+                    _combat.SetPersistentSpeedModifier(p.Slot, "global-mutation-speed", 1.5f);
                     break;
                 case MutationType.LifestealAura:
                     _combat.Apply(EffectTag.Lifesteal, p.Slot, 0.2f, _activeMutation.Duration);
@@ -114,7 +114,7 @@ public class RaceMutationSystem
         switch (_activeMutation.Type)
         {
             case MutationType.SpeedBoost:
-                _engine.SetSpeed(p.Slot, 1.5f);
+                _combat.SetPersistentSpeedModifier(p.Slot, "global-mutation-speed", 1.5f);
                 break;
             case MutationType.LifestealAura:
                 _combat.Apply(EffectTag.Lifesteal, p.Slot, 0.2f, _activeMutation.Duration);
@@ -137,7 +137,7 @@ public class RaceMutationSystem
             switch (_activeMutation.Type)
             {
                 case MutationType.SpeedBoost:
-                    _engine.SetSpeed(p.Slot, 1.0f);
+                    _combat.RemovePersistentSpeedModifier(p.Slot, "global-mutation-speed");
                     break;
                 case MutationType.LifestealAura:
                     _combat.RemoveEffect(p.Slot, EffectTag.Lifesteal);
