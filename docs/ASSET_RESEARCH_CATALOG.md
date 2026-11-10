@@ -540,3 +540,30 @@ Important limit for the Universal Animation Library: the creator states that 60�
 
 For AETHERION, start with one source humanoid and the Universal Animation Library. Inspect the rig hierarchy and rest pose, export a minimal test set (idle, walk, run, attack, death), retarget in Blender to the actual CS2 agent skeleton, and test the compiled model/animation graph in Workshop Tools. Only after that works should the same path be applied to the 52-character pack. Animation packs tested in Unity/Unreal/Godot are not automatically compatible with Source 2.
 
+
+
+---
+
+## Dungeon environment, particle textures and SFX expansion — 2026-11-10
+
+### Dungeon and boss-arena kits
+
+- KayKit Dungeon Pack 1.1 free tier: 200 modular 3D assets, low-poly, one 1024×1024 gradient atlas, FBX/GLTF/OBJ; CC0. The 275+ Extra tier and Blender source tier are paid, so the free registry entry does not include those paid additions — https://kaylousberg.itch.io/kaykit-dungeon-pack
+- SigilsVault Modular Dungeon Kit: 90+ modular pieces, GLB/FBX, shared trim sheet, metre grid, 53 MB archive; CC0, creator declares no generative AI — https://sigilsvault.itch.io/modular-dungeon-kit-v10
+- Quaternius Modular Dungeon Pack: 41 models, barrels, torches, potions and modular walls; FBX/OBJ/Blend, CC0 — https://quaternius.com/packs/medievaldungeon.html
+- Quaternius Modular Dungeons Pack: separate 48-model set, FBX/OBJ/Blend, CC0 — https://quaternius.com/packs/modulardungeon.html
+
+Do not import every kit at once. Pick one set, test texture atlas and collision generation in Source 2, then combine only assets that improve visual variety without duplicating the same walls/props.
+
+### Particle sprite source
+
+SpriteCanvas's CC0 effects package is 2.3 MB and contains six transparent sprite sheets: sword slash, hit spark, fireball, lightning, explosion and ice burst. Each has six frames at 12 FPS and a JSON atlas containing frame rectangles, durations and centre pivot. It is a texture source only; the sheets need slicing/texture import and a VPCF authored in the Source 2 Particle Editor.
+
+- https://spritecanvas.com/free-sprite-sheets/effects/
+
+### Sound source update
+
+SpritePilot's current sound page lists 78 CC0 effects across 10 groups, supplied as WAV/OGG/MP3, with eight seamless ambient loops and one dragon roar. The full ZIP is 24.5 MB, OGG-only is 2.5 MB; creator says 48 kHz mono and trimmed/levelled. These are strong options for AETHERION abilities, boss events, UI and ambient systems, but still require Source 2 sound compilation and client playback testing.
+
+- https://spritepilot.com/free-game-assets/sound-effects
+
