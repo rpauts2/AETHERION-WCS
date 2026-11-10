@@ -16,7 +16,7 @@ $licenseUrl = "https://sfxmint.com/license"
 $runtimePath = "sounds/race/dragon_roar.vsnd"
 $raceId = "2033"
 
-$contentRoot = Join-Path $RepositoryRoot "content\csgo_addons\aetherion"
+$contentRoot = Join-Path $Cs2Path "content\csgo_addons\aetherion"
 $configPath = Join-Path $RepositoryRoot "configs\assets\sounds.json"
 $incomingRoot = Join-Path $RepositoryRoot "assets\incoming\cc0\audio\sfxmint"
 $incomingFile = Join-Path $incomingRoot "dragon-roar-03.mp3"
