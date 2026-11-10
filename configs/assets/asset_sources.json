@@ -549,8 +549,10 @@
       "name": "SpritePilot Sound Effects",
       "source_page": "https://spritepilot.com/free-game-assets/sound-effects",
       "license": "CC0",
-      "inventory": "78 WAV/OGG/MP3 sound effects covering impacts, combat, magic, creatures, UI and ambience.",
-      "status": "candidate_requires_audio_audition_and_source2_compile"
+      "inventory": "78 CC0 sound effects across 10 groups, WAV/OGG/MP3. Includes explosions and impacts, combat, sci-fi weapons, pickups, jumps/footsteps, interface clicks, creatures (including dragon roar), magic, game-over/victory and 8 seamless ambient loops. Full ZIP 24.5 MB; OGG-only ZIP 2.5 MB.",
+      "status": "candidate_requires_audio_audition_and_source2_compile",
+      "technical_notes": "48 kHz mono, trimmed/levelled; WAV is 16-bit and OGG works well for loops. Select and audition individual clips, preserve direct filenames and hashes, then compile to Source 2 VSND/VSND_C. This is source audio, not ready-to-play addon content.",
+      "license_evidence": "https://spritepilot.com/free-game-assets/sound-effects"
     },
     {
       "id": "supaVoxel-160-cc0-animations",
@@ -576,6 +578,94 @@
       "inventory": "8 rigged low-poly characters: Hero, Knight, Wizard, Astronaut, Pirate, Robot, Zombie and Princess. 22-bone humanoid skeleton with Mixamo-compatible names; idle, walk, run, jump, fall and wave clips. 2.4k-4.6k triangles, one 256x256 palette texture.",
       "technical_notes": "Rigid skinning, no facial animation; rest pose has arms down rather than a T-pose. Good technical test for retargeting but blocky visual style may not suit the main AETHERION art direction.",
       "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "kaykit-dungeon-pack-free-1-1",
+      "name": "KayKit Dungeon Pack 1.1 — Free Tier",
+      "category": "environment-and-props",
+      "license": "CC0-1.0",
+      "license_evidence": "https://kaylousberg.itch.io/kaykit-dungeon-pack",
+      "source_page": "https://kaylousberg.itch.io/kaykit-dungeon-pack",
+      "status": "candidate_requires_manual_download",
+      "archive_name": "Free 1.1",
+      "archive_size": "31 MB",
+      "format": [
+        "FBX",
+        "GLTF",
+        "OBJ"
+      ],
+      "inventory": "200 stylized modular dungeon assets: walls, floors, stairs, doors, chests, barrels, chairs, tables, crates, traps and banners. Uses one 1024×1024 gradient atlas, downsample-friendly. The free tier includes 200 assets; Extra 1.1 is paid and expands the pack to 275+ assets; the Blender source tier is also paid.",
+      "technical_notes": "Good first dungeon set for a future boss arena or lobby. Verify scale, collision and atlas materials during Source 2 import; keep raw asset pack separate from compiled addon resources.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "sigilsvault-modular-dungeon-kit",
+      "name": "SigilsVault Modular Dungeon Kit v1.0",
+      "category": "environment-and-props",
+      "license": "CC0-1.0",
+      "license_evidence": "https://sigilsvault.itch.io/modular-dungeon-kit-v10",
+      "source_page": "https://sigilsvault.itch.io/modular-dungeon-kit-v10",
+      "status": "candidate_requires_manual_download",
+      "archive_name": "modular dungeon kit v1.0.zip",
+      "archive_size": "53 MB",
+      "format": [
+        "GLB",
+        "FBX"
+      ],
+      "inventory": "90+ modular low-poly pieces: walls, floors, ceilings, doors, pillars, stairs and props. Shared trim sheet, 1-metre grid, GLB textures embedded; FBX textures require manual assignment.",
+      "technical_notes": "Excellent modular kit for dungeons/boss chambers. No generative AI declared by creator. Use GLB first for intake, inspect UVs/materials and build collision before a map pass.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "quaternius-modular-dungeon-pack-41",
+      "name": "Quaternius Modular Dungeon Pack",
+      "category": "environment-and-props",
+      "license": "CC0-1.0",
+      "license_evidence": "https://quaternius.com/packs/medievaldungeon.html",
+      "source_page": "https://quaternius.com/packs/medievaldungeon.html",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "FBX",
+        "OBJ",
+        "BLEND"
+      ],
+      "inventory": "41 models including barrels, torches, potions and modular wall pieces; CC0.",
+      "technical_notes": "A small themed kit that complements the larger KayKit/SigilsVault sets. Validate collision and material consolidation for Source 2.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "quaternius-modular-dungeons-pack-48",
+      "name": "Quaternius Modular Dungeons Pack",
+      "category": "environment-and-props",
+      "license": "CC0-1.0",
+      "license_evidence": "https://quaternius.com/packs/modulardungeon.html",
+      "source_page": "https://quaternius.com/packs/modulardungeon.html",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "FBX",
+        "OBJ",
+        "BLEND"
+      ],
+      "inventory": "48 models in a modular dungeon set; CC0.",
+      "technical_notes": "Separate Quaternius pack from the older 41-model Modular Dungeon Pack. Check whether the included pieces overlap before importing both.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "spritecanvas-cc0-vfx-sheets",
+      "name": "SpriteCanvas CC0 Effect Sprite Sheets",
+      "category": "vfx-textures",
+      "license": "CC0-1.0",
+      "license_evidence": "https://spritecanvas.com/free-sprite-sheets/effects/",
+      "source_page": "https://spritecanvas.com/free-sprite-sheets/effects/",
+      "status": "candidate_requires_manual_download",
+      "archive_size": "2.3 MB",
+      "format": [
+        "PNG",
+        "JSON"
+      ],
+      "inventory": "6 transparent effect sheets: sword slash, hit spark, fireball, lightning, explosion and ice burst. Each has 6 frames at 12 FPS plus a JSON atlas with frame rectangles, durations and centre pivot.",
+      "technical_notes": "These are 2D texture sources, not CS2 VPCFs. Could be used as sprites in a custom Source 2 particle material after slicing the sheets and authoring a VPCF in Particle Editor.",
+      "cs2_readiness": "texture_source_only"
     }
   ],
   "cs2_technical_references": [
