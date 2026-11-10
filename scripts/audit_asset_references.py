@@ -59,24 +59,35 @@ def scan(root: Path):
             missing_particles.append(reference)
 
     sound_config = root / "configs/assets/sounds.json"
-    audio_entries = []
+    planned_audio_entries = []
+    active_audio_entries = []
     if sound_config.exists():
         try:
             raw = json.loads(sound_config.read_text(encoding="utf-8-sig"))
             if isinstance(raw, dict):
-                audio_entries = [
-                    value.get("customSound", "").strip()
-                    for value in raw.values()
-                    if isinstance(value, dict)
-                    and isinstance(value.get("customSound", ""), str)
-                    and value.get("customSound", "").strip()
-                ]
+                for sound_id, value in raw.items():
+                    if not isinstance(value, dict):
+                        continue
+                    custom_path = value.get("customSound", "")
+                    if not isinstance(custom_path, str) or not custom_path.strip():
+                        continue
+                    entry = {"id": str(sound_id), "path": custom_path.strip()}
+                    if value.get("customSoundEnabled") is True:
+                        active_audio_entries.append(entry)
+                    else:
+                        planned_audio_entries.append(entry)
         except (OSError, json.JSONDecodeError):
             pass
 
-    audio_paths = sorted(set(audio_entries), key=str.lower)
+    planned_audio_paths = sorted({entry["path"] for entry in planned_audio_entries}, key=str.lower)
+    active_audio_paths = sorted({entry["path"] for entry in active_audio_entries}, key=str.lower)
+    audio_paths = sorted(set(planned_audio_paths) | set(active_audio_paths), key=str.lower)
     missing_audio = [
-        path for path in audio_paths
+        path for path in active_audio_paths
+        if not any(candidate.is_file() for candidate in _audio_source_candidates(root, path))
+    ]
+    missing_planned_audio = [
+        path for path in planned_audio_paths
         if not any(candidate.is_file() for candidate in _audio_source_candidates(root, path))
     ]
     legacy_audio_paths = [
@@ -93,10 +104,15 @@ def scan(root: Path):
         "quarantined_model_files": sum(1 for p in extracted.rglob("*") if p.is_file()) if extracted.exists() else 0,
     }
     audio = {
-        "configured_entries": len(audio_entries),
+        "configured_entries": len(planned_audio_entries) + len(active_audio_entries),
+        "planned_entries": planned_audio_entries,
+        "active_entries": active_audio_entries,
+        "planned_paths": planned_audio_paths,
+        "active_paths": active_audio_paths,
         "unique_paths": len(audio_paths),
         "paths": audio_paths,
         "missing_paths": missing_audio,
+        "missing_planned_paths": missing_planned_audio,
         "legacy_paths": legacy_audio_paths,
     }
     return particle_refs, missing_particles, counts, audio
@@ -115,9 +131,13 @@ def render(particle_refs, missing_particles, counts, audio):
         f"- Unique AETHERION-owned particle references: **{len(particle_refs)}**",
         f"- Missing AETHERION-owned particle resources: **{len(missing_particles)}**",
         f"- Non-empty customSound config fields: **{audio['configured_entries']}**",
+        f"- Planned disabled customSound entries: **{len(audio['planned_entries'])}**",
+        f"- Active customSound entries: **{len(audio['active_entries'])}**",
         f"- Unique customSound paths: **{audio['unique_paths']}**",
-        f"- Missing customSound files: **{len(audio['missing_paths'])}**", "",
-        "Stock CS2 particle and sound resources are excluded from missing-file checks because they belong to the game depot.",
+        f"- Active paths missing a source/compiled file: **{len(audio['missing_paths'])}**",
+        f"- Planned paths not yet installed: **{len(audio['missing_planned_paths'])}**", "",
+        "Disabled planned paths are reported separately and do not override working stock sounds. Only customSoundEnabled=true entries are treated as active/missing.",
+        "Stock CS2 particle and sound resources are excluded from repository missing-file checks because they belong to the game depot.",
         "This report checks repository file presence and path shape only; it does not prove compilation, precache, client delivery or playback.", "",
         "## AETHERION-owned particle references", ""
     ]
@@ -128,16 +148,21 @@ def render(particle_refs, missing_particles, counts, audio):
         callsites = ", ".join(sorted(set(particle_refs[reference])))
         lines.extend((f"- **{status}** {reference}", f"  Referenced from: {callsites}"))
 
-    lines.extend(("", "## Custom audio references", ""))
-    if not audio["unique_paths"]:
-        lines.append("No non-empty customSound paths found.")
-    for path in audio["paths"]:
-        status = "MISSING" if path in audio["missing_paths"] else "present"
+    lines.extend(("", "## Active custom audio references", ""))
+    if not audio["active_paths"]:
+        lines.append("No custom audio paths are enabled. Stock game sounds remain in use.")
+    for path in audio["active_paths"]:
+        status = "MISSING ACTIVE" if path in audio["missing_paths"] else "active source/compiled file present"
         lines.append(f"- **{status}** {path}")
+
+    lines.extend(("", "## Planned disabled custom audio paths", ""))
+    if not audio["planned_paths"]:
+        lines.append("No planned disabled custom audio paths.")
+    for path in audio["planned_paths"]:
+        status = "not installed yet" if path in audio["missing_planned_paths"] else "source/compiled file already present"
+        lines.append(f"- **PLANNED** {path} ({status})")
     if audio["legacy_paths"]:
         lines.append(f"- **{len(audio['legacy_paths'])}** paths use a source-style .wav or singular sound/ path. Review their runtime form before enabling.")
-    for path in audio["missing_paths"]:
-        lines.append(f"- **MISSING** {path}")
     lines.extend(("", "## Interpretation", "",
         "- Missing custom particle references need a real Source 2 particle resource or a code/config change to a verified stock effect.",
         "- A custom WAV is source material, not the compiled CS2 audio resource. Source 2 uses compiled .vsnd_c assets and sound-event scripts where applicable.",
@@ -162,8 +187,8 @@ def main():
         output.write_text(report, encoding="utf-8")
     print(
         f"Asset audit: {len(particle_refs)} custom particle ref(s), {len(missing_particles)} missing; "
-        f"{audio['configured_entries']} custom audio field(s), {audio['unique_paths']} unique path(s), "
-        f"{len(audio['missing_paths'])} missing; {counts['source_vpcf']} VPCF, "
+        f"{audio['configured_entries']} custom audio field(s), {len(audio['planned_paths'])} planned, "
+        f"{len(audio['active_paths'])} active, {len(audio['missing_paths'])} active missing; {counts['source_vpcf']} VPCF, "
         f"{counts['compiled_vpcf']} VPCF_C, {counts['source_audio']} source audio, "
         f"{counts['compiled_audio']} VSND_C"
     )
