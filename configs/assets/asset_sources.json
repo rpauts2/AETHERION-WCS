@@ -115,9 +115,9 @@
       "license": "CC0 per indexed source item; verify on each original source page",
       "license_evidence": "https://3dvalley.com/3d-models/rigged",
       "source_page": "https://3dvalley.com/3d-models/rigged",
-      "status": "research_index_not_bulk_download",
-      "inventory": "Catalogue states 705 CC0 rigged models, 681 animated. Includes many Gobkit animals and other creators.",
-      "technical_notes": "Aggregator, not blanket permission for every file. Verify original creator, exact CC0 evidence, skeleton, animation clips and download URL for each candidate before import.",
+      "status": "index_only_per_model_license_gate",
+      "inventory": "3D Valley currently lists 705 rigged CC0 GLB assets, 681 with embedded animation clips. The visible index includes Gobkit Animal Packs Vol.4, Vol.5, Vol.6, Vol.7 and Vol.11, with measured creature topology often below 900 triangles per model. Categories also include characters, animals, transport, weapons and household props.",
+      "technical_notes": "This is a discovery index, not a bulk licence grant. The site says each model links to its original source where CC0 is stated; inspect that original page and actual GLB for every chosen asset. Use the measured triangle and rig/animation metadata to shortlist small CS2-friendly creatures, then capture per-item source, licence, archive SHA-256 and animation names.",
       "cs2_readiness": "index_only"
     },
     {
@@ -666,6 +666,69 @@
       "inventory": "6 transparent effect sheets: sword slash, hit spark, fireball, lightning, explosion and ice burst. Each has 6 frames at 12 FPS plus a JSON atlas with frame rectangles, durations and centre pivot.",
       "technical_notes": "These are 2D texture sources, not CS2 VPCFs. Could be used as sprites in a custom Source 2 particle material after slicing the sheets and authoring a VPCF in Particle Editor.",
       "cs2_readiness": "texture_source_only"
+    },
+    {
+      "id": "kaykit-character-animations-free-1-1",
+      "name": "KayKit Character Animations Free 1.1",
+      "category": "humanoid-animation-library",
+      "license": "CC0-1.0",
+      "license_evidence": "https://kaylousberg.itch.io/kaykit-character-animations",
+      "source_page": "https://kaylousberg.com/game-assets/character-animations",
+      "status": "curated_archive_hash_available",
+      "format": [
+        "FBX",
+        "GLTF"
+      ],
+      "inventory": "Official publisher page lists 133 humanoid animations across Rig_Medium and Rig_Large: idle, hit, death, spawn, movement, dodge, crouch, melee styles, ranged weapons, bows, magic/spellcasting, emotes and special skeleton animations. A curated archive snapshot reports 161 published animation files across both rig groups; treat the publisher's 133 figure as the canonical pack count.",
+      "technical_notes": "Free for personal and commercial use, no attribution required; CC0. The paid .blend source tier is not part of this free archive. Retargeting to the actual CS2 player-agent skeleton and animation graph remains untested.",
+      "archive_name": "KayKit-Character-Animations-Free-1.1.zip",
+      "archive_size_bytes": 14858957,
+      "sha256_snapshot": "65882f31f905ad2e953819648a59287cdeab8f623908d5ef701971d3758be20f",
+      "download_method": "itch_free_upload",
+      "itch_upload_id": "15799903",
+      "cs2_readiness": "source_animation_library_only"
+    },
+    {
+      "id": "quaternius-ual2-standard",
+      "name": "Quaternius Universal Animation Library 2 Standard",
+      "category": "humanoid-animation-library",
+      "license": "CC0-1.0",
+      "license_evidence": "https://quaternius.itch.io/universal-animation-library-2",
+      "source_page": "https://quaternius.itch.io/universal-animation-library-2",
+      "status": "curated_archive_hash_available",
+      "format": [
+        "GLB",
+        "FBX"
+      ],
+      "inventory": "Free Standard tier archive snapshot is 18.7 MB with 43 animation tracks in the current GLB export. The full pack page advertises 130+ clips including melee combos, parkour, farming/fishing and zombie locomotion; paid Source and full tiers are separate.",
+      "technical_notes": "CC0, free for personal, educational and commercial projects; no generative AI declared by publisher. Standard tier is the no-cost downloadable target. Use UAL1 for base locomotion and UAL2 for combat/parkour/zombie additions.",
+      "archive_name": "Quaternius-Universal-Animation-Library-2-Standard.zip",
+      "archive_size_bytes": 18735003,
+      "sha256_snapshot": "4008ea208a604773a2b2177d965f0f5d3195498b5bf838c3f5785d68e95f2a68",
+      "download_method": "itch_free_upload",
+      "itch_upload_id": "17958478",
+      "cs2_readiness": "source_animation_library_only"
+    },
+    {
+      "id": "quaternius-ual1-standard",
+      "name": "Quaternius Universal Animation Library Standard",
+      "category": "humanoid-animation-library",
+      "license": "CC0-1.0",
+      "license_evidence": "https://quaternius.itch.io/universal-animation-library",
+      "source_page": "https://quaternius.itch.io/universal-animation-library",
+      "status": "curated_archive_hash_available",
+      "format": [
+        "GLB",
+        "FBX"
+      ],
+      "inventory": "Free Standard tier archive snapshot is 15.9 MB with 43 animation tracks in the current GLB export. The full pack page advertises 120+ clips including 8-direction locomotion, jog, sprint, push, crawl, swim, sit, emotes, combat/gun, spellcasting and death.",
+      "technical_notes": "CC0. The Pro tier ($9.99 in the current itch listing) and Source tier ($14.99) are not included in this free archive. Confirm exact current tier availability before download.",
+      "archive_name": "Quaternius-Universal-Animation-Library-Standard.zip",
+      "archive_size_bytes": 15904933,
+      "sha256_snapshot": "cc73fc4e495b82958207316596317a3f40b9fa38065bde1027937452da537724",
+      "download_method": "itch_free_upload",
+      "itch_upload_id": "17958403",
+      "cs2_readiness": "source_animation_library_only"
     }
   ],
   "cs2_technical_references": [
@@ -696,5 +759,142 @@
       "technical_notes": "Author says it is a showcase, not production-ready. The Steam Workshop item associated with it is removed; use only as a technical reading reference, not an asset source.",
       "status": "reference_only_not_for_vendor"
     }
-  ]
+  ],
+  "external_curated_indexes": [
+    {
+      "id": "ludots-cc0-archive",
+      "name": "Ludots Assets CC0 curated archive",
+      "repository": "https://github.com/MightyBubble/Ludots-Assets",
+      "readme": "https://github.com/MightyBubble/Ludots-Assets/blob/main/README.md",
+      "manifests": {
+        "kenney": "https://github.com/MightyBubble/Ludots-Assets/blob/main/manifest.kenney.json",
+        "kaykit": "https://github.com/MightyBubble/Ludots-Assets/blob/main/manifest.kaykit.json",
+        "animations": "https://github.com/MightyBubble/Ludots-Assets/blob/main/manifest.animations.json"
+      },
+      "snapshot_generated_utc": "2026-08-20",
+      "inventory": "213 Kenney packs, 10 KayKit packs and 3 dedicated humanoid animation releases. Per-pack manifests record official source URL, licence evidence, archive byte count and SHA-256.",
+      "note": "Curated discovery and checksum cross-check only. Assets remain third-party items; use the original creator's current licence page as the authority. ZIP blobs are stored using Git LFS. The archive itself has not been downloaded into AETHERION.",
+      "status": "curated_index_only"
+    }
+  ],
+  "curated_download_batch": {
+    "id": "cc0-batch-2026-11-10",
+    "source_index": "https://github.com/MightyBubble/Ludots-Assets",
+    "source_manifest_snapshot": "2026-08-20",
+    "entries": [
+      {
+        "id": "kenney-modular-dungeon-kit",
+        "name": "Kenney Modular Dungeon Kit",
+        "method": "direct",
+        "source": "https://kenney.nl/assets/modular-dungeon-kit",
+        "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "url": "https://kenney.nl/media/pages/assets/modular-dungeon-kit/7bed87605b-1771926065/kenney_modular-dungeon-kit_1.0.zip",
+        "bytes": 6886434,
+        "sha256": "dd0aa6776db8912283cdca60161dee6a8839bbda3558eba2ea501419eb5b4623",
+        "destination": "kenney_modular_dungeon_kit"
+      },
+      {
+        "id": "kenney-particle-pack",
+        "name": "Kenney Particle Pack",
+        "method": "direct",
+        "source": "https://kenney.nl/assets/particle-pack",
+        "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "url": "https://kenney.nl/media/pages/assets/particle-pack/f8fe0f8cb8-1677578741/kenney_particle-pack.zip",
+        "bytes": 15001764,
+        "sha256": "b631d4b07f7002549fdcf155f01141ad482f79f3440e4e301eed49ce5f1d8958",
+        "destination": "kenney_particle_pack"
+      },
+      {
+        "id": "kenney-smoke-particles",
+        "name": "Kenney Smoke Particles",
+        "method": "direct",
+        "source": "https://kenney.nl/assets/smoke-particles",
+        "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "url": "https://kenney.nl/media/pages/assets/smoke-particles/23249a0d35-1677695171/kenney_smoke-particles.zip",
+        "bytes": 6019666,
+        "sha256": "97a1d09c66e4fd6c247c8ea87f84c0cc59caaeceae19414c995afb1616a1e1c9",
+        "destination": "kenney_smoke_particles"
+      },
+      {
+        "id": "kaykit-adventures",
+        "name": "KayKit Character Pack Adventures 1.0",
+        "method": "direct",
+        "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0",
+        "license": "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/main/README.md",
+        "url": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/archive/refs/heads/main.zip",
+        "bytes": 6141833,
+        "sha256": "e19176d799036452bc783c00dd1036e158c66c5a43b7285ccbfea3466d6f57bf",
+        "destination": "kaykit_adventures"
+      },
+      {
+        "id": "kaykit-skeletons",
+        "name": "KayKit Character Pack Skeletons 1.0",
+        "method": "direct",
+        "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0",
+        "license": "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0/main/README.md",
+        "url": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0/archive/refs/heads/main.zip",
+        "bytes": 6658096,
+        "sha256": "bb666ec30ff243f54cffdd936fcceeb5c68cdb424d230fe637b7bfd756c0c8e6",
+        "destination": "kaykit_skeletons"
+      },
+      {
+        "id": "kaykit-dungeon-remastered",
+        "name": "KayKit Dungeon Remastered 1.0",
+        "method": "direct",
+        "source": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0/main/README.md",
+        "url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0/archive/refs/heads/main.zip",
+        "bytes": 6312130,
+        "sha256": "8e92aa460f5be4252dff0cf030f92846ab74b875ce4756076ecce75b5d0c9bee",
+        "destination": "kaykit_dungeon_remastered"
+      },
+      {
+        "id": "kaykit-medieval-hexagon",
+        "name": "KayKit Medieval Hexagon Pack 1.0",
+        "method": "direct",
+        "source": "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0",
+        "license": "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/main/README.md",
+        "url": "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/refs/heads/main.zip",
+        "bytes": 8354303,
+        "sha256": "abe5b0c00456ab66a82883b6a16e860c419d822db5597596efccb09e57820c42",
+        "destination": "kaykit_medieval_hexagon"
+      },
+      {
+        "id": "kaykit-character-animations-free-1-1",
+        "name": "KayKit Character Animations Free 1.1",
+        "method": "itch",
+        "source": "https://kaylousberg.itch.io/kaykit-character-animations",
+        "license": "https://kaylousberg.itch.io/kaykit-character-animations",
+        "bytes": 14858957,
+        "sha256": "65882f31f905ad2e953819648a59287cdeab8f623908d5ef701971d3758be20f",
+        "uploadId": "15799903",
+        "destination": "kaykit_character_animations"
+      },
+      {
+        "id": "quaternius-ual1-standard",
+        "name": "Quaternius Universal Animation Library Standard",
+        "method": "itch",
+        "source": "https://quaternius.itch.io/universal-animation-library",
+        "license": "https://quaternius.itch.io/universal-animation-library",
+        "bytes": 15904933,
+        "sha256": "cc73fc4e495b82958207316596317a3f40b9fa38065bde1027937452da537724",
+        "uploadId": "17958403",
+        "destination": "quaternius_ual1_standard"
+      },
+      {
+        "id": "quaternius-ual2-standard",
+        "name": "Quaternius Universal Animation Library 2 Standard",
+        "method": "itch",
+        "source": "https://quaternius.itch.io/universal-animation-library-2",
+        "license": "https://quaternius.itch.io/universal-animation-library-2",
+        "bytes": 18735003,
+        "sha256": "4008ea208a604773a2b2177d965f0f5d3195498b5bf838c3f5785d68e95f2a68",
+        "uploadId": "17958478",
+        "destination": "quaternius_ual2_standard"
+      }
+    ],
+    "total_bytes": 104873119,
+    "state": "script_prepared_not_downloaded",
+    "note": "Expected archive SHA-256 values come from the curated snapshot manifest. The Windows intake script fails closed if an upstream archive changes."
+  }
 }
