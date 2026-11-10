@@ -50,7 +50,7 @@ class AssetSourceRegistryTests(unittest.TestCase):
         )
         self.assertIn("78 CC0 sound effects", item["inventory"])
         self.assertIn("license_evidence", item)
-        self.assertEqual(item["status"], "candidate_requires_manual_download")
+        self.assertEqual(item["status"], "candidate_requires_audio_audition_and_source2_compile")
 
     def test_universal_animation_library_free_tier_is_not_overstated(self):
         item = next(
