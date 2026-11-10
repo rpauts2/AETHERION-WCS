@@ -78,3 +78,25 @@ All seven are source assets only. Retargeting, material conversion, Source 2 mod
 | [SpritePilot SFX](https://spritepilot.com/free-game-assets/sound-effects) | 78 sounds, 8 seamless ambient loops, WAV/OGG/MP3 | CC0 | Dragon, combat, abilities, UI, ambient | Low source intake; VSND compile + playback gate |
 
 The environment kits are suitable for map/arena construction, not player-agent models. The SpriteCanvas sheets do not create particle definitions by themselves, and SpritePilot sounds do not become usable runtime resources until the Source 2 sound pipeline is run.
+
+
+---
+
+## Curated first intake batch (10 archives, approximately 105 MB)
+
+| Pack | Purpose | Size | Integrity record |
+|---|---|---:|---|
+| Kenney Modular Dungeon Kit | Dungeon geometry and props | 6.9 MB | SHA-256 pinned |
+| Kenney Particle Pack | Fire, smoke, magic and impact sprite sources | 15.0 MB | SHA-256 pinned |
+| Kenney Smoke Particles | Smoke and explosion sprite sources | 6.0 MB | SHA-256 pinned |
+| KayKit Adventures | Humanoid characters | 6.1 MB | SHA-256 pinned |
+| KayKit Skeletons | Undead humanoid characters and equipment | 6.7 MB | SHA-256 pinned |
+| KayKit Dungeon Remastered | Environment props and dungeon pieces | 6.3 MB | SHA-256 pinned |
+| KayKit Medieval Hexagon | Medieval modular environment kit | 8.4 MB | SHA-256 pinned |
+| KayKit Character Animations Free 1.1 | 133 official animations across Medium/Large rigs | 14.9 MB | SHA-256 pinned |
+| Quaternius UAL1 Standard | Humanoid locomotion, combat, spell and death tracks | 15.9 MB | SHA-256 pinned |
+| Quaternius UAL2 Standard | Combat combos, parkour, farming and zombie tracks | 18.7 MB | SHA-256 pinned |
+
+Exact creator URLs, licence pages, pinned archive sizes and SHA-256 are stored in configs/assets/asset_sources.json under curated_download_batch. Run scripts/fetch_curated_cc0_assets.ps1 from the Windows checkout to fetch and safely extract into assets/incoming/cc0-curated. The script verifies bytes/hash and refuses changed upstream files.
+
+These are source files only. They are not compiled Source 2 models, VPCFs, VSNDs or ready-to-play player agents.
