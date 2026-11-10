@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Audit configured AETHERION customSound paths and report missing files.
-
-The script checks source files in the repository/addon content tree; it does not
-claim that audio is compiled, precached, delivered to clients, or audible in-game.
-"""
+"""Audit configured Source 2 customSound references and their source/compiled files."""
 from __future__ import annotations
 
 import argparse
@@ -11,7 +7,7 @@ import json
 from collections import defaultdict
 from pathlib import Path, PurePosixPath
 
-ALLOWED_EXTENSIONS = {".wav", ".mp3", ".ogg", ".vsnd"}
+SOURCE_EXTENSIONS = (".wav", ".mp3", ".ogg", ".vsnd")
 
 
 def load_config(path: Path):
@@ -26,25 +22,40 @@ def load_config(path: Path):
     return data
 
 
-def normalize_asset_path(value: str) -> str:
+def normalize_runtime_path(value: str) -> str:
     normalized = value.strip().replace("\\", "/")
-    while normalized.startswith("./"):
-        normalized = normalized[2:]
     path = PurePosixPath(normalized)
     if path.is_absolute() or not path.parts or any(part in ("", ".", "..") for part in path.parts):
         raise ValueError(f"unsafe customSound path: {value!r}")
-    if path.suffix.lower() not in ALLOWED_EXTENSIONS:
-        raise ValueError(f"unsupported customSound extension: {value!r}")
+    if ":" in path.parts[0]:
+        raise ValueError(f"drive-qualified customSound path is not allowed: {value!r}")
+    if path.parts[0].lower() != "sounds":
+        raise ValueError(f"Source 2 runtime sound path must start with sounds/: {value!r}")
+    if path.suffix.lower() != ".vsnd":
+        raise ValueError(f"Source 2 runtime sound reference must end in .vsnd: {value!r}")
     return path.as_posix()
 
 
-def locate_asset(root: Path, asset_path: str):
-    candidates = [
-        root / asset_path,
-        root / "content" / "csgo_addons" / "aetherion" / asset_path,
-        root / "game" / "csgo_addons" / "aetherion" / asset_path,
-    ]
-    for candidate in candidates:
+def locate_source(root: Path, runtime_path: str):
+    runtime = PurePosixPath(runtime_path)
+    stem = runtime.with_suffix("")
+    for extension in SOURCE_EXTENSIONS:
+        relative = str(stem) + extension
+        for candidate in (
+            root / "content" / "csgo_addons" / "aetherion" / relative,
+            root / relative,
+        ):
+            if candidate.is_file():
+                return candidate
+    return None
+
+
+def locate_compiled(root: Path, runtime_path: str):
+    relative = runtime_path + "_c"
+    for candidate in (
+        root / "game" / "csgo_addons" / "aetherion" / relative,
+        root / relative,
+    ):
         if candidate.is_file():
             return candidate
     return None
@@ -65,26 +76,31 @@ def audit(config_path: Path, root: Path):
             empty_count += 1
             continue
         try:
-            asset_path = normalize_asset_path(str(value))
+            runtime_path = normalize_runtime_path(str(value))
         except ValueError as exc:
             malformed.append(f"sound {sound_id}: {exc}")
             continue
-        references[asset_path].append(str(sound_id))
+        references[runtime_path].append(str(sound_id))
 
-    found = {}
+    found_source = {}
+    found_compiled = {}
     missing = []
-    for asset_path in sorted(references, key=str.lower):
-        located = locate_asset(root, asset_path)
-        if located is None:
-            missing.append(asset_path)
-        else:
-            found[asset_path] = located
+    for runtime_path in sorted(references, key=str.lower):
+        source = locate_source(root, runtime_path)
+        compiled = locate_compiled(root, runtime_path)
+        if source is not None:
+            found_source[runtime_path] = source
+        if compiled is not None:
+            found_compiled[runtime_path] = compiled
+        if source is None and compiled is None:
+            missing.append(runtime_path)
 
     return {
         "entries": len(config),
         "empty": empty_count,
         "references": references,
-        "found": found,
+        "found_source": found_source,
+        "found_compiled": found_compiled,
         "missing": missing,
         "malformed": malformed,
     }
@@ -93,28 +109,33 @@ def audit(config_path: Path, root: Path):
 def render(result):
     lines = [
         "# AETHERION custom audio asset audit", "",
-        "This report checks configured source-file presence only. It does not prove soundevent registration, compilation, client delivery, precache, or playback.", "",
+        "This audit checks Source 2 source and compiled file presence. It does not prove soundevent registration, precache, client delivery, or audible playback.", "",
         "## Summary", "",
         f"- Config entries: **{result['entries']}**",
         f"- Empty customSound slots: **{result['empty']}**",
-        f"- Unique configured custom audio paths: **{len(result['references'])}**",
-        f"- Present source files: **{len(result['found'])}**",
-        f"- Missing source files: **{len(result['missing'])}**",
-        f"- Invalid paths or unsupported formats: **{len(result['malformed'])}**", "",
-        "## Missing files", ""
+        f"- Unique runtime sound references: **{len(result['references'])}**",
+        f"- Present source audio files: **{len(result['found_source'])}**",
+        f"- Present compiled VSND_C files: **{len(result['found_compiled'])}**",
+        f"- Missing source and compiled files: **{len(result['missing'])}**",
+        f"- Invalid runtime paths: **{len(result['malformed'])}**", "",
+        "## Missing resources", ""
     ]
     if result["missing"]:
-        for asset_path in result["missing"]:
-            ids = ", ".join(sorted(result["references"][asset_path], key=int))
-            lines.append(f"- MISSING {asset_path} (sound IDs: {ids})")
+        for runtime_path in result["missing"]:
+            ids = ", ".join(sorted(result["references"][runtime_path], key=int))
+            lines.append(f"- MISSING {runtime_path} (sound IDs: {ids})")
     else:
-        lines.append("No configured custom audio files are missing.")
+        lines.append("No missing custom audio resources.")
     lines.extend(("", "## Present source files", ""))
-    if result["found"]:
-        for asset_path, full_path in sorted(result["found"].items()):
-            lines.append(f"- {asset_path} -> {full_path.as_posix()}")
-    else:
-        lines.append("No configured custom audio source files were found.")
+    for runtime_path, path in sorted(result["found_source"].items()):
+        lines.append(f"- {runtime_path} <- {path.as_posix()}")
+    if not result["found_source"]:
+        lines.append("No source audio files found.")
+    lines.extend(("", "## Present compiled files", ""))
+    for runtime_path, path in sorted(result["found_compiled"].items()):
+        lines.append(f"- {runtime_path} -> {path.as_posix()}")
+    if not result["found_compiled"]:
+        lines.append("No compiled VSND_C files found.")
     lines.extend(("", "## Invalid configuration entries", ""))
     lines.extend(f"- {message}" for message in result["malformed"])
     if not result["malformed"]:
@@ -145,13 +166,13 @@ def main():
         output.write_text(report, encoding="utf-8")
     print(
         f"Audio asset audit: {result['entries']} config entries, "
-        f"{len(result['references'])} unique custom paths, "
+        f"{len(result['references'])} unique runtime paths, "
         f"{len(result['missing'])} missing, {len(result['malformed'])} invalid"
     )
-    for asset_path in result["missing"]:
-        print(f"MISSING: {asset_path}")
+    for runtime_path in result["missing"]:
+        print(f"MISSING AUDIO: {runtime_path}")
     for message in result["malformed"]:
-        print(f"INVALID: {message}")
+        print(f"INVALID AUDIO: {message}")
     return 1 if args.fail_on_missing and (result["missing"] or result["malformed"]) else 0
 
 
