@@ -402,6 +402,57 @@
       "inventory": "624 sound types across 23 categories, with downloadable MP3 variations including UI, impacts, magic/sci-fi, ambience and creatures.",
       "technical_notes": "AI-generated/procedural source; free download allowance is 10 MP3/day and public API has daily lookup/download limits. Capture exact audio URL, format, duration, loudness and SHA-256 per chosen clip.",
       "cs2_readiness": "source_audio_only"
+    },
+    {
+      "id": "gobkit-dinosaur-pack",
+      "name": "Gobkit Free Dinosaur Pack",
+      "category": "creatures",
+      "license": "CC0-1.0",
+      "license_evidence": "https://gobkit.itch.io/gobkit-free-dinosaur-pack",
+      "source_page": "https://gobkit.itch.io/gobkit-free-dinosaur-pack",
+      "status": "candidate_requires_manual_download",
+      "archive_name": "gobkit-dino-itch.zip",
+      "archive_size": "8.9 MB",
+      "format": [
+        "GLB"
+      ],
+      "inventory": "10 rigged low-poly dinosaurs including T-Rex, Triceratops, Stegosaurus, Spinosaurus, Ankylosaurus, Carnotaurus, Pachycephalosaurus, Oviraptor, Plesiosaurus and Pterodactyl. Creator notes say files contain idle, walk, attack and death animations.",
+      "technical_notes": "Creature rigs are useful for PvE bosses, summoned creatures and wave enemies, not automatically player agents. Inspect clip names/frame ranges and skeleton on the exact download before retargeting.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "gobkit-animal-pack-vol-5",
+      "name": "Gobkit Free Animal Pack Vol.5",
+      "category": "creatures",
+      "license": "CC0-1.0",
+      "license_evidence": "https://gobkit.itch.io/gobkit-free-animal-pack-vol-5",
+      "source_page": "https://gobkit.itch.io/gobkit-free-animal-pack-vol-5",
+      "status": "candidate_requires_manual_download",
+      "archive_name": "gobkit-free-animal-pack-vol-5.zip",
+      "archive_size": "525 kB",
+      "format": [
+        "GLB"
+      ],
+      "inventory": "10 rigged animals: Narwhal, Koala, Tasmanian Devil, Dingo, Sea Otter, Mole, Seagull, Quail, Scorpion and Chick. Shared retarget-friendly skeleton with named idle, attack, dead and walk clips at 24 FPS.",
+      "technical_notes": "Small archive and low-poly topology make this an excellent first creature intake test. It remains source GLB, not a compiled Source 2 entity.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "polyyai-low-poly-guns-25",
+      "name": "Polyy.AI 25 Low-Poly Guns Pack",
+      "category": "weapons",
+      "license": "CC0-1.0",
+      "license_evidence": "https://polyyai.itch.io/3d-low-poly-guns-pack",
+      "source_page": "https://polyyai.itch.io/3d-low-poly-guns-pack",
+      "status": "candidate_requires_manual_download",
+      "archive_name": "3D_low_poly_guns_pack_low.zip",
+      "archive_size": "43 MB",
+      "format": [
+        "GLB"
+      ],
+      "inventory": "25 weapons including pistols, SMGs, rifles, shotguns, sniper, LMG, minigun, rocket/grenade launchers, flamethrower and sci-fi ray/plasma weapons. Low-poly version is 6k-10k triangles per mesh.",
+      "technical_notes": "Publisher marks artwork AI-assisted. CC0 allows use and modification. Inspect files and consider platform AI-content disclosure for a distributed build. GLB models need weapon-specific grip/attachment pivots and CS2 model compilation; they are not ready-to-use viewmodels.",
+      "cs2_readiness": "source_asset_only"
     }
   ],
   "cs2_technical_references": [
