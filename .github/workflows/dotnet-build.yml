@@ -86,3 +86,35 @@ jobs:
           path: race-balance-report.md
           if-no-files-found: error
           retention-days: 14
+
+  validate-powershell:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Parse PowerShell asset scripts
+        shell: pwsh
+        run: |
+          $paths = @(
+            "scripts/fetch_cc0_assets.ps1",
+            "scripts/fetch_curated_cc0_assets.ps1",
+            "scripts/install_cc0_dragon_roar.ps1",
+            "scripts/compile_addon_audio.ps1",
+            "scripts/audit_cs2_stock_resources.ps1"
+          )
+          $failed = $false
+          foreach ($path in $paths) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path).Path, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $failed = $true
+              Write-Host "PowerShell parse errors in $path"
+              $errors | ForEach-Object { Write-Error $_.Message }
+            } else {
+              Write-Host "PowerShell syntax OK: $path"
+            }
+          }
+          if ($failed) { exit 1 }
