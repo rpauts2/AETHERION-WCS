@@ -72,8 +72,17 @@ $receipt=@()
 foreach ($pack in $packs) {
     $archive=Join-Path $downloads ($pack.Id+".zip")
     $destination=Join-Path $incoming $pack.Destination
-    if (Test-Path -LiteralPath $destination) {
-        throw "Destination exists; refusing to overwrite: $destination"
+    $alreadyExtracted = $false
+    if (-not $SkipExtraction -and (Test-Path -LiteralPath $destination)) {
+        $existingReceipt = Join-Path $destination "SOURCE-RECEIPT.md"
+        if (-not (Test-Path -LiteralPath $existingReceipt)) {
+            throw "Destination exists without a source receipt; refusing to overwrite or trust it: $destination"
+        }
+        $receiptText = Get-Content -Raw -LiteralPath $existingReceipt
+        if ($receiptText -notmatch [regex]::Escape($pack.Sha256)) {
+            throw "Existing extraction receipt does not match the pinned SHA-256; inspect manually: $destination"
+        }
+        $alreadyExtracted = $true
     }
 
     if (Test-Path -LiteralPath $archive) {
@@ -117,7 +126,7 @@ foreach ($pack in $packs) {
     try { if ($zip.Entries.Count -eq 0) { throw "Empty ZIP: $archive" } }
     finally { $zip.Dispose() }
 
-    if (-not $SkipExtraction) {
+    if (-not $SkipExtraction -and -not $alreadyExtracted) {
         New-Item -ItemType Directory -Path $destination | Out-Null
         Expand-SafeZip -ArchivePath $archive -DestinationPath $destination
         $readme=@"
@@ -140,7 +149,7 @@ This is an original CC0 source package. It has not been imported into CS2, compi
         id=$pack.Id; name=$pack.Name; source=$pack.Source; license_evidence=$pack.License
         archive=$archive; bytes=$actualBytes; sha256=$actualHash
         extracted_to=if($SkipExtraction){$null}else{$destination}
-        status=if($SkipExtraction){"downloaded_source_only"}else{"downloaded_and_safely_extracted_source_only"}
+        status=if($SkipExtraction){"downloaded_source_only"}elseif($alreadyExtracted){"existing_extraction_verified"}else{"downloaded_and_safely_extracted_source_only"}
     }
     $receipt | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $incoming "download-receipt.json") -Encoding UTF8
     Write-Host "Verified: $($pack.Name) ($actualBytes bytes)"
