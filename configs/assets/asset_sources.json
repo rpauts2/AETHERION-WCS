@@ -109,6 +109,27 @@
   ],
   "additional_research_candidates": [
     {
+      "id": "3dvalley-rigged-cc0-index",
+      "name": "3D Valley rigged CC0 model index",
+      "category": "asset-index",
+      "license": "CC0 per indexed source item; verify on each original source page",
+      "license_evidence": "https://3dvalley.com/3d-models/rigged",
+      "source_page": "https://3dvalley.com/3d-models/rigged",
+      "status": "research_index_not_bulk_download",
+      "inventory": "Catalogue states 705 CC0 rigged models, 681 animated. Includes many Gobkit animals and other creators.",
+      "technical_notes": "Aggregator, not blanket permission for every file. Verify original creator, exact CC0 evidence, skeleton, animation clips and download URL for each candidate before import.",
+      "cs2_readiness": "index_only"
+    },
+    {
+      "id": "autosprite-free-assets",
+      "name": "AutoSprite Free Game Assets",
+      "source_page": "https://www.autosprite.io/free",
+      "license": "CC0",
+      "inventory": "20 3D GLB models, 13 animated 2D character sheets and 50 2D prop/effect sheets.",
+      "status": "candidate_requires_per_model_triage",
+      "risk": "The 2D sheets are useful for menus/icons but cannot replace a rigged 3D CS2 player agent."
+    },
+    {
       "id": "fantasy-creatures-26",
       "name": "Fantasy Creatures: 26 rigged and animated",
       "source_page": "https://algumacoisaqq.itch.io/fantasy-creatures-wolf-giant-rat-spider-wasp-centipede",
@@ -127,87 +148,6 @@
       "license_evidence": "https://isatern.itch.io/fantasy-forge-animated-fantasy-assets"
     },
     {
-      "id": "kaino-sfx-library",
-      "name": "Kaino SFX Library",
-      "source_page": "https://kaino.dev/library/sfx",
-      "license": "CC0-1.0",
-      "inventory": "1397 sound effects across 21 categories, including creatures, fantasy/RPG, magic, spell, impacts, fire and whoosh.",
-      "status": "candidate_requires_audio_audition",
-      "license_evidence": "https://kaino.dev/library/sfx"
-    },
-    {
-      "id": "grab3d-dragon-index",
-      "name": "Grab3D Dragon catalogue",
-      "source_page": "https://grab3d.com/free-3d-models/dragon/",
-      "license": "CC0-1.0",
-      "inventory": "8 dragon entries, 6k to 800k triangles, GLB/FBX/BLEND/USDZ/OBJ.",
-      "status": "candidate_requires_per_model_triage",
-      "risk": "Some high-detail entries are very heavy or static; do not select for a live CS2 server without checking polygon budget and rigging.",
-      "license_evidence": "https://grab3d.com/free-3d-models/dragon/"
-    },
-    {
-      "id": "supaVoxel-160-cc0-animations",
-      "name": "SupaVoxel humanoid animation tool",
-      "source_page": "https://supavoxel.com/tools/animate-3d-model",
-      "license": "160 CC0 animation clips",
-      "inventory": "Accepts an already-rigged humanoid GLB/FBX and offers 160 CC0 clips; exports animated GLB with one clip or a set.",
-      "status": "candidate_requires_rig_compatibility_test",
-      "use": "Retarget locomotion, attack, hit and death animation to existing humanoid player-agent rigs."
-    },
-    {
-      "id": "kinemiq-free-game-animations",
-      "name": "KinemIQ free game animations",
-      "source_page": "https://kinemiq.itch.io/free-game-animations",
-      "license": "175 CC0 clips; an additional 170 clips require CC BY 4.0 and 115 require CC BY 3.0",
-      "inventory": "The complete browser library lists 460 clips on one humanoid skeleton; 175 from Quaternius are CC0, 170 require CC BY 4.0 and 115 require CC BY 3.0. The standalone downloadable CC0 pack currently advertised on the asset page contains 35 clips and is offered as 2.4 MB FBX and 2.1 MB GLB archives.",
-      "status": "candidate_requires_manual_export_and_rig_test",
-      "technical_notes": "Use only the 35-clip stand-alone CC0 pack for straightforward import. The larger 175-clip CC0 collection is advertised in the full browser library; do not assume it is identical to the 35-clip ZIP or that non-CC0 clips are included without attribution obligations.",
-      "download_formats": [
-        "FBX",
-        "GLB"
-      ]
-    },
-    {
-      "id": "autosprite-free-assets",
-      "name": "AutoSprite Free Game Assets",
-      "source_page": "https://www.autosprite.io/free",
-      "license": "CC0",
-      "inventory": "20 3D GLB models, 13 animated 2D character sheets and 50 2D prop/effect sheets.",
-      "status": "candidate_requires_per_model_triage",
-      "risk": "The 2D sheets are useful for menus/icons but cannot replace a rigged 3D CS2 player agent."
-    },
-    {
-      "id": "spritepilot-sfx-78",
-      "name": "SpritePilot Sound Effects",
-      "source_page": "https://spritepilot.com/free-game-assets/sound-effects",
-      "license": "CC0",
-      "inventory": "78 WAV/OGG/MP3 sound effects covering impacts, combat, magic, creatures, UI and ambience.",
-      "status": "candidate_requires_audio_audition_and_source2_compile"
-    },
-    {
-      "id": "spritepilot-pixel-effects",
-      "name": "SpritePilot Pixel Art Game Assets",
-      "category": "2d-vfx",
-      "license": "CC0-1.0",
-      "license_evidence": "https://spritepilot.com/free-game-assets",
-      "source_page": "https://spritepilot.com/free-game-assets",
-      "status": "candidate_requires_sprite_extraction_and_vpcf_authoring",
-      "inventory": "82 sprites and sheets; 7 general effects, 9 combat effects and 9 spell/projectile effects.",
-      "technical_notes": "2D sheets, not ready-made CS2 VPCF resources.",
-      "cs2_readiness": "texture_source_only"
-    },
-    {
-      "id": "spritecanvas-monster-sprites",
-      "name": "Free CC0 Monster Sprites",
-      "category": "2d-character",
-      "license": "CC0-1.0",
-      "license_evidence": "https://spritecanvas.itch.io/free-cc0-monster-sprites",
-      "source_page": "https://spritecanvas.itch.io/free-cc0-monster-sprites",
-      "status": "candidate_for_ui_only",
-      "inventory": "Slime, mushroom, goblin and stone golem sprite sheets with idle/walk/attack/hurt/death animation sets.",
-      "cs2_readiness": "2d_ui_asset_only"
-    },
-    {
       "id": "gobkit-animal-pack-vol-2",
       "name": "Gobkit Free Animal Pack Vol. 2",
       "category": "creature",
@@ -223,49 +163,21 @@
       "cs2_readiness": "source_asset_only"
     },
     {
-      "id": "gobkit-nature-kit",
-      "name": "Gobkit Nature Kit",
-      "category": "environment-props",
+      "id": "gobkit-animal-pack-vol-5",
+      "name": "Gobkit Free Animal Pack Vol.5",
+      "category": "creatures",
       "license": "CC0-1.0",
-      "license_evidence": "https://gobkit.com/freebies",
-      "source_page": "https://gobkit.com/freebies",
-      "download_url": "https://gobkit.com/freebies/environment/gobkit-nature-kit.zip",
-      "status": "candidate_in_dynamic_gobkit_api",
+      "license_evidence": "https://gobkit.itch.io/gobkit-free-animal-pack-vol-5",
+      "source_page": "https://gobkit.itch.io/gobkit-free-animal-pack-vol-5",
+      "status": "candidate_requires_manual_download",
+      "archive_name": "gobkit-free-animal-pack-vol-5.zip",
+      "archive_size": "525 kB",
       "format": [
         "GLB"
       ],
-      "inventory": "Nature kit pack: trees, rocks, cliffs and props; API snapshot count 42 including an assembled scene.",
+      "inventory": "10 rigged animals: Narwhal, Koala, Tasmanian Devil, Dingo, Sea Otter, Mole, Seagull, Quail, Scorpion and Chick. Shared retarget-friendly skeleton with named idle, attack, dead and walk clips at 24 FPS.",
+      "technical_notes": "Small archive and low-poly topology make this an excellent first creature intake test. It remains source GLB, not a compiled Source 2 entity.",
       "cs2_readiness": "source_asset_only"
-    },
-    {
-      "id": "rollpoly-generator",
-      "name": "Rollpoly low-poly character & prop generator",
-      "category": "procedural-3d",
-      "license": "CC0-1.0",
-      "license_evidence": "https://rollpoly.tsuyatt.com/",
-      "source_page": "https://rollpoly.tsuyatt.com/",
-      "status": "candidate_for_original_placeholders",
-      "format": [
-        "GLB",
-        "FBX",
-        "glTF",
-        "Unity package"
-      ],
-      "inventory": "Browser-based generator for humanoids, monsters and props; example output 566 triangles, 23 bones and 2 morph targets. Generation runs in browser, no account.",
-      "technical_notes": "Generated assets vary by seed and selected options; inspect each exported model. Useful for rapid placeholder races, props and basic monster silhouettes, not finished art.",
-      "cs2_readiness": "source_asset_only"
-    },
-    {
-      "id": "3dvalley-rigged-cc0-index",
-      "name": "3D Valley rigged CC0 model index",
-      "category": "asset-index",
-      "license": "CC0 per indexed source item; verify on each original source page",
-      "license_evidence": "https://3dvalley.com/3d-models/rigged",
-      "source_page": "https://3dvalley.com/3d-models/rigged",
-      "status": "research_index_not_bulk_download",
-      "inventory": "Catalogue states 705 CC0 rigged models, 681 animated. Includes many Gobkit animals and other creators.",
-      "technical_notes": "Aggregator, not blanket permission for every file. Verify original creator, exact CC0 evidence, skeleton, animation clips and download URL for each candidate before import.",
-      "cs2_readiness": "index_only"
     },
     {
       "id": "gobkit-character-pack-vol-1",
@@ -316,20 +228,55 @@
       "cs2_readiness": "source_asset_only"
     },
     {
-      "id": "kaykit-skeletons-character-pack",
-      "name": "KayKit Skeletons Character Pack",
-      "category": "humanoid-characters-and-weapons",
+      "id": "gobkit-dinosaur-pack",
+      "name": "Gobkit Free Dinosaur Pack",
+      "category": "creatures",
       "license": "CC0-1.0",
-      "license_evidence": "https://kaylousberg.itch.io/kaykit-skeletons",
-      "source_page": "https://kaylousberg.itch.io/kaykit-skeletons",
+      "license_evidence": "https://gobkit.itch.io/gobkit-free-dinosaur-pack",
+      "source_page": "https://gobkit.itch.io/gobkit-free-dinosaur-pack",
       "status": "candidate_requires_manual_download",
+      "archive_name": "gobkit-dino-itch.zip",
+      "archive_size": "8.9 MB",
       "format": [
-        "FBX",
-        "GLTF"
+        "GLB"
       ],
-      "inventory": "Free tier has 4 fully textured, rigged and animated skeleton characters plus 10+ weapons/accessories including swords, shields, axes, crossbows, arrows and staffs. Two additional characters are in the paid Extra tier and are not included in this free candidate.",
-      "technical_notes": "Single 1024x1024 gradient atlas, downsample-friendly. Basic movement animations included; pack is documented as compatible with KayKit Character Animations.",
+      "inventory": "10 rigged low-poly dinosaurs including T-Rex, Triceratops, Stegosaurus, Spinosaurus, Ankylosaurus, Carnotaurus, Pachycephalosaurus, Oviraptor, Plesiosaurus and Pterodactyl. Creator notes say files contain idle, walk, attack and death animations.",
+      "technical_notes": "Creature rigs are useful for PvE bosses, summoned creatures and wave enemies, not automatically player agents. Inspect clip names/frame ranges and skeleton on the exact download before retargeting.",
       "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "gobkit-nature-kit",
+      "name": "Gobkit Nature Kit",
+      "category": "environment-props",
+      "license": "CC0-1.0",
+      "license_evidence": "https://gobkit.com/freebies",
+      "source_page": "https://gobkit.com/freebies",
+      "download_url": "https://gobkit.com/freebies/environment/gobkit-nature-kit.zip",
+      "status": "candidate_in_dynamic_gobkit_api",
+      "format": [
+        "GLB"
+      ],
+      "inventory": "Nature kit pack: trees, rocks, cliffs and props; API snapshot count 42 including an assembled scene.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "grab3d-dragon-index",
+      "name": "Grab3D Dragon catalogue",
+      "source_page": "https://grab3d.com/free-3d-models/dragon/",
+      "license": "CC0-1.0",
+      "inventory": "8 dragon entries, 6k to 800k triangles, GLB/FBX/BLEND/USDZ/OBJ.",
+      "status": "candidate_requires_per_model_triage",
+      "risk": "Some high-detail entries are very heavy or static; do not select for a live CS2 server without checking polygon budget and rigging.",
+      "license_evidence": "https://grab3d.com/free-3d-models/dragon/"
+    },
+    {
+      "id": "kaino-sfx-library",
+      "name": "Kaino SFX Library",
+      "source_page": "https://kaino.dev/library/sfx",
+      "license": "CC0-1.0",
+      "inventory": "1397 sound effects across 21 categories, including creatures, fantasy/RPG, magic, spell, impacts, fire and whoosh.",
+      "status": "candidate_requires_audio_audition",
+      "license_evidence": "https://kaino.dev/library/sfx"
     },
     {
       "id": "kaykit-adventurers-character-pack",
@@ -348,20 +295,83 @@
       "cs2_readiness": "source_asset_only"
     },
     {
-      "id": "vuena-blocky-characters-sample",
-      "name": "Vuena 8 Free Blocky Characters",
+      "id": "kaykit-skeletons-character-pack",
+      "name": "KayKit Skeletons Character Pack",
+      "category": "humanoid-characters-and-weapons",
+      "license": "CC0-1.0",
+      "license_evidence": "https://kaylousberg.itch.io/kaykit-skeletons",
+      "source_page": "https://kaylousberg.itch.io/kaykit-skeletons",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "FBX",
+        "GLTF"
+      ],
+      "inventory": "Free tier has 4 fully textured, rigged and animated skeleton characters plus 10+ weapons/accessories including swords, shields, axes, crossbows, arrows and staffs. Two additional characters are in the paid Extra tier and are not included in this free candidate.",
+      "technical_notes": "Single 1024x1024 gradient atlas, downsample-friendly. Basic movement animations included; pack is documented as compatible with KayKit Character Animations.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "kenney-animated-characters-protagonists",
+      "name": "Kenney Animated Characters Protagonists",
       "category": "humanoid-characters",
       "license": "CC0-1.0",
-      "license_evidence": "https://vuena.itch.io/blocky-characters-free-sample",
-      "source_page": "https://vuena.itch.io/blocky-characters-free-sample",
-      "status": "candidate_requires_style_review",
+      "license_evidence": "https://kenney.nl/assets/animated-characters-protagonists",
+      "source_page": "https://kenney.nl/assets/animated-characters-protagonists",
+      "status": "candidate_requires_manual_download",
       "format": [
-        "GLB",
-        "FBX"
+        "FBX",
+        "PNG",
+        "SVG"
       ],
-      "inventory": "8 rigged low-poly characters: Hero, Knight, Wizard, Astronaut, Pirate, Robot, Zombie and Princess. 22-bone humanoid skeleton with Mixamo-compatible names; idle, walk, run, jump, fall and wave clips. 2.4k-4.6k triangles, one 256x256 palette texture.",
-      "technical_notes": "Rigid skinning, no facial animation; rest pose has arms down rather than a T-pose. Good technical test for retargeting but blocky visual style may not suit the main AETHERION art direction.",
+      "inventory": "3D animated character pack, 8 files; skater, cyborg and criminal themes. The Kenney CC0 pack uses rigged low-poly characters with swappable skins (community inventory reports 4 FBX files plus skin PNGs).",
+      "technical_notes": "Use for stylized NPCs or as an animation/rig test. Verify exact skeleton and clip names from archive before retargeting to a CS2 player agent.",
       "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "kenney-animated-characters-retro",
+      "name": "Kenney Animated Characters Retro",
+      "category": "humanoid-characters",
+      "license": "CC0-1.0",
+      "license_evidence": "https://kenney.nl/assets/animated-characters-retro",
+      "source_page": "https://kenney.nl/assets/animated-characters-retro",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "FBX",
+        "PNG"
+      ],
+      "inventory": "3D animated character pack, 8 files; retro, zombie and survivor themes. Community inventory reports four FBX models with skin PNGs.",
+      "technical_notes": "Good source for undead/NPC variants. Verify exact animation clips and skeleton against the first Kenney pack.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "kenney-animated-characters-survivors",
+      "name": "Kenney Animated Characters Survivors",
+      "category": "humanoid-characters",
+      "license": "CC0-1.0",
+      "license_evidence": "https://kenney.nl/assets/animated-characters-survivors",
+      "source_page": "https://kenney.nl/assets/animated-characters-survivors",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "FBX",
+        "PNG",
+        "SVG"
+      ],
+      "inventory": "3D animated character pack, 8 files; survivor and zombie theme.",
+      "technical_notes": "The strongest Kenney candidate for zombie/undead waves and survival-themed NPCs. Confirm FBX animation clips and material texture mapping from archive.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "kinemiq-free-game-animations",
+      "name": "KinemIQ free game animations",
+      "source_page": "https://kinemiq.itch.io/free-game-animations",
+      "license": "175 CC0 clips; an additional 170 clips require CC BY 4.0 and 115 require CC BY 3.0",
+      "inventory": "The complete browser library lists 460 clips on one humanoid skeleton; 175 from Quaternius are CC0, 170 require CC BY 4.0 and 115 require CC BY 3.0. The standalone downloadable CC0 pack currently advertised on the asset page contains 35 clips and is offered as 2.4 MB FBX and 2.1 MB GLB archives.",
+      "status": "candidate_requires_manual_export_and_rig_test",
+      "technical_notes": "Use only the 35-clip stand-alone CC0 pack for straightforward import. The larger 175-clip CC0 collection is advertised in the full browser library; do not assume it is identical to the 35-clip ZIP or that non-CC0 clips are included without attribution obligations.",
+      "download_formats": [
+        "FBX",
+        "GLB"
+      ]
     },
     {
       "id": "polyyai-fantasy-weapons-25",
@@ -376,6 +386,110 @@
       ],
       "inventory": "25 PBR-textured weapons: longsword, cleaver, leaf blade, war axes, mace, warhammer, dagger, cutlass, katana, claymore, rapier, halberd, spear, trident, scythe, staff and more. Low-poly archive is 57 MB with 4k-12k triangles per mesh; full archive is 90 MB with 49k-55k triangles.",
       "technical_notes": "Prefer the low-poly archive for live-server equipment. Author explicitly asks not to resell unmodified copies; license page itself declares CC0 1.0.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "polyyai-low-poly-guns-25",
+      "name": "Polyy.AI 25 Low-Poly Guns Pack",
+      "category": "weapons",
+      "license": "CC0-1.0",
+      "license_evidence": "https://polyyai.itch.io/3d-low-poly-guns-pack",
+      "source_page": "https://polyyai.itch.io/3d-low-poly-guns-pack",
+      "status": "candidate_requires_manual_download",
+      "archive_name": "3D_low_poly_guns_pack_low.zip",
+      "archive_size": "43 MB",
+      "format": [
+        "GLB"
+      ],
+      "inventory": "25 weapons including pistols, SMGs, rifles, shotguns, sniper, LMG, minigun, rocket/grenade launchers, flamethrower and sci-fi ray/plasma weapons. Low-poly version is 6k-10k triangles per mesh.",
+      "technical_notes": "Publisher marks artwork AI-assisted. CC0 allows use and modification. Inspect files and consider platform AI-content disclosure for a distributed build. GLB models need weapon-specific grip/attachment pivots and CS2 model compilation; they are not ready-to-use viewmodels.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "quaternius-modular-weapons-pack",
+      "name": "Quaternius Modular Weapons Pack",
+      "category": "weapons",
+      "license": "CC0-1.0",
+      "license_evidence": "https://quaternius.com/packs/medievalweapons.html",
+      "source_page": "https://quaternius.com/packs/medievalweapons.html",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "FBX",
+        "OBJ",
+        "BLEND"
+      ],
+      "inventory": "24 medieval weapon models including swords, daggers, bows, shields and hammers.",
+      "technical_notes": "Useful for race-specific equipment and shop/cosmetic props. Must set Source 2 grip pivots, attachment points, materials and view/world model variations.",
+      "cs2_readiness": "source_model_only"
+    },
+    {
+      "id": "quaternius-rpg-character-pack",
+      "name": "Quaternius RPG Character Pack",
+      "category": "humanoid-characters",
+      "license": "CC0-1.0",
+      "license_evidence": "https://quaternius.com/packs/rpgcharacters.html",
+      "source_page": "https://quaternius.com/packs/rpgcharacters.html",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "FBX",
+        "OBJ",
+        "BLEND",
+        "GLTF"
+      ],
+      "inventory": "6 rigged, animated and textured fantasy characters.",
+      "technical_notes": "Compact first batch for a fantasy player-agent/NPC retargeting prototype. Confirm exact rig compatibility and animation names.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "quaternius-ultimate-animated-character-pack",
+      "name": "Quaternius Ultimate Animated Character Pack",
+      "category": "humanoid-characters",
+      "license": "CC0-1.0",
+      "license_evidence": "https://quaternius.com/packs/ultimatedanimatedcharacter",
+      "source_page": "https://quaternius.com/packs/ultimatedanimatedcharacter",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "FBX",
+        "OBJ",
+        "BLEND"
+      ],
+      "inventory": "52 animated and textured low-poly character models with many animations; CC0.",
+      "technical_notes": "Potential character pool for races/NPCs; check each model's rig and animation set, and measure per-model draw/triangle cost before server integration.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "quaternius-universal-animation-library",
+      "name": "Quaternius Universal Animation Library",
+      "category": "humanoid-animation-library",
+      "license": "CC0-1.0",
+      "license_evidence": "https://quaternius.com/packs/universalanimationlibrary.html",
+      "source_page": "https://quaternius.com/packs/universalanimationlibrary.html",
+      "status": "candidate_free_subset_manual_download",
+      "format": [
+        "FBX",
+        "GLB",
+        "BLEND"
+      ],
+      "inventory": "120+ humanoid animations on a universal rig: 8-direction locomotion, jog, sprint, combat/gun, push, crawl, swim, sit, emotes, death and more. Creator says the free download is 60-70% of the pack; more is available through supporter tiers.",
+      "technical_notes": "High-value source for retargeting tests. The CS2 player skeleton and animation graph must be validated; compatibility with Unity/Unreal/Godot does not imply Source 2 compatibility.",
+      "cs2_readiness": "source_animation_library_only"
+    },
+    {
+      "id": "rollpoly-generator",
+      "name": "Rollpoly low-poly character & prop generator",
+      "category": "procedural-3d",
+      "license": "CC0-1.0",
+      "license_evidence": "https://rollpoly.tsuyatt.com/",
+      "source_page": "https://rollpoly.tsuyatt.com/",
+      "status": "candidate_for_original_placeholders",
+      "format": [
+        "GLB",
+        "FBX",
+        "glTF",
+        "Unity package"
+      ],
+      "inventory": "Browser-based generator for humanoids, monsters and props; example output 566 triangles, 23 bones and 2 morph targets. Generation runs in browser, no account.",
+      "technical_notes": "Generated assets vary by seed and selected options; inspect each exported model. Useful for rapid placeholder races, props and basic monster silhouettes, not finished art.",
       "cs2_readiness": "source_asset_only"
     },
     {
@@ -408,54 +522,59 @@
       "cs2_readiness": "source_audio_only"
     },
     {
-      "id": "gobkit-dinosaur-pack",
-      "name": "Gobkit Free Dinosaur Pack",
-      "category": "creatures",
+      "id": "spritecanvas-monster-sprites",
+      "name": "Free CC0 Monster Sprites",
+      "category": "2d-character",
       "license": "CC0-1.0",
-      "license_evidence": "https://gobkit.itch.io/gobkit-free-dinosaur-pack",
-      "source_page": "https://gobkit.itch.io/gobkit-free-dinosaur-pack",
-      "status": "candidate_requires_manual_download",
-      "archive_name": "gobkit-dino-itch.zip",
-      "archive_size": "8.9 MB",
-      "format": [
-        "GLB"
-      ],
-      "inventory": "10 rigged low-poly dinosaurs including T-Rex, Triceratops, Stegosaurus, Spinosaurus, Ankylosaurus, Carnotaurus, Pachycephalosaurus, Oviraptor, Plesiosaurus and Pterodactyl. Creator notes say files contain idle, walk, attack and death animations.",
-      "technical_notes": "Creature rigs are useful for PvE bosses, summoned creatures and wave enemies, not automatically player agents. Inspect clip names/frame ranges and skeleton on the exact download before retargeting.",
-      "cs2_readiness": "source_asset_only"
+      "license_evidence": "https://spritecanvas.itch.io/free-cc0-monster-sprites",
+      "source_page": "https://spritecanvas.itch.io/free-cc0-monster-sprites",
+      "status": "candidate_for_ui_only",
+      "inventory": "Slime, mushroom, goblin and stone golem sprite sheets with idle/walk/attack/hurt/death animation sets.",
+      "cs2_readiness": "2d_ui_asset_only"
     },
     {
-      "id": "gobkit-animal-pack-vol-5",
-      "name": "Gobkit Free Animal Pack Vol.5",
-      "category": "creatures",
+      "id": "spritepilot-pixel-effects",
+      "name": "SpritePilot Pixel Art Game Assets",
+      "category": "2d-vfx",
       "license": "CC0-1.0",
-      "license_evidence": "https://gobkit.itch.io/gobkit-free-animal-pack-vol-5",
-      "source_page": "https://gobkit.itch.io/gobkit-free-animal-pack-vol-5",
-      "status": "candidate_requires_manual_download",
-      "archive_name": "gobkit-free-animal-pack-vol-5.zip",
-      "archive_size": "525 kB",
-      "format": [
-        "GLB"
-      ],
-      "inventory": "10 rigged animals: Narwhal, Koala, Tasmanian Devil, Dingo, Sea Otter, Mole, Seagull, Quail, Scorpion and Chick. Shared retarget-friendly skeleton with named idle, attack, dead and walk clips at 24 FPS.",
-      "technical_notes": "Small archive and low-poly topology make this an excellent first creature intake test. It remains source GLB, not a compiled Source 2 entity.",
-      "cs2_readiness": "source_asset_only"
+      "license_evidence": "https://spritepilot.com/free-game-assets",
+      "source_page": "https://spritepilot.com/free-game-assets",
+      "status": "candidate_requires_sprite_extraction_and_vpcf_authoring",
+      "inventory": "82 sprites and sheets; 7 general effects, 9 combat effects and 9 spell/projectile effects.",
+      "technical_notes": "2D sheets, not ready-made CS2 VPCF resources.",
+      "cs2_readiness": "texture_source_only"
     },
     {
-      "id": "polyyai-low-poly-guns-25",
-      "name": "Polyy.AI 25 Low-Poly Guns Pack",
-      "category": "weapons",
+      "id": "spritepilot-sfx-78",
+      "name": "SpritePilot Sound Effects",
+      "source_page": "https://spritepilot.com/free-game-assets/sound-effects",
+      "license": "CC0",
+      "inventory": "78 WAV/OGG/MP3 sound effects covering impacts, combat, magic, creatures, UI and ambience.",
+      "status": "candidate_requires_audio_audition_and_source2_compile"
+    },
+    {
+      "id": "supaVoxel-160-cc0-animations",
+      "name": "SupaVoxel humanoid animation tool",
+      "source_page": "https://supavoxel.com/tools/animate-3d-model",
+      "license": "160 CC0 animation clips",
+      "inventory": "Accepts an already-rigged humanoid GLB/FBX and offers 160 CC0 clips; exports animated GLB with one clip or a set.",
+      "status": "candidate_requires_rig_compatibility_test",
+      "use": "Retarget locomotion, attack, hit and death animation to existing humanoid player-agent rigs."
+    },
+    {
+      "id": "vuena-blocky-characters-sample",
+      "name": "Vuena 8 Free Blocky Characters",
+      "category": "humanoid-characters",
       "license": "CC0-1.0",
-      "license_evidence": "https://polyyai.itch.io/3d-low-poly-guns-pack",
-      "source_page": "https://polyyai.itch.io/3d-low-poly-guns-pack",
-      "status": "candidate_requires_manual_download",
-      "archive_name": "3D_low_poly_guns_pack_low.zip",
-      "archive_size": "43 MB",
+      "license_evidence": "https://vuena.itch.io/blocky-characters-free-sample",
+      "source_page": "https://vuena.itch.io/blocky-characters-free-sample",
+      "status": "candidate_requires_style_review",
       "format": [
-        "GLB"
+        "GLB",
+        "FBX"
       ],
-      "inventory": "25 weapons including pistols, SMGs, rifles, shotguns, sniper, LMG, minigun, rocket/grenade launchers, flamethrower and sci-fi ray/plasma weapons. Low-poly version is 6k-10k triangles per mesh.",
-      "technical_notes": "Publisher marks artwork AI-assisted. CC0 allows use and modification. Inspect files and consider platform AI-content disclosure for a distributed build. GLB models need weapon-specific grip/attachment pivots and CS2 model compilation; they are not ready-to-use viewmodels.",
+      "inventory": "8 rigged low-poly characters: Hero, Knight, Wizard, Astronaut, Pirate, Robot, Zombie and Princess. 22-bone humanoid skeleton with Mixamo-compatible names; idle, walk, run, jump, fall and wave clips. 2.4k-4.6k triangles, one 256x256 palette texture.",
+      "technical_notes": "Rigid skinning, no facial animation; rest pose has arms down rather than a T-pose. Good technical test for retargeting but blocky visual style may not suit the main AETHERION art direction.",
       "cs2_readiness": "source_asset_only"
     }
   ],
