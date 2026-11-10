@@ -44,26 +44,47 @@ class AssetReferenceAuditTests(unittest.TestCase):
             self.assertEqual(missing, [])
             self.assertEqual(counts["compiled_vpcf"], 1)
 
-    def test_missing_custom_audio_is_reported(self):
+    def test_disabled_custom_audio_is_planned_not_reported_as_missing(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             config = root / "configs" / "assets" / "sounds.json"
             config.parent.mkdir(parents=True)
             config.write_text(json.dumps({
-                "1": {"customSound": "sound/ui/click.wav"},
-                "2": {"customSound": "sound/ui/click.wav"}
+                "1081": {"sound": "ui.error", "customSound": "sounds/ui/error.vsnd"},
+                "5006": {"event": "system", "category": "ui", "sound": "ui.error", "customSound": "sounds/ui/error.vsnd"},
             }), encoding="utf-8")
             refs, missing, counts, audio = MODULE.scan(root)
             self.assertEqual(audio["configured_entries"], 2)
-            self.assertEqual(audio["unique_paths"], 1)
-            self.assertEqual(audio["missing_paths"], ["sound/ui/click.wav"])
+            self.assertEqual(audio["active_paths"], [])
+            self.assertEqual(audio["missing_paths"], [])
+            self.assertEqual(audio["planned_paths"], ["sounds/ui/error.vsnd"])
+            self.assertEqual(audio["missing_planned_paths"], ["sounds/ui/error.vsnd"])
+            report = MODULE.render(refs, missing, counts, audio)
+            self.assertIn("Planned disabled customSound entries: **2**", report)
+            self.assertIn("PLANNED", report)
+            self.assertNotIn("MISSING ACTIVE", report)
 
-    def test_content_audio_source_satisfies_custom_path(self):
+    def test_active_custom_audio_missing_is_reported(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             config = root / "configs" / "assets" / "sounds.json"
             config.parent.mkdir(parents=True)
-            config.write_text('{"1":{"customSound":"sound/ui/click.wav"}}', encoding="utf-8")
+            config.write_text(json.dumps({
+                "1": {"sound": "ui.error", "customSound": "sounds/ui/error.vsnd", "customSoundEnabled": True}
+            }), encoding="utf-8")
+            refs, missing, counts, audio = MODULE.scan(root)
+            self.assertEqual(audio["active_paths"], ["sounds/ui/error.vsnd"])
+            self.assertEqual(audio["missing_paths"], ["sounds/ui/error.vsnd"])
+            self.assertEqual(audio["planned_paths"], [])
+
+    def test_missing_custom_audio_source_is_recognized(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            config = root / "configs" / "assets" / "sounds.json"
+            config.parent.mkdir(parents=True)
+            config.write_text(json.dumps({
+                "1": {"customSound": "sounds/ui/click.vsnd", "customSoundEnabled": True}
+            }), encoding="utf-8")
             wav = root / "content" / "csgo_addons" / "aetherion" / "sounds" / "ui" / "click.wav"
             wav.parent.mkdir(parents=True)
             wav.write_bytes(b"source-audio-placeholder")
