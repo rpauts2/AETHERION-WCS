@@ -575,7 +575,7 @@ SpritePilot's current sound page lists 78 CC0 effects across 10 groups, supplied
 
 A second pass cross-checked source archives against the public Ludots-Assets index. Its README reports manifests for 213 Kenney packs, 10 official KayKit GitHub packs and three free humanoid-animation releases. Each pack entry records its original creator page, license URL, byte count and SHA-256. The archive itself uses Git LFS and is an index/curation source, not part of AETHERION.
 
-The selected intake batch is 104,? MB (exact total is in configs/assets/asset_sources.json) and includes:
+The selected intake batch is 104.9 MB (99.97 MiB; exact total is in configs/assets/asset_sources.json) and includes:
 - Kenney Modular Dungeon Kit, Particle Pack and Smoke Particles.
 - KayKit Adventures, Skeletons, Dungeon Remastered and Medieval Hexagon public GitHub packs.
 - KayKit Character Animations Free 1.1.
