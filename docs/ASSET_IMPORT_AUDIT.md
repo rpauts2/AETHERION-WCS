@@ -84,3 +84,12 @@ The Windows source-intake script now reads the official no-auth JSON manifest in
 Important freshness caveat: the API snapshot currently advertises version 2026-07-23 and enumerates Minion, Animal, Animal Vol. 2 and Nature Kit packages. The current freebies landing page describes a newer 79-model count and the creator devlog mentions additional later packs. The intake script downloads only the packs present in the live API response at execution time; it does not claim the API fully mirrors every newer page/devlog item.
 
 The script is still source intake only. It does not place GLB files in the CS2 game directory, retarget skeletons, compile models or run a server test.
+
+
+## Audio pipeline correction — 2026-11-10
+
+The previous customSound placeholders used singular sound/ paths and .wav extensions. They have been converted to Source 2 virtual references of the form sounds/... .vsnd. Source audio files must live in content/csgo_addons/aetherion/sounds/ and compile to .vsnd_c in game/csgo_addons/aetherion/sounds/.
+
+AudioManager now routes stock soundevent names through EmitSound and direct addon VSND references through the client play command. CustomSound now overrides the built-in sound/default selection.
+
+See docs/SOURCE2_AUDIO_PIPELINE.md. The current CI audit reports 68 unique audio runtime references missing source and compiled resources; no audio binaries have yet been installed by this remote editing session.
