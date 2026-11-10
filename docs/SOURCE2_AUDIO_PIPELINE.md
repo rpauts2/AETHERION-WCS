@@ -22,9 +22,9 @@ Sources:
 
 ## AETHERION changes
 
-- All 71 non-empty customSound fields in configs/assets/sounds.json now use Source 2 virtual runtime references in sounds/*.vsnd form (68 unique paths).
+- All 71 non-empty customSound fields in configs/assets/sounds.json now use Source 2 virtual runtime references in sounds/*.vsnd form (68 unique paths). They remain planned/disabled until the installer has produced and verified the matching .vsnd_c file.
 - AudioManager now emits stock sound event names with EmitSound and sends direct addon VSND paths through the client play command.
-- The customSound override takes priority over the built-in default, rather than silently being ignored.
+- The customSound override is gated by customSoundEnabled. Pending asset paths no longer silence the working stock sound; the installer enables the selected path only after successful compilation.
 - scripts/audit_audio_assets.py checks both source audio in content/csgo_addons/aetherion/sounds and compiled VSND_C output in game/csgo_addons/aetherion/sounds.
 - CI now keeps audio source/compiled resource presence separate from the C# build result.
 
@@ -46,5 +46,12 @@ The installer has not been run in this environment because it has no local CS2 c
 - 18 Python tests passed.
 - 30 .NET tests passed.
 - Release build succeeded with zero build errors.
-- The audit currently reports 68 unique customSound runtime paths missing both source and compiled files; this is expected until actual audio files are staged and compiled.
+- The audit distinguishes 68 planned/disabled paths from active missing resources. Only paths with customSoundEnabled=true are required to have source or compiled files.
 - The audit does not prove soundevent behaviour, client download, or audible playback.
+
+
+## System event deserialization fix
+
+The current JSON uses `event` and `category`, while the C# model previously only checked `event_category`. That caused the system-sound rows (IDs 3000–6033) to be incorrectly loaded into the race dictionary, leaving the system dictionary empty. AudioManager now deserializes the real JSON fields and classifies system entries before dispatch.
+
+The project also remaps AETHERION placeholder event names to stock game soundevents until addon-specific soundevent scripts and audio samples exist. This is a fallback layer, not final custom sound design.
