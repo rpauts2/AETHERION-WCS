@@ -512,3 +512,31 @@ All entries above are candidates, not installed resources.
 
 
 **KinemIQ download-scope clarification:** the source page distinguishes the 460-clip browser library from the small downloadable CC0 bundle currently listed on the page. The downloadable FBX and GLB archives are advertised as **35 CC0 clips** (2.4 MB and 2.1 MB respectively). The broader library's license breakdown lists 175 CC0 clips, 170 CC BY 4.0 clips and 115 CC BY 3.0 clips. These are not interchangeable numbers: start with the 35-clip package, and treat access to the broader 175-clip CC0 subset as a separate export workflow. Do not pull in CC BY clips without preserving the required attribution.
+
+
+---
+
+## Further CC0 animation and humanoid sources — 2026-11-10
+
+### Kenney Animated Characters (three separate 3D packs)
+
+Kenney's creator pages list three separate 3D Animated Characters packs, each with 8 files and an explicit CC0 license:
+- Protagonists: skater/cyborg/criminal themes — https://kenney.nl/assets/animated-characters-protagonists
+- Retro: zombies and survivors — https://kenney.nl/assets/animated-characters-retro
+- Survivors: survival/zombie characters — https://kenney.nl/assets/animated-characters-survivors
+
+A community inventory of the actual ZIPs reports 4 FBX files plus PNG skins for each pack. Treat that as a source-level inventory, not a verified CS2 import: check the exact archive skeleton and animation clips, then retarget to the addon player-agent rig. These packs are promising for undead waves and low-poly NPCs.
+
+### Quaternius character and animation sources
+
+- Ultimate Animated Character Pack: 52 animated, textured low-poly characters, FBX/OBJ/Blend, CC0 — https://quaternius.com/packs/ultimatedanimatedcharacter
+- RPG Character Pack: 6 rigged, animated and textured fantasy characters, FBX/OBJ/Blend/glTF, CC0 — https://quaternius.com/packs/rpgcharacters.html
+- Universal Animation Library: 120+ humanoid animations on a universal retargetable rig, including 8-direction locomotion, jogging, sprinting, combat/gun, push, crawling, swimming, sitting, emotes and death — https://quaternius.com/packs/universalanimationlibrary.html
+- Modular Weapons Pack: 24 medieval weapon models, including swords, daggers, bows, shields and hammers, FBX/OBJ/Blend, CC0 — https://quaternius.com/packs/medievalweapons.html
+
+Important limit for the Universal Animation Library: the creator states that 60–70% of the pack is in the free version; the remaining 30–40% is offered in the full/source editions. The registry only marks the CC0 source and records the partial-free-download status. Do not assume all 120+ clips are in the no-cost download.
+
+### Practical retarget strategy
+
+For AETHERION, start with one source humanoid and the Universal Animation Library. Inspect the rig hierarchy and rest pose, export a minimal test set (idle, walk, run, attack, death), retarget in Blender to the actual CS2 agent skeleton, and test the compiled model/animation graph in Workshop Tools. Only after that works should the same path be applied to the 52-character pack. Animation packs tested in Unity/Unreal/Godot are not automatically compatible with Source 2.
+
