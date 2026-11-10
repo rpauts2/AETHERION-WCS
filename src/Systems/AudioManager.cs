@@ -526,11 +526,23 @@ public class AudioManager
         ["ambient/storm_loop"] = "ui.button_hover",
     };
 
+    // Direct addon assets are compiled from WAV/MP3 into .vsnd_c and addressed
+    // by their virtual .vsnd path. Stock names are soundevents and must use EmitSound.
+    private static bool IsDirectSoundAsset(string sound) =>
+        sound.StartsWith("sounds/", StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(Path.GetExtension(sound), ".vsnd", StringComparison.OrdinalIgnoreCase);
+
     private static void Execute(CCSPlayerController player, string? sound)
     {
-        if (player == null || string.IsNullOrEmpty(sound)) return;
+        if (player == null || string.IsNullOrWhiteSpace(sound)) return;
         string resolved = SoundRemap.TryGetValue(sound, out var remap) ? remap : sound;
-        try { player.ExecuteClientCommand($"play {resolved}"); }
+        try
+        {
+            if (IsDirectSoundAsset(resolved))
+                player.ExecuteClientCommand($"play {resolved}");
+            else
+                player.EmitSound(resolved);
+        }
         catch (Exception ex)
         {
             Console.WriteLine($"[AETHERION] sound fail: {ex.Message}");
