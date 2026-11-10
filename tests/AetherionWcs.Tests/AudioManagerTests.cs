@@ -7,17 +7,26 @@ namespace AetherionWcs.Tests;
 
 public sealed class AudioManagerTests
 {
-    private static readonly MethodInfo ResolveMethod =
-        typeof(AudioManager).GetMethod("Resolve", BindingFlags.NonPublic | BindingFlags.Static)
-        ?? throw new InvalidOperationException("AudioManager.Resolve was not found.");
+    private static readonly Type ManagerType = typeof(AudioManager);
 
-    private static string? Resolve(string? primary, string? fallback, string? custom) =>
-        (string?)ResolveMethod.Invoke(null, new object?[] { primary, fallback, custom });
+    private static string? Resolve(string? primary, string? fallback, string? custom)
+    {
+        var method = ManagerType.GetMethod("Resolve", BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("AudioManager.Resolve was not found.");
+        return (string?)method.Invoke(null, new object?[] { primary, fallback, custom });
+    }
+
+    private static bool IsDirectSoundAsset(string sound)
+    {
+        var method = ManagerType.GetMethod("IsDirectSoundAsset", BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("AudioManager.IsDirectSoundAsset was not found.");
+        return (bool)(method.Invoke(null, new object?[] { sound }) ?? false);
+    }
 
     [Fact]
     public void Resolve_PrefersExplicitCustomSoundOverBuiltInDefaults()
     {
-        const string custom = "sound/race/dragon_roar.wav";
+        const string custom = "sounds/race/dragon_roar.vsnd";
         Assert.Equal(custom, Resolve("event.default_ult", "event.stock", custom));
     }
 
@@ -37,5 +46,17 @@ public sealed class AudioManagerTests
     public void Resolve_ReturnsNullWhenEveryCandidateIsMissing()
     {
         Assert.Null(Resolve(null, null, null));
+    }
+
+    [Theory]
+    [InlineData("sounds/ui/click.vsnd", true)]
+    [InlineData("SOUNDS/race/dragon_roar.vsnd", true)]
+    [InlineData("weapons.awp.fire", false)]
+    [InlineData("player/death1.wav", false)]
+    [InlineData("sound/ui/click.wav", false)]
+    [InlineData("sounds/ui/click.wav", false)]
+    public void IsDirectSoundAsset_OnlyAcceptsSource2VirtualSoundPaths(string value, bool expected)
+    {
+        Assert.Equal(expected, IsDirectSoundAsset(value));
     }
 }
