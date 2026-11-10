@@ -504,11 +504,13 @@ public class AudioManager
             : null;
 
     // ── Helpers ──────────────────────────────────────────────────────
+    // Explicit custom assets must override stock defaults. Otherwise the customSound
+    // field is silently ignored whenever a built-in sound or event fallback exists.
     private static string? Resolve(string? primary, string? fallback, string? custom)
     {
-        if (!string.IsNullOrEmpty(primary)) return primary;
-        if (!string.IsNullOrEmpty(fallback)) return fallback;
-        if (!string.IsNullOrEmpty(custom)) return custom;
+        if (!string.IsNullOrWhiteSpace(custom)) return custom;
+        if (!string.IsNullOrWhiteSpace(primary)) return primary;
+        if (!string.IsNullOrWhiteSpace(fallback)) return fallback;
         return null;
     }
 
