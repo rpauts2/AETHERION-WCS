@@ -36,7 +36,21 @@ class AssetSourceRegistryTests(unittest.TestCase):
             "quaternius-ultimate-animated-character-pack",
             "quaternius-rpg-character-pack",
             "quaternius-modular-weapons-pack",
+            "kaykit-dungeon-pack-free-1-1",
+            "sigilsvault-modular-dungeon-kit",
+            "quaternius-modular-dungeon-pack-41",
+            "quaternius-modular-dungeons-pack-48",
+            "spritecanvas-cc0-vfx-sheets",
         }.issubset(ids))
+
+    def test_spritepilot_sound_inventory_has_source_and_license(self):
+        item = next(
+            item for item in self.data["additional_research_candidates"]
+            if item["id"] == "spritepilot-sfx-78"
+        )
+        self.assertIn("78 CC0 sound effects", item["inventory"])
+        self.assertIn("license_evidence", item)
+        self.assertEqual(item["status"], "candidate_requires_manual_download")
 
     def test_universal_animation_library_free_tier_is_not_overstated(self):
         item = next(
