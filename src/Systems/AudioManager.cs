@@ -24,7 +24,6 @@ public class AudioManager
         public bool customSoundEnabled { get; set; } = false;
         [JsonPropertyName("event")] public string eventType { get; set; } = string.Empty;
         public string category { get; set; } = string.Empty;
-        public string? event_category { get; set; }
         public string? levelUp { get; set; }
         public string? castActive { get; set; }
         public string? castUltimate { get; set; }
