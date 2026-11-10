@@ -76,6 +76,7 @@ if ($null -eq $entryProperty) {
         ult = ""
         sound = ""
         customSound = $runtimePath
+        customSoundEnabled = $true
     }
     $config | Add-Member -MemberType NoteProperty -Name $raceId -Value $entry
 }
@@ -85,6 +86,7 @@ else {
         throw "Race $raceId already has a different customSound mapping: $($entry.customSound). Compiled asset was kept, config was not changed."
     }
     $entry.customSound = $runtimePath
+    $entry.customSoundEnabled = $true
 }
 
 Copy-Item -LiteralPath $configPath -Destination $backupPath
