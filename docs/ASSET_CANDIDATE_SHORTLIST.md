@@ -62,3 +62,19 @@ A 3D model with a valid CC0 license is not automatically a working CS2 player ag
 | [Quaternius Modular Weapons Pack](https://quaternius.com/packs/medievalweapons.html) | 24 weapon models | CC0 | Race equipment, shop props, cosmetic weapons |
 
 All seven are source assets only. Retargeting, material conversion, Source 2 model compilation, precache and private-server verification remain required. The first model should be chosen by exact rig and animation evidence, not by the number of assets in the pack.
+
+
+---
+
+## Dungeon, VFX and sound additions
+
+| Candidate | Contents | License | AETHERION use | Import risk |
+|---|---|---|---|---|
+| [KayKit Dungeon Pack 1.1 Free](https://kaylousberg.itch.io/kaykit-dungeon-pack) | 200 modular props, walls, floors, doors, stairs and furniture, one atlas | CC0 | Boss arenas, dungeon map, lobby | Low-medium; collision, atlas and scale |
+| [SigilsVault Modular Dungeon Kit](https://sigilsvault.itch.io/modular-dungeon-kit-v10) | 90+ pieces, GLB/FBX, shared trim sheet, 1 m grid | CC0 | Dark fantasy arenas and corridors | Medium; map assembly and collision |
+| [Quaternius Modular Dungeon](https://quaternius.com/packs/medievaldungeon.html) | 41 dungeon models | CC0 | Torches, potions, barrels and walls | Low-medium |
+| [Quaternius Modular Dungeons](https://quaternius.com/packs/modulardungeon.html) | 48 modular dungeon models | CC0 | Alternate set for map variety | Low-medium; overlap with 41-model pack |
+| [SpriteCanvas effects](https://spritecanvas.com/free-sprite-sheets/effects/) | 6 transparent sprite sheets, 6 frames each, JSON atlas | CC0 | Slash, hit, fire, lightning, explosion, ice VPCF texture source | Medium; must author VPCF |
+| [SpritePilot SFX](https://spritepilot.com/free-game-assets/sound-effects) | 78 sounds, 8 seamless ambient loops, WAV/OGG/MP3 | CC0 | Dragon, combat, abilities, UI, ambient | Low source intake; VSND compile + playback gate |
+
+The environment kits are suitable for map/arena construction, not player-agent models. The SpriteCanvas sheets do not create particle definitions by themselves, and SpritePilot sounds do not become usable runtime resources until the Source 2 sound pipeline is run.
