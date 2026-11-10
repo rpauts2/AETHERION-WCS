@@ -24,16 +24,28 @@ def _audio_source_candidates(root: Path, configured_path: str) -> list[Path]:
     if parts and parts[0].lower() in {"sound", "sounds"}:
         parts = parts[1:]
     relative = Path(*parts)
-    source = relative
-    compiled = relative.with_suffix(".vsnd_c")
-    return [
-        root / "content/csgo_addons/aetherion/sounds" / source,
-        root / "content/csgo_addons/aetherion" / Path(normalized),
-        root / "sounds" / source,
-        root / "sound" / source,
-        root / "assets/sounds" / source,
-        root / "game/csgo_addons/aetherion/sounds" / compiled,
+    stem = relative.with_suffix("")
+    source_files = [
+        stem.with_suffix(extension)
+        for extension in sorted(AUDIO_SUFFIXES)
     ]
+    compiled = relative.with_suffix(".vsnd_c")
+
+    candidates = []
+    for source in source_files:
+        candidates.extend([
+            root / "content/csgo_addons/aetherion/sounds" / source,
+            root / "content/csgo_addons/aetherion" / Path(normalized).with_suffix(source.suffix),
+            root / "sounds" / source,
+            root / "sound" / source,
+            root / "assets/sounds" / source,
+        ])
+    candidates.extend([
+        root / "content/csgo_addons/aetherion/sounds" / relative,
+        root / "content/csgo_addons/aetherion/sounds" / compiled,
+        root / "game/csgo_addons/aetherion/sounds" / compiled,
+    ])
+    return candidates
 
 
 def scan(root: Path):
