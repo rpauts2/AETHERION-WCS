@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit configured Source 2 customSound references and their source/compiled files."""
+"""Audit active Source 2 customSound references and separate disabled plans."""
 from __future__ import annotations
 
 import argparse
@@ -63,7 +63,8 @@ def locate_compiled(root: Path, runtime_path: str):
 
 def audit(config_path: Path, root: Path):
     config = load_config(config_path)
-    references: dict[str, list[str]] = defaultdict(list)
+    planned: dict[str, list[str]] = defaultdict(list)
+    active: dict[str, list[str]] = defaultdict(list)
     malformed: list[str] = []
     empty_count = 0
 
@@ -80,12 +81,15 @@ def audit(config_path: Path, root: Path):
         except ValueError as exc:
             malformed.append(f"sound {sound_id}: {exc}")
             continue
-        references[runtime_path].append(str(sound_id))
+        if entry.get("customSoundEnabled") is True:
+            active[runtime_path].append(str(sound_id))
+        else:
+            planned[runtime_path].append(str(sound_id))
 
     found_source = {}
     found_compiled = {}
     missing = []
-    for runtime_path in sorted(references, key=str.lower):
+    for runtime_path in sorted(active, key=str.lower):
         source = locate_source(root, runtime_path)
         compiled = locate_compiled(root, runtime_path)
         if source is not None:
@@ -98,7 +102,8 @@ def audit(config_path: Path, root: Path):
     return {
         "entries": len(config),
         "empty": empty_count,
-        "references": references,
+        "planned": planned,
+        "active": active,
         "found_source": found_source,
         "found_compiled": found_compiled,
         "missing": missing,
@@ -109,33 +114,41 @@ def audit(config_path: Path, root: Path):
 def render(result):
     lines = [
         "# AETHERION custom audio asset audit", "",
-        "This audit checks Source 2 source and compiled file presence. It does not prove soundevent registration, precache, client delivery, or audible playback.", "",
+        "This audit checks active Source 2 source and compiled file presence. Planned-but-disabled paths do not override stock sounds. It does not prove soundevent registration, precache, client delivery, or audible playback.", "",
         "## Summary", "",
         f"- Config entries: **{result['entries']}**",
         f"- Empty customSound slots: **{result['empty']}**",
-        f"- Unique runtime sound references: **{len(result['references'])}**",
-        f"- Present source audio files: **{len(result['found_source'])}**",
-        f"- Present compiled VSND_C files: **{len(result['found_compiled'])}**",
-        f"- Missing source and compiled files: **{len(result['missing'])}**",
+        f"- Planned disabled paths: **{len(result['planned'])}**",
+        f"- Active runtime custom paths: **{len(result['active'])}**",
+        f"- Present active source audio files: **{len(result['found_source'])}**",
+        f"- Present active compiled VSND_C files: **{len(result['found_compiled'])}**",
+        f"- Active paths missing source and compiled files: **{len(result['missing'])}**",
         f"- Invalid runtime paths: **{len(result['malformed'])}**", "",
-        "## Missing resources", ""
+        "## Planned disabled paths", ""
     ]
+    if result["planned"]:
+        for runtime_path in sorted(result["planned"], key=str.lower):
+            ids = ", ".join(sorted(result["planned"][runtime_path], key=int))
+            lines.append(f"- PLANNED {runtime_path} (sound IDs: {ids})")
+    else:
+        lines.append("No pending custom sound paths.")
+    lines.extend(("", "## Active missing resources", ""))
     if result["missing"]:
         for runtime_path in result["missing"]:
-            ids = ", ".join(sorted(result["references"][runtime_path], key=int))
+            ids = ", ".join(sorted(result["active"][runtime_path], key=int))
             lines.append(f"- MISSING {runtime_path} (sound IDs: {ids})")
     else:
-        lines.append("No missing custom audio resources.")
-    lines.extend(("", "## Present source files", ""))
+        lines.append("No active custom audio resources are missing.")
+    lines.extend(("", "## Present active source files", ""))
     for runtime_path, path in sorted(result["found_source"].items()):
         lines.append(f"- {runtime_path} <- {path.as_posix()}")
     if not result["found_source"]:
-        lines.append("No source audio files found.")
-    lines.extend(("", "## Present compiled files", ""))
+        lines.append("No active source audio files found.")
+    lines.extend(("", "## Present active compiled files", ""))
     for runtime_path, path in sorted(result["found_compiled"].items()):
         lines.append(f"- {runtime_path} -> {path.as_posix()}")
     if not result["found_compiled"]:
-        lines.append("No compiled VSND_C files found.")
+        lines.append("No active compiled VSND_C files found.")
     lines.extend(("", "## Invalid configuration entries", ""))
     lines.extend(f"- {message}" for message in result["malformed"])
     if not result["malformed"]:
@@ -166,11 +179,12 @@ def main():
         output.write_text(report, encoding="utf-8")
     print(
         f"Audio asset audit: {result['entries']} config entries, "
-        f"{len(result['references'])} unique runtime paths, "
-        f"{len(result['missing'])} missing, {len(result['malformed'])} invalid"
+        f"{len(result['planned'])} planned disabled, "
+        f"{len(result['active'])} active, {len(result['missing'])} active missing, "
+        f"{len(result['malformed'])} invalid"
     )
     for runtime_path in result["missing"]:
-        print(f"MISSING AUDIO: {runtime_path}")
+        print(f"MISSING ACTIVE AUDIO: {runtime_path}")
     for message in result["malformed"]:
         print(f"INVALID AUDIO: {message}")
     return 1 if args.fail_on_missing and (result["missing"] or result["malformed"]) else 0
