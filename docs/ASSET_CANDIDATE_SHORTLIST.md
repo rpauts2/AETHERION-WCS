@@ -45,3 +45,20 @@ Polyy.AI labels its artwork AI-assisted. The source page declares CC0 1.0 and pe
 7. Only then enable the asset in configs/assets/models.json, configs/assets/sounds.json or ability definitions.
 
 A 3D model with a valid CC0 license is not automatically a working CS2 player agent. A PNG effect sheet is not automatically a VPCF. A source WAV/MP3 is not runtime-ready until Workshop Tools compiles it.
+
+
+---
+
+## New 2026-11-10 additions: animation-first intake
+
+| Candidate | Contents | License | Recommended use |
+|---|---|---|---|
+| [Kenney Protagonists](https://kenney.nl/assets/animated-characters-protagonists) | 3D animated pack, 8 files | CC0 | First retarget test for human NPCs |
+| [Kenney Retro](https://kenney.nl/assets/animated-characters-retro) | 3D animated pack, 8 files | CC0 | Zombies/survivors and undead waves |
+| [Kenney Survivors](https://kenney.nl/assets/animated-characters-survivors) | 3D animated pack, 8 files | CC0 | Survival NPCs and enemy variants |
+| [Quaternius Universal Animation Library](https://quaternius.com/packs/universalanimationlibrary.html) | 120+ clips on one humanoid rig; only 60–70% in the free version | CC0 | Locomotion/combat/emotes/death retarget library |
+| [Quaternius Ultimate Animated Character Pack](https://quaternius.com/packs/ultimatedanimatedcharacter) | 52 animated and textured models | CC0 | Broader humanoid race/NPC pool |
+| [Quaternius RPG Character Pack](https://quaternius.com/packs/rpgcharacters.html) | 6 rigged and animated fantasy characters | CC0 | First fantasy agent prototypes |
+| [Quaternius Modular Weapons Pack](https://quaternius.com/packs/medievalweapons.html) | 24 weapon models | CC0 | Race equipment, shop props, cosmetic weapons |
+
+All seven are source assets only. Retargeting, material conversion, Source 2 model compilation, precache and private-server verification remain required. The first model should be chosen by exact rig and animation evidence, not by the number of assets in the pack.
