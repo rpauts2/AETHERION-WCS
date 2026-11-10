@@ -114,7 +114,8 @@
       "source_page": "https://algumacoisaqq.itch.io/fantasy-creatures-wolf-giant-rat-spider-wasp-centipede",
       "license": "CC0-1.0",
       "inventory": "26 creatures. The dragon has 14 clips including idle, locomotion, bite, claw, tail sweep, roar, fire breath, takeoff, fly, glide, land, hit and death. The hydra has three heads and nine clips.",
-      "status": "candidate_requires_manual_download"
+      "status": "candidate_requires_manual_download",
+      "license_evidence": "https://algumacoisaqq.itch.io/fantasy-creatures-wolf-giant-rat-spider-wasp-centipede"
     },
     {
       "id": "fantasy-forge-144",
@@ -122,7 +123,8 @@
       "source_page": "https://isatern.itch.io/fantasy-forge-animated-fantasy-assets",
       "license": "CC0-1.0",
       "inventory": "144 models and 479 named animation clips; original GLB, two LOD tiers and Blender source files.",
-      "status": "candidate_requires_manual_download"
+      "status": "candidate_requires_manual_download",
+      "license_evidence": "https://isatern.itch.io/fantasy-forge-animated-fantasy-assets"
     },
     {
       "id": "kaino-sfx-library",
@@ -130,7 +132,8 @@
       "source_page": "https://kaino.dev/library/sfx",
       "license": "CC0-1.0",
       "inventory": "1397 sound effects across 21 categories, including creatures, fantasy/RPG, magic, spell, impacts, fire and whoosh.",
-      "status": "candidate_requires_audio_audition"
+      "status": "candidate_requires_audio_audition",
+      "license_evidence": "https://kaino.dev/library/sfx"
     },
     {
       "id": "grab3d-dragon-index",
@@ -139,7 +142,8 @@
       "license": "CC0-1.0",
       "inventory": "8 dragon entries, 6k to 800k triangles, GLB/FBX/BLEND/USDZ/OBJ.",
       "status": "candidate_requires_per_model_triage",
-      "risk": "Some high-detail entries are very heavy or static; do not select for a live CS2 server without checking polygon budget and rigging."
+      "risk": "Some high-detail entries are very heavy or static; do not select for a live CS2 server without checking polygon budget and rigging.",
+      "license_evidence": "https://grab3d.com/free-3d-models/dragon/"
     },
     {
       "id": "supaVoxel-160-cc0-animations",
