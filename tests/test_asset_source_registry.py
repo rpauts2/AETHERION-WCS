@@ -41,7 +41,27 @@ class AssetSourceRegistryTests(unittest.TestCase):
             "quaternius-modular-dungeon-pack-41",
             "quaternius-modular-dungeons-pack-48",
             "spritecanvas-cc0-vfx-sheets",
+            "kaykit-character-animations-free-1-1",
+            "quaternius-ual1-standard",
+            "quaternius-ual2-standard",
         }.issubset(ids))
+
+    def test_curated_download_batch_has_pinned_hashes(self):
+        batch = self.data["curated_download_batch"]
+        self.assertEqual(len(batch["entries"]), 10)
+        for entry in batch["entries"]:
+            self.assertEqual(len(entry["sha256"]), 64, entry["id"])
+            self.assertGreater(entry["bytes"], 1000, entry["id"])
+            self.assertTrue(entry.get("source"), entry["id"])
+            self.assertTrue(entry.get("license"), entry["id"])
+
+    def test_external_archive_index_is_not_marked_as_installed(self):
+        index = next(
+            item for item in self.data["external_curated_indexes"]
+            if item["id"] == "ludots-cc0-archive"
+        )
+        self.assertEqual(index["status"], "curated_index_only")
+        self.assertIn("not been downloaded", index["note"])
 
     def test_spritepilot_sound_inventory_has_source_and_license(self):
         item = next(
