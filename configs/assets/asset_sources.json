@@ -262,6 +262,175 @@
       "inventory": "Catalogue states 705 CC0 rigged models, 681 animated. Includes many Gobkit animals and other creators.",
       "technical_notes": "Aggregator, not blanket permission for every file. Verify original creator, exact CC0 evidence, skeleton, animation clips and download URL for each candidate before import.",
       "cs2_readiness": "index_only"
+    },
+    {
+      "id": "gobkit-character-pack-vol-1",
+      "name": "Gobkit Free Character Pack Vol.1",
+      "category": "humanoid-characters",
+      "license": "CC0-1.0",
+      "license_evidence": "https://gobkit.itch.io/gobkit-free-character-pack-vol-1",
+      "source_page": "https://gobkit.itch.io/gobkit-free-character-pack-vol-1",
+      "archive_name": "gobkit-free-character-pack-vol-1.zip",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "GLB"
+      ],
+      "inventory": "8 characters: Office Lady, Schoolkid, Cashier, Food Courier, Grandma Shopper, Stock Clerk, Store Manager and Shoplifter. Shared retarget-friendly humanoid skeleton and 7 named clips: Idle, Walk, Run, Death, Hit, Attack and Special at 30 FPS.",
+      "technical_notes": "GLB with baked texture and one shared atlas; inspect named clips and humanoid bone mapping before Source 2 ModelDoc/animation graph work.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "gobkit-character-pack-vol-3",
+      "name": "Gobkit Free Character Pack Vol.3",
+      "category": "humanoid-characters",
+      "license": "CC0-1.0",
+      "license_evidence": "https://gobkit.itch.io/gobkit-free-character-pack-vol-3",
+      "source_page": "https://gobkit.itch.io/gobkit-free-character-pack-vol-3",
+      "archive_name": "gobkit-free-character-pack-vol-3.zip",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "GLB"
+      ],
+      "inventory": "8 fantasy-style characters: Peasant Militia, Archer, Footman, Scout, Priestess, Heavy Warrior, Knight Captain and King. Shared humanoid skeleton and 7 named clips: Idle, Walk, Run, Death, Hit, Attack and Special at 30 FPS.",
+      "technical_notes": "Strong match for human NPCs, guards and player race prototypes. Retargeting still has to be verified on an actual Source 2 agent skeleton.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "gobkit-character-pack-vol-5",
+      "name": "Gobkit Free Character Pack Vol.5",
+      "category": "humanoid-characters",
+      "license": "CC0-1.0",
+      "license_evidence": "https://gobkit.itch.io/gobkit-free-character-pack-vol-5",
+      "source_page": "https://gobkit.itch.io/gobkit-free-character-pack-vol-5",
+      "archive_name": "gobkit-free-character-pack-vol-5.zip",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "GLB"
+      ],
+      "inventory": "8 civilian/medical characters: Ward Orderly, White Coat Doctor, Ward Nurse, Paramedic, Pharmacist, Ward Patient, Chief Surgeon and Hospital Director. Shared humanoid skeleton, 7 named clips at 30 FPS.",
+      "technical_notes": "Better suited to map NPCs and themed events than fantasy races. Page says CC0 1.0 and has separate GLB downloads.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "kaykit-skeletons-character-pack",
+      "name": "KayKit Skeletons Character Pack",
+      "category": "humanoid-characters-and-weapons",
+      "license": "CC0-1.0",
+      "license_evidence": "https://kaylousberg.itch.io/kaykit-skeletons",
+      "source_page": "https://kaylousberg.itch.io/kaykit-skeletons",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "FBX",
+        "GLTF"
+      ],
+      "inventory": "Free tier has 4 fully textured, rigged and animated skeleton characters plus 10+ weapons/accessories including swords, shields, axes, crossbows, arrows and staffs. Two additional characters are in the paid Extra tier and are not included in this free candidate.",
+      "technical_notes": "Single 1024x1024 gradient atlas, downsample-friendly. Basic movement animations included; pack is documented as compatible with KayKit Character Animations.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "kaykit-adventurers-character-pack",
+      "name": "KayKit Adventurers Character Pack",
+      "category": "humanoid-characters-and-weapons",
+      "license": "CC0-1.0",
+      "license_evidence": "https://kaylousberg.itch.io/kaykit-adventurers",
+      "source_page": "https://kaylousberg.itch.io/kaykit-adventurers",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "FBX",
+        "GLTF"
+      ],
+      "inventory": "Free 2.0 pack is 12 MB and is name-your-price. Stylized low-poly rigged adventurer base characters; the publisher identifies the asset license as CC0 1.0. Additional character variants and editable Blender source files are paid tiers.",
+      "technical_notes": "A complementary pack to the skeletons. Inspect exact free-tier contents and bone names in the download before scheduling a retarget pass.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "vuena-blocky-characters-sample",
+      "name": "Vuena 8 Free Blocky Characters",
+      "category": "humanoid-characters",
+      "license": "CC0-1.0",
+      "license_evidence": "https://vuena.itch.io/blocky-characters-free-sample",
+      "source_page": "https://vuena.itch.io/blocky-characters-free-sample",
+      "status": "candidate_requires_style_review",
+      "format": [
+        "GLB",
+        "FBX"
+      ],
+      "inventory": "8 rigged low-poly characters: Hero, Knight, Wizard, Astronaut, Pirate, Robot, Zombie and Princess. 22-bone humanoid skeleton with Mixamo-compatible names; idle, walk, run, jump, fall and wave clips. 2.4k-4.6k triangles, one 256x256 palette texture.",
+      "technical_notes": "Rigid skinning, no facial animation; rest pose has arms down rather than a T-pose. Good technical test for retargeting but blocky visual style may not suit the main AETHERION art direction.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "polyyai-fantasy-weapons-25",
+      "name": "Polyy.AI 25 Fantasy Weapons Pack",
+      "category": "weapons",
+      "license": "CC0-1.0",
+      "license_evidence": "https://polyyai.itch.io/3d-fantasy-weapons-pack",
+      "source_page": "https://polyyai.itch.io/3d-fantasy-weapons-pack",
+      "status": "candidate_requires_manual_download",
+      "format": [
+        "GLB"
+      ],
+      "inventory": "25 PBR-textured weapons: longsword, cleaver, leaf blade, war axes, mace, warhammer, dagger, cutlass, katana, claymore, rapier, halberd, spear, trident, scythe, staff and more. Low-poly archive is 57 MB with 4k-12k triangles per mesh; full archive is 90 MB with 49k-55k triangles.",
+      "technical_notes": "Prefer the low-poly archive for live-server equipment. Author explicitly asks not to resell unmodified copies; license page itself declares CC0 1.0.",
+      "cs2_readiness": "source_asset_only"
+    },
+    {
+      "id": "sfxmint-dragon-roar-03",
+      "name": "SFXMint Deep Rasping Dragon Roar 03",
+      "category": "sound-effects",
+      "license": "CC0-1.0",
+      "license_evidence": "https://sfxmint.com/license",
+      "source_page": "https://sfxmint.com/sounds/dragon-roar-03",
+      "download_url": "https://sfxmint.com/dl/dragon-roar-03.mp3",
+      "status": "candidate_source_url_verified",
+      "format": [
+        "MP3",
+        "WAV"
+      ],
+      "inventory": "3.8-second dragon boss roar, 44.1 kHz, approximately 678 KB as WAV; direct MP3 download URL is provided on the sound page.",
+      "technical_notes": "SFXMint says its public library is AI-generated or procedurally synthesised and dedicated under CC0 1.0. The site limits free downloads to 10 MP3/day; WAV/ZIP packs require payment. Steam/itch may require AI-audio disclosure for shipped game content.",
+      "cs2_readiness": "source_audio_only"
+    },
+    {
+      "id": "sfxmint-public-library",
+      "name": "SFXMint Public CC0 Sound Library",
+      "category": "sound-effects",
+      "license": "CC0-1.0",
+      "license_evidence": "https://sfxmint.com/license",
+      "source_page": "https://sfxmint.com/sounds",
+      "status": "candidate_requires_audition_and_download_limits",
+      "inventory": "624 sound types across 23 categories, with downloadable MP3 variations including UI, impacts, magic/sci-fi, ambience and creatures.",
+      "technical_notes": "AI-generated/procedural source; free download allowance is 10 MP3/day and public API has daily lookup/download limits. Capture exact audio URL, format, duration, loudness and SHA-256 per chosen clip.",
+      "cs2_readiness": "source_audio_only"
+    }
+  ],
+  "cs2_technical_references": [
+    {
+      "id": "source2-audio-pipeline",
+      "source_page": "https://www.source2.wiki/Basics/working-on-content/directory-layout",
+      "related_docs": [
+        "https://s2v.app/ValveResourceFormat/guides/exporting-sounds.html",
+        "https://docs.cssharp.dev/api/CounterStrikeSharp.API.Core.CCSPlayerController.html"
+      ],
+      "inventory": "Addon content uses sounds/ for WAV/MP3 source files, which compile to .vsnd_c. Runtime direct-play paths use sounds/... .vsnd. Sound event definitions live under soundevents/ as .vsndevts and compile to .vsndevts_c.",
+      "technical_notes": "The CounterStrikeSharp example shows ExecuteClientCommand('play sounds/ui/counter_beep.vsnd') for direct asset playback. Stock soundevents should be emitted through EmitSound, not passed to the console play command.",
+      "status": "technical_reference_verified"
+    },
+    {
+      "id": "counterstrikesharp-particle-demo",
+      "source_page": "https://github.com/qazlll456/ParticleDemo",
+      "license": "not_verified",
+      "inventory": "Demonstrates spawning existing CS2 VPCF resources at positions around a player and configurable placement modes.",
+      "technical_notes": "Uses a built-in CS2 effect, not an original CC0 effect. Use as a technical reference only until repository license and addon requirements are verified; do not vendor the code or assets yet.",
+      "status": "reference_only_license_unverified"
+    },
+    {
+      "id": "cs2-custom-trails-reference",
+      "source_page": "https://github.com/Letaryat/CS2-CustomTrailAndTracers",
+      "license": "not_verified",
+      "inventory": "C# example of particle control points for grenade trails, player trails and bullet tracers.",
+      "technical_notes": "Author says it is a showcase, not production-ready. The Steam Workshop item associated with it is removed; use only as a technical reading reference, not an asset source.",
+      "status": "reference_only_not_for_vendor"
     }
   ]
 }
