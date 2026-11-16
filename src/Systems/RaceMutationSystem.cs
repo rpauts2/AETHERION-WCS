@@ -122,7 +122,7 @@ public class RaceMutationSystem
                 _combat.Apply(EffectTag.Lifesteal, p.Slot, 0.2f, _activeMutation.Duration);
                 break;
             case MutationType.MegaShield:
-                _engine.AddArmor(p.Slot, 100, 300);
+                ApplyMegaShield(p.Slot);
                 break;
             case MutationType.DoubleUltDamage:
             case MutationType.NoCooldowns:
