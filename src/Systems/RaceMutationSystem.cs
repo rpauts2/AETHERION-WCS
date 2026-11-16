@@ -23,6 +23,8 @@ public class RaceMutationSystem
     private MutationDef? _activeMutation;
     private float _mutationTimer;
     private float _nextMutationIn = 3600f;
+    // Track only the armor actually granted, so expiry does not erase pre-existing armor.
+    private readonly Dictionary<int, int> _megaShieldArmorGranted = new();
 
     private static readonly MutationDef[] _mutations =
     {
@@ -94,7 +96,7 @@ public class RaceMutationSystem
                     _combat.Apply(EffectTag.Lifesteal, p.Slot, 0.2f, _activeMutation.Duration);
                     break;
                 case MutationType.MegaShield:
-                    _engine.AddArmor(p.Slot, 100, 300);
+                    ApplyMegaShield(p.Slot);
                     break;
                 case MutationType.DoubleUltDamage:
                 case MutationType.NoCooldowns:
@@ -143,11 +145,35 @@ public class RaceMutationSystem
                     _combat.RemoveEffect(p.Slot, EffectTag.Lifesteal);
                     break;
                 case MutationType.MegaShield:
-                    _engine.AddArmor(p.Slot, 0, 0);
+                    RemoveMegaShield(p.Slot);
                     break;
             }
         }
+
+        // Also discard entries for players who disconnected before the mutation expired.
+        if (_activeMutation.Type == MutationType.MegaShield)
+            _megaShieldArmorGranted.Clear();
     }
+
+    private void ApplyMegaShield(int slot)
+    {
+        int before = Math.Max(0, _engine.GetArmor(slot));
+        _engine.AddArmor(slot, 100, 300);
+        int after = Math.Max(0, _engine.GetArmor(slot));
+        _megaShieldArmorGranted[slot] = Math.Max(0, after - before);
+    }
+
+    private void RemoveMegaShield(int slot)
+    {
+        if (!_megaShieldArmorGranted.Remove(slot, out int granted) || granted <= 0) return;
+        int current = Math.Max(0, _engine.GetArmor(slot));
+        _engine.SetArmor(slot, CalculateArmorAfterRemovingBonus(current, granted));
+    }
+
+    private static int CalculateArmorAfterRemovingBonus(int currentArmor, int grantedArmor) =>
+        Math.Max(0, Math.Max(0, currentArmor) - Math.Max(0, grantedArmor));
+
+    public void CleanupSlot(int slot) => _megaShieldArmorGranted.Remove(slot);
 
     public bool IsNoCooldowns() => _activeMutation?.Type == MutationType.NoCooldowns;
 }
