@@ -10,7 +10,7 @@ import argparse
 import json
 import re
 from collections import defaultdict
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 PARTICLE_REF = re.compile(r"""['"](?P<path>particles/[A-Za-z0-9_./-]+\.vpcf)['"]""", re.IGNORECASE)
 CUSTOM_PREFIXES = ("particles/aether_", "particles/aetherion/")
@@ -48,6 +48,27 @@ def _audio_source_candidates(root: Path, configured_path: str) -> list[Path]:
     return candidates
 
 
+
+def _particle_resource_candidates(root: Path, reference: str) -> list[Path]:
+    """Resolve a Source 2 virtual particle path in addon source and game trees.
+
+    Keep root-relative candidates as a compatibility fallback for older local
+    intake layouts, but prefer the canonical Workshop Tools source/compiled
+    locations used by this repository's audio audit.
+    """
+    virtual_path = PurePosixPath(reference.replace("\\\\", "/"))
+    if virtual_path.is_absolute() or any(part in ("", ".", "..") for part in virtual_path.parts):
+        return []
+
+    relative = Path(*virtual_path.parts)
+    compiled = Path(*virtual_path.parts[:-1], virtual_path.name + "_c")
+    return [
+        root / "content" / "csgo_addons" / "aetherion" / relative,
+        root / "game" / "csgo_addons" / "aetherion" / compiled,
+        root / relative,
+        root / compiled,
+    ]
+
 def scan(root: Path):
     particle_refs = defaultdict(list)
     for base in (root / "src", root / "configs"):
@@ -67,7 +88,7 @@ def scan(root: Path):
 
     missing_particles = []
     for reference in sorted(particle_refs, key=str.lower):
-        if not (root / reference).is_file() and not (root / (reference + "_c")).is_file():
+        if not any(candidate.is_file() for candidate in _particle_resource_candidates(root, reference)):
             missing_particles.append(reference)
 
     sound_config = root / "configs/assets/sounds.json"
