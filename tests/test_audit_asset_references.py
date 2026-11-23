@@ -44,6 +44,38 @@ class AssetReferenceAuditTests(unittest.TestCase):
             self.assertEqual(missing, [])
             self.assertEqual(counts["compiled_vpcf"], 1)
 
+    def test_source_particle_resource_uses_source2_content_tree(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            config = root / "configs" / "assets" / "models.json"
+            config.parent.mkdir(parents=True)
+            config.write_text('{"fx":"particles/aether_cast.vpcf"}', encoding="utf-8")
+            source = root / "content" / "csgo_addons" / "aetherion" / "particles" / "aether_cast.vpcf"
+            source.parent.mkdir(parents=True)
+            source.write_bytes(b"source-vpcf-placeholder")
+
+            refs, missing, counts, audio = MODULE.scan(root)
+
+            self.assertIn("particles/aether_cast.vpcf", refs)
+            self.assertEqual(missing, [])
+            self.assertEqual(counts["source_vpcf"], 1)
+
+    def test_compiled_particle_resource_uses_source2_game_tree(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            config = root / "configs" / "assets" / "models.json"
+            config.parent.mkdir(parents=True)
+            config.write_text('{"fx":"particles/aether_cast.vpcf"}', encoding="utf-8")
+            compiled = root / "game" / "csgo_addons" / "aetherion" / "particles" / "aether_cast.vpcf_c"
+            compiled.parent.mkdir(parents=True)
+            compiled.write_bytes(b"compiled-vpcf-placeholder")
+
+            refs, missing, counts, audio = MODULE.scan(root)
+
+            self.assertIn("particles/aether_cast.vpcf", refs)
+            self.assertEqual(missing, [])
+            self.assertEqual(counts["compiled_vpcf"], 1)
+
     def test_disabled_custom_audio_is_planned_not_reported_as_missing(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
