@@ -1,0 +1,593 @@
+# AETHERION-WCS — каталог визуальных ресурсов, эффектов и идей
+
+Дата исследования: 2026-11-10  
+Ветка исследования: `improve/production-roadmap`  
+Назначение: единый реестр направлений, открытых материалов, лицензий и требований интеграции. Это исследовательский каталог, а не утверждение, что все перечисленные модели уже импортированы в CS2.
+
+## 1. Ключевой вывод
+
+Для AETHERION лучше строить визуальную систему из трёх слоёв:
+
+1. **Модель/образ** — игрок, питомец, призванное существо, оружие или временный объект.
+2. **Событийный VFX** — вспышка, след, удар, взрыв, портал, руны, огонь, лёд, молния.
+3. **Игровая механика** — урон, контроль, лечение, перемещение, защита, призыв, зона или усиление.
+
+Не нужно искать одну «готовую модель дракона, которая сама всё делает». Дракон может быть моделью/анимацией, а его пролёт, огненный след, звук, попадание и урон — отдельными связанными событиями.
+
+## 2. Что уже найдено в репозитории
+
+На ветке исследования на момент проверки HEAD: `e7d02fbfccf61f4f80e9e7fa377fac12371551ec`.
+
+В репозитории уже есть:
+- 16 концепт-изображений в `assets/concept`, `assets/models`, `assets/skins`.
+- исходный FBX `assets/skins/frost_maiden_rigged.fbx` (сам по себе не является готовой CS2-моделью).
+- 18 ZIP-архивов и 4 RAR-архива в `gb_models`.
+- 41 скомпилированный файл `.vmdl_c`, 52 `.vmat_c`, 180 `.vtex_c` в дереве `gb_models/extracted`.
+- среди извлечённых наборов видны Herta, LEGO-персонажи, Maalik Inferno, Shark, Skeleton, Santa, Trollface, Cameraman и другие.
+
+**Важно:** наличие архива или `.vmdl_c` в Git не подтверждает лицензию, полноту материалов/анимаций, совместимость скелета или готовность к раздаче клиентам. Фанатские модели известных франшиз и персонажей нельзя автоматически считать разрешёнными для публичного сервера. Перед включением каждого такого набора нужен источник и проверка условий автора. Не использовать их как «разрешённые» только потому, что они уже лежат в репозитории.
+
+В коде уже существуют:
+- `ModelManager`: precache, применение модели, tint, spawn FX, aura/accessory hooks.
+- `RaceRuntime.EffectLibrary`: уже есть механики dash/blink, lightning, AOE explosion, freeze, shield, fear, stun, root, poison, ignite, chain lightning, hook pull, team heal, summon-подобный удар/защита и другие.
+- `CombatEffects`: длительные статусы, контроль, щиты, замедление, страх, отбрасывание/притягивание и прочие боевые эффекты.
+
+Текущая система spawn FX — одноразовый всплеск при появлении игрока. Дракон, летящий через арену, или постоянный портал требуют отдельного контроллера жизненного цикла: создать → обновлять позицию/состояние → завершить → удалить. Нельзя создавать такие эффекты каждый тик без ограничений.
+
+## 3. Проверенные источники открытых материалов
+
+### 3.1. 3D-существа и персонажи
+
+| Источник | Что найдено | Лицензия на странице источника | Пригодность |
+|---|---|---|---|
+| Quaternius — Ultimate Monsters: https://quaternius.com/packs/ultimatemonsters.html | 50 анимированных монстров, FBX/OBJ/Blend/glTF | CC0 | Высокий кандидат для питомцев, боссов, призывов и референсов; проверить конкретные модели/анимации перед портированием |
+| Quaternius — Cute Animated Monsters: https://quaternius.com/packs/cutemonsters | 21 анимированный монстр с текстурами | CC0 | Высокий кандидат для питомцев, мелких фамильяров, летающих существ |
+| Quaternius — Animated Monster Pack: https://quaternius.com/packs/animatedmonster.html | 4 анимированных монстра | CC0 | Небольшой стартовый набор для проверки пайплайна |
+| Quaternius — Ultimate Animated Animal Pack: https://quaternius.com/packs/ultimateanimatedanimals.html | 12 животных, более 12 анимаций на модель | CC0 | Животные-компаньоны, ездовые/призываемые существа, декор |
+| Quaternius — каталог: https://quaternius.com/ | Bestiary — Dungeon Monsters Kit, Ultimate Fantasy RTS, Ultimate RPG, Animated Dinosaur, Animated Robot, Animated Alien, Ultimate Animated Character и другие | Уточнять на странице каждого набора | Большой каталог для расширения рас и боссов |
+| Cethiel's Dragon 3D: https://opengameart.org/content/cethiels-dragon-3d | Ригованный и анимированный low-poly дракон, две текстуры | CC0 | Прямой кандидат на дракона-фамильяра/визуальный прототип; нужно проверить скелет и экспорт |
+| Fantasy Forge — 144 Animated Fantasy Assets: https://isatern.itch.io/fantasy-forge-animated-fantasy-assets | 144 3D-модели, 479 именованных клипов анимации, GLB и Blender | CC0 1.0 заявлена на странице | Большой набор для прототипов и поиска существ; проверить, какие именно модели подходят под нужные роли и стиль |
+
+Ссылки:
+- https://quaternius.com/packs/ultimatemonsters.html
+- https://quaternius.com/packs/cutemonsters
+- https://quaternius.com/packs/animatedmonster.html
+- https://quaternius.com/packs/ultimateanimatedanimals.html
+- https://opengameart.org/content/cethiels-dragon-3d
+- https://isatern.itch.io/fantasy-forge-animated-fantasy-assets
+
+### 3.2. Частицы, вспышки и текстуры VFX
+
+| Источник | Содержимое | Лицензия | Как использовать в AETHERION |
+|---|---|---|---|
+| Kenney Particle Pack: https://kenney.nl/assets/particle-pack | 80 текстур/элементов частиц | CC0 | Текстуры для искр, магических вспышек, попаданий и свечений; это не готовые Source 2 .vpcf |
+| Kenney Smoke Particles: https://kenney.nl/assets/smoke-particles | 70 элементов дыма | CC0 | Дымовые шлейфы, появление/исчезновение, следы взрывов |
+| PVFX Foundry: https://nerijs.itch.io/pvfx-foundry | 101 pixel-art VFX: удары, slash, взрывы, огонь, лёд, молния, holy/shadow, природа, вода, ветер, ауры, снаряды | CC0 заявлена на странице | Визуальный референс или текстурный атлас; пиксельный стиль может не совпасть с реалистичным CS2 |
+| OpenGameArt — Special Effects CC0: https://opengameart.org/content/special-effects-cc0 | Подборка спецэффектов: огонь, молния, телепорт, взрывы, магия | У подборки есть отдельные исходные работы; лицензию каждой работы проверять отдельно | Источник идей/текстур, не считать всю подборку одной лицензией |
+
+Дополнительный каталог частиц Kenney: https://github.com/GeorgeQLe/assets-vfx-particles — индекс 527 CC0-ассетов Kenney с manifest и тегами. Проверять оригинальный источник/пак при импорте.
+
+### 3.3. Инструменты и технические примеры CS2 / Source 2
+
+| Материал | Что даёт | Примечание |
+|---|---|---|
+| Source 2 Wiki — Addons: https://www.source2.wiki/Basics/working-on-content/addons | Структура `content/csgo_addons/<addon>` и `game/csgo_addons/<addon>`, компиляция и монтирование | Базовая схема поставки контента |
+| Source 2 Wiki — Particle Editor: https://www.source2.wiki/EngineTools/ParticleEditor | Source 2 частицы могут включать sprites, lights, models, text и физические симуляции | Самый важный инструмент для сложных VFX; редактор в CS2 по умолчанию отключён |
+| Source 2 Wiki — Particle Editor Guide: https://www.source2.wiki/EngineTools/ParticleEditor/particle-editor-guide | Создание и редактирование .vpcf | Использовать для собственных эффектов |
+| Source 2 Viewer — CS2 extraction: https://s2v.app/ValveResourceFormat/games/counter-strike-2.html | Где находятся VPK, модели, материалы и Workshop assets | Для аудита существующих ресурсов игры |
+| CS2Draw: https://github.com/ShookEagle/CS2Draw | Примеры пользовательских частиц и геометрических эффектов в CS2 | Репозиторий GPL-3.0; не копировать код/ресурсы в проект без проверки совместимости лицензии |
+| ParticleDemo: https://github.com/Letaryat/ParticleDemo | Пример CounterStrikeSharp-плагина для запуска частиц в разных позициях | MIT; полезен как технический пример, не готовая система RPG-способностей |
+| CS2 CustomTrailAndTracers: https://github.com/Letaryat/CS2-CustomTrailAndTracers | Пример пользовательских следов/трейсеров на VPCF | В первую очередь демонстрационный проект |
+| Source2Mod — Entities: https://www.source2mod.net/docs/entities | Создание и управление игровыми entity, модели, частицы, телепортация | Сверять API с используемым стеком CounterStrikeSharp |
+
+Технические заметки:
+- Исходники моделей и частиц должны быть скомпилированы Workshop Tools в ресурсы Source 2.
+- Для модели обычно нужен полный набор: модель, материалы, текстуры, скелет/анимации, а не только один FBX/GLB.
+- В документации Source2Wiki player-agent модели игры расположены в `agents/models/<faction>/`, а материалы — в `characters/models/<faction>/materials/`. Поэтому любые пути в конфиге надо сверять с реальными ресурсами; не следует автоматически считать `characters/models/.../*.vmdl` корректным путём модели агента.
+- `.vpcf` — исходный файл системы частиц, `.vpcf_c` — скомпилированный ресурс. В конфигурациях плагина обычно указывается путь ресурса, ожидаемый API, а не произвольный файл из архива.
+- Частицы могут использовать модели и текстуры, поэтому визуально эффект «дракон пролетает» можно собрать как управляемый объект/модель плюс частицы огня/дыма/искр и звук.
+
+## 4. Большая библиотека идей для рас и способностей
+
+Ниже — идеи для дальнейшего дизайна. Это не обещание, что всё уже поддержано текущим кодом. В скобках указаны визуальные компоненты и возможная механика.
+
+### 4.1. Драконы и драконья магия
+1. **Небесный налёт** — дракон пересекает карту сверху, оставляя огненный след; по линии пролёта проходит волна урона.
+2. **Огненный ковёр** — дракон выдыхает конус пламени; краткая зона горения.
+3. **Метеор-дракон** — огненный силуэт падает с неба и взрывается в выбранной области.
+4. **Драконья печать** — на земле появляется руна, затем из неё вырывается пламя.
+5. **Дракон-хранитель** — короткий призыв-компаньон, который кружит рядом и усиливает броню/урон.
+6. **Пепельное перерождение** — при смертельном уроне вспышка пепла, краткая неуязвимость или спасение с малым HP (с большим cooldown).
+
+### 4.2. Метеоры, космос и гравитация
+1. **Метеоритный дождь** — несколько падающих объектов с предупреждающими кругами на земле, затем взрывы.
+2. **Один метеор** — заметный объект входит сверху, ударная волна и кратерный VFX.
+3. **Гравитационный колодец** — сфера притягивает противников к центру, затем схлопывается.
+4. **Орбитальные осколки** — камни вращаются вокруг игрока и блокируют/ранят ближайших врагов.
+5. **Кометный рывок** — рывок с длинным светящимся хвостом и ударом в конце.
+6. **Звёздный разлом** — вертикальный луч/разлом с задержкой и взрывом.
+
+### 4.3. Призывы и существа
+1. **Каменный голем** — поднимается из земли; удар кулаком создаёт конус/кольцо отбрасывания.
+2. **Ледяной голем** — медленнее, но ставит ледяную стену/замедляет область.
+3. **Феникс** — вспыхивает, пролетает над игроком и оставляет огненный круг; может быть визуалом возрождения.
+4. **Ангел-хранитель** — крылья/световой нимб; щит союзнику или спасение от одного удара.
+5. **Демон-палач** — портал, появление демона, метка цели и мощный одиночный удар.
+6. **Призрачный волк** — быстрый рывок по следу к отмеченной цели.
+7. **Рой воронов/летучих мышей** — тёмный вихрь, ослепление/страх или маскировка отхода.
+8. **Эфирный дракончик** — маленький спутник, который меняет форму/цвет при прокачке.
+9. **Паук-разломник** — ловушка-паутина, замедление/Root.
+10. **Страж-автоматон** — механический спутник, импульсный щит и электрический разряд.
+
+### 4.4. Стихии
+- **Огонь:** огненный шар, огненная дорожка, взрыв лавы, кольцо пламени, горящий меч, огненный дождь.
+- **Лёд:** ледяное копьё, ледяные шипы из земли, снежная буря, заморозка, ледяная броня, ледяное зеркало.
+- **Молния:** цепная молния, молниеносный рывок, грозовой столб, электрическая клетка, перегрузка.
+- **Яд/природа:** ядовитое облако, корни из земли, шипастая лоза, грибной споровый взрыв, зелёная регенерация.
+- **Тьма:** теневой двойник, чёрный портал, поглощение света, метка жнеца, стая теней.
+- **Свет:** луч очищения, купол защиты, священные копья, крылья света, ослепляющая вспышка.
+- **Ветер/вода:** торнадо, воздушный клинок, водяной хлыст, пузырь-щит, приливная волна.
+- **Земля/металл:** каменные шипы, броня из обломков, магнитный импульс, земляной разлом, металлические осколки.
+
+### 4.5. Пространство, время и иллюзии
+- Портал входа/выхода, короткий телепорт, обмен местами с целью.
+- Замедление времени в сфере, ускорение союзников, временной откат к сохранённой позиции.
+- Иллюзорные копии игрока, ложные силуэты, исчезновение в дыме.
+- Разрез пространства, фиолетовая трещина, чёрная дыра, разрыв с выбросом энергии.
+- Метка возврата: руна ставится заранее, игрок возвращается к ней через несколько секунд.
+
+### 4.6. Оружие, руны и ближний бой
+- Меч с меняющейся стихией; большой двуручный клинок; коса жнеца; эфирный лук; магический посох.
+- Заряженный удар с волной по земле; круговой slash; парирование со вспышкой; контратака.
+- Рунические печати на полу; цепи, связывающие врага; глифы над целью.
+- Призрачный крюк/цепь; гарпун; энергетические клинки; вращающиеся кинжалы.
+
+### 4.7. Боссы и глобальные события
+- Дракон-босс с фазами: пролёт → огненный дождь → посадка/удар → взлёт.
+- Титан-голем: медленные телеграфируемые удары, каменные волны, броня по фазам.
+- Архангел: световые копья, купол, волна очищения.
+- Демон из портала: цепи, огненные круги, рывок по метке.
+- Эфирный Левиафан: водяной/пространственный вихрь.
+- Разлом: случайные волны существ и модификаторы арены.
+- Метеоритный шторм: глобальное предупреждение, маркеры падения, серия ударов.
+
+## 5. Как превращать идею в настоящую способность
+
+Пример: «Дракон прилетает сверху».
+
+1. **Телеграф:** на земле появляется круг/тень и звук предупреждения.
+2. **Вход:** модель дракона появляется за пределом видимости над ареной.
+3. **Движение:** контроллер двигает модель по заранее заданной траектории.
+4. **След:** VPCF огня, дыма и искр следует за моделью.
+5. **Удар:** при пересечении линии/зоны сервер рассчитывает попадания и урон.
+6. **Финиш:** вспышка, дым, звук, удаление модели и частиц.
+7. **Баланс:** cooldown, максимальная дальность, число целей, иммунитет к повторному попаданию, ограничение одновременных эффектов.
+
+Для «метеора» та же схема: предупреждающий маркер → падающая модель/частица → удар → AOE → дым/осколки → cleanup.
+
+## 6. Приоритеты реализации
+
+### P0 — дешёвые визуальные улучшения
+- Собрать whitelist существующих игровых частиц CS2 и проверить их в игре.
+- Добавить единый каталог VFX с категориями: fire, ice, lightning, holy, shadow, portal, impact, summon, trail.
+- Сделать безопасный lifecycle-контроллер для временных моделей/частиц.
+- Добавить cooldown/лимиты и гарантированную очистку при смерти, disconnect, смене карты и выгрузке плагина.
+
+### P1 — первые эффектные способности
+1. Метеорит с предупреждающим кругом и AOE.
+2. Драконий пролёт с огненным следом.
+3. Каменный голем/удар из-под земли.
+4. Портал с появлением существа.
+5. Феникс/ангельское спасение.
+6. Ледяные шипы и грозовой столб.
+
+### P2 — модели и питомцы
+- Проверить CC0 Dragon из OpenGameArt.
+- Выбрать 3–5 существ из Quaternius Ultimate Monsters и Cute Animated Monsters.
+- Проверить риг, анимации, текстуры, масштаб, материалы и возможность портирования.
+- Создать отдельный Source 2 test addon и проверить модели до добавления в основной каталог.
+
+### P3 — крупные системы
+- Система summon-существ с таймером, HP/визуальным состоянием и ограничением одновременных призывов.
+- Боссовые модели с фазами.
+- Косметические эволюции питомцев и визуальные формы рас.
+- Набор синхронизированных звуков, телеграфов и анимаций.
+
+## 7. Технический pipeline для каждого внешнего ассета
+
+1. Записать оригинальную страницу, автора, точную лицензию, дату проверки и разрешённые способы использования.
+2. Скачать исходный архив и сохранить оригинал отдельно.
+3. Проверить содержимое: FBX/GLB/Blend, текстуры, скелет, клипы анимации, зависимости.
+4. Проверить масштаб, ориентацию, материалы, число полигонов и имена костей.
+5. Подготовить модель к CS2: совместимый риг/анимационный граф, материалы Source 2 и нужные исходники.
+6. Скомпилировать Workshop Tools в addon.
+7. Проверить на тестовом сервере: CT/T, spawn, death, crouch, бег, оружие, камера, hitboxes, видимость у клиентов.
+8. Только после smoke test добавить путь в `configs/assets/models.json` или отдельный реестр summon assets.
+9. Добавить asset validation: файл существует, ресурс компилируется, лицензия записана, все зависимости присутствуют.
+10. Не коммитить тяжёлые бинарные архивы без необходимости; хранить оригиналы в отдельном asset storage, а в репозитории — manifest, license receipt и подготовленный пакет согласно выбранной политике.
+
+## 8. Ограничения и открытые вопросы
+
+- CC0 3D-модель не становится автоматически Source 2 player-agent: нужен риг/анимации, материалы и компиляция.
+- 2D VFX-пакеты Kenney/PVFX не являются готовыми `.vpcf`; их можно использовать как текстурный материал/атлас после адаптации.
+- Портирование существующей анимированной модели в CS2 может оказаться дороже, чем создание эффекта из модели + частиц.
+- Для публичного сервера клиентам должен быть доступен полный набор ресурсов; одного серверного файла недостаточно.
+- Перед массовым включением нужны замеры FPS, сетевой нагрузки и лимитов сущностей.
+- Лицензии проверяются на странице конкретного ассета, а не по словам «free download» в поиске.
+
+## 9. Источники и доказательства
+
+- Quaternius Ultimate Monsters — CC0, 50 анимированных моделей: https://quaternius.com/packs/ultimatemonsters.html
+- Quaternius Cute Animated Monsters — CC0, 21 модель: https://quaternius.com/packs/cutemonsters
+- Quaternius Animated Monster Pack — CC0, 4 модели: https://quaternius.com/packs/animatedmonster.html
+- Quaternius Ultimate Animated Animal Pack — CC0, 12 моделей с анимациями: https://quaternius.com/packs/ultimateanimatedanimals.html
+- Cethiel Dragon 3D — CC0, ригованный и анимированный дракон: https://opengameart.org/content/cethiels-dragon-3d
+- Fantasy Forge — CC0, 144 модели и 479 клипов: https://isatern.itch.io/fantasy-forge-animated-fantasy-assets
+- Kenney Particle Pack — CC0, 80 файлов: https://kenney.nl/assets/particle-pack
+- Kenney Smoke Particles — CC0, 70 файлов: https://kenney.nl/assets/smoke-particles
+- PVFX Foundry — CC0, 101 2D VFX: https://nerijs.itch.io/pvfx-foundry
+- Source 2 Addons: https://www.source2.wiki/Basics/working-on-content/addons
+- Source 2 Particle Editor: https://www.source2.wiki/EngineTools/ParticleEditor
+- Source 2 Particle Editor Guide: https://www.source2.wiki/EngineTools/ParticleEditor/particle-editor-guide
+- Source2Viewer CS2 extraction: https://s2v.app/ValveResourceFormat/games/counter-strike-2.html
+- CS2Draw (GPL-3.0): https://github.com/ShookEagle/CS2Draw
+- ParticleDemo (MIT): https://github.com/Letaryat/ParticleDemo
+- CustomTrailAndTracers: https://github.com/Letaryat/CS2-CustomTrailAndTracers
+- Source2Mod Entities: https://www.source2mod.net/docs/entities
+
+
+---
+
+# 10. Дополнительная волна исследования: больше существ, звука и окружения
+
+Этот раздел добавлен после расширенного поиска. Здесь есть несколько особенно ценных находок, которых не было в первом списке.
+
+## 10.1. Приоритетные 3D-кандидаты для существ
+
+| Пакет | Содержимое | Формат / анимации | Лицензия | Оценка для AETHERION |
+|---|---|---|---|---|
+| Fantasy Creatures: 26 rigged and animated — https://algumacoisaqq.itch.io/fantasy-creatures-wolf-giant-rat-spider-wasp-centipede | 26 существ, включая огнедышащего дракона, трёхголовую гидру, волков/варгов, слизня и насекомых | Ригованные 3D-модели; дракон имеет 14 клипов (idle, walk, run, bite, claw, tail sweep, roar, fire breath, take off, fly, glide, land, hit, death); гидра 9 клипов | CC0 заявлена автором | **Очень высокий**: один из наиболее подходящих источников для драконьего налёта, гидры-босса и призывов. Проверить доступные форматы и экспортный риг |
+| Gobkit Freebies — https://gobkit.com/freebies | На странице заявлено 79 бесплатных моделей; на основном сайте заявлен каталог из 341 CC0-модели в 30 наборах, 300 ригованных персонажей и 41 природного объекта | GLB, ригованные анимированные персонажи, в том числе животные и существа | CC0 1.0 заявлена на сайте | **Высокий** как большой источник компаньонов и существ; каталог/API нужно инвентаризировать, не полагаться на рекламное число без проверки фактического manifest |
+| Gobkit Free Animal Pack — https://gobkit.itch.io/gobkit-free-animal-pack | 10 существ: рыба-удильщик, летучая мышь, корги, утка, бегемот, медуза, утконос, красная панда, носорог, акула | GLB, риг, idle/attack/dead/walk | CC0 1.0 | Средний: животные-компаньоны, летучая мышь, акула/медуза для необычных рас |
+| Gobkit Free Animal Pack Vol. 2 — https://gobkit.itch.io/gobkit-free-animal-pack-vol-2 | 10 существ: пчела, синий кит, кабан, фугу, коза, сурок, сова, крыса, тюлень, кит | GLB, риг, idle/attack/dead/walk | CC0 1.0 | Средний: питомцы, рой, тотемные животные, водные/воздушные компаньоны |
+| Cethiel's Dragon 3D — https://opengameart.org/content/cethiels-dragon-3d | Низкополигональный дракон с ригом и анимацией, две текстуры | 3D ZIP | CC0 | Высокий как лёгкий тестовый дракон |
+| Fantasy Forge — https://isatern.itch.io/fantasy-forge-animated-fantasy-assets | 144 модели, 479 именованных анимационных клипов, существа, персонажи, растения, строения, оружие и механизмы | GLB с текстурами и анимациями, Blender sources, два LOD | CC0 1.0 | **Очень высокий для массового отбора**; архивы большие (оригинальный GLB около 865 MB), сначала скачать только оригинальный GLB, не все LOD/Blender архивы |
+| Quaternius Ultimate Monsters — https://quaternius.com/packs/ultimatemonsters.html | 50 анимированных монстров | FBX/OBJ/Blend/glTF | CC0 | Высокий |
+| Quaternius Cute Animated Monsters — https://quaternius.com/packs/cutemonsters | 21 анимированный монстр | 3D-пакет, проверить точный состав файлов | CC0 | Средний/высокий для фамильяров и малых призывов |
+
+### Особо интересные драконьи анимации
+
+У набора Fantasy Creatures (26) указаны именно те клипы, которые нужны для эффектной способности:
+- `take off` — взлёт;
+- `fly` и `glide` — пролёт через арену;
+- `fire breath` — огненное дыхание;
+- `roar` — рёв перед атакой;
+- `land` — посадка;
+- `tail sweep` — удар хвостом;
+- `death` — эффектное завершение.
+
+Это гораздо лучше, чем пытаться из статической модели сделать летающего дракона. Сама модель всё ещё требует портирования в Source 2 и настройки анимационного графа.
+
+### Идеи способностей на базе этих конкретных типов существ
+
+- **Гидра: Три приговора** — три головы атакуют три отмеченные позиции; каждая оставляет яд/замедление.
+- **Дракон: Небесный испепелитель** — взлёт за пределы карты, пролёт по выбранной линии, огненное дыхание.
+- **Слизень: Поглощение** — слизь накрывает область, замедляет, затем распадается на мелкие капли.
+- **Варг: Охота стаи** — призрачные волки появляются с боков и рывком сходятся на цели.
+- **Паук: Кокон** — паутина фиксирует врага, кокон визуально закрывается, затем разрушается.
+- **Летучая мышь: Ночная завеса** — стая пересекает экран/пространство и скрывает отход.
+- **Медуза: Электрический купол** — пульсирующая сфера и цепная молния по ближайшим врагам.
+- **Кит/морское чудовище: Прилив** — водяная волна проходит по линии, отбрасывая врагов.
+- **Орел/сова: Пикирование** — тень/маркер на земле, затем быстрый удар сверху.
+- **Кабан: Таран** — короткий разгон с пылевым следом и отбрасыванием.
+
+## 10.2. Ещё визуальные материалы и 2D-эффекты
+
+| Источник | Что внутри | Лицензия/условия | Применение |
+|---|---|---|---|
+| Free CC0 Fantasy Monster Sprites — https://spritecanvas.itch.io/free-cc0-monster-sprites | Слизень, гриб, гоблин, каменный голем; у каждого idle/walk/attack/hurt/death | CC0 1.0 | Не для 3D player models; полезно как референс движений/телеграфов, иконки/визуальные ассеты при подходящем стиле |
+| Fantasy Creatures Bundle — https://pulsarcp.itch.io/fantasy-creatures | Emberwing Dragon, Rune Golem, Spirit Fox, Abyss Jelly; 4 цветовых варианта каждого, 852 кадра; дракон fly/fire breath, голем ground slam/crystal beam | CC0 | Отличный референс для анимаций, пиктограмм, HUD, превью навыков; 2D pixel-art не заменяет 3D модель |
+| Monsters Creatures Fantasy — https://luizmelo.itch.io/monsters-creatures-fantasy | Skeleton, Mushroom, Goblin, Flying Eye с анимациями атаки/ходьбы/смерти | CC0 | Иконки/превью и 2D эффекты, не 3D игровые агенты |
+| PVFX Foundry — https://nerijs.itch.io/pvfx-foundry | 101 эффект: impact, slash, explosion, fire, ice, lightning, holy, shadow, nature, water, wind, smoke, auras, projectiles, pickups | CC0 заявлена автором | Текстуры/референсы для переноса в Source 2 particle systems |
+| Free Spell VFX Sampler — https://gegx.itch.io/free-spell-vfx-sampler | Flame Spiral, Frost Rune Circle, Storm Spiral; прозрачные sprite sheets, 8 кадров; также sci-fi laser/explosion/shield samples | Бесплатный сэмплер; перед распространением проверить полный LICENSE | Референсы и текстуры для огня/льда/молнии |
+| Magic Spells VFX Lite — https://willosuna.itch.io/magic-spells-vfx-lite | Cast, impact, fire impact, ice shatter, zap, heal; полный набор описан как 30 эффектов: fire, ice, lightning, wind, poison, holy, shadow, arcane, shield, teleport, portal, summon, runes | Royalty-free для личных и коммерческих игр; нельзя перепродавать/распространять исходные файлы как asset pack | Текстуры для VFX, с соблюдением запрета на перепродажу ассетов |
+| SpritePilot Magic & Projectiles — https://spritepilot.com/free-game-assets/magic | Fireball, ice shard, energy orb, lightning, poison cloud, healing aura, shield bubble, portal, teleport beam | CC0 указана в каталоге, проверить отдельный файл LICENSE | Быстрые прототипы магических телеграфов/иконок |
+| SpritePilot Effects — https://spritepilot.com/free-game-assets | Explosion, smoke puff, landing dust, hit spark и другие 2D эффекты | CC0 указана в каталоге | Превью, HUD, reference sheets; для 3D арены использовать как текстуры/референсы, не как готовый VPCF |
+
+## 10.3. Звуки: важная часть ощущения силы способности
+
+| Источник | Содержимое | Лицензия | Применение |
+|---|---|---|---|
+| SpritePilot SFX — https://spritepilot.com/free-game-assets/sound-effects | 78 звуков: взрывы, удары, оружие, движения, существа, магия, интерфейс, ambient loops; WAV/OGG/MP3 | CC0 | Быстрый старт для боевых звуков |
+| Kaino CC0 SFX Library — https://kaino.dev/library/sfx | Заявлено 1397 звуков, 21 категория; fantasy/RPG, creatures, explosions, impacts, magic, spell, fire, whoosh | CC0 | Большая библиотека для поиска звуков по тегам |
+| SFXMint Dragon Roars — https://sfxmint.com/sounds/dragon-roar | 10 рёвов дракона, дыхание огнём, атакующие и победные варианты | CC0 заявлена на странице | Звуковая связка для драконьих способностей; проверить скачанные файлы и лицензию |
+
+Для каждой способности нужен комплект звуков, а не один случайный звук:
+- cast / charge — начало подготовки;
+- warning — телеграф противнику;
+- travel — пролёт/движение;
+- impact — попадание;
+- sustain — петля для длительной зоны;
+- end — исчезновение/завершение.
+
+## 10.4. Окружение, оружие и предметы
+
+| Источник | Что внутри | Лицензия | Применение |
+|---|---|---|---|
+| Quaternius Fantasy Props MegaKit — https://quaternius.com/packs/fantasypropsmegakit.html | 200+ средневековых предметов: оружие, инструменты, зелья, сундуки, мебель, лавки; стандартный пакет на OpenGameArt содержит 94 модели | CC0 | Предметы, тотемы, алтари, декор способности, иконки оружия |
+| Quaternius Fantasy Props MegaKit на OpenGameArt — https://opengameart.org/content/fantasy-props-megakit | Standard pack, 94 модели в ZIP; полный комплект на сайте Quaternius | CC0 | Удобная альтернативная точка загрузки |
+| Avramania — https://avramania.itch.io/ | Бесплатная коллекция 203 CC0 моделей из средневековых наборов; мебель, интерьер, крепости, осада, ферма, реквизит | CC0 для free collection, перепроверить конкретный архив | Окружение/декор тестовой арены, порталы, алтари |
+| Free CC0 Medieval Props — https://3dmodelscc0.itch.io/free-cc0-medieval-props | 10 предметов: арбалет, пушка, виселица, гильотина, торговая лавка, кубок, мешок, свиток, ключ | CC0 | Предметы/пропсы, но не все нужны для боевых способностей |
+| Low Poly Fantasy Village Props — https://luzbilliardsgames.itch.io/low-poly-fantasy-village-props | 20 моделей: колодец, бочка, наковальня, фонарь, телега, костёр, сундук, мост и др. | CC0 | Тестовая сцена и тематические декорации |
+| Gobkit Nature Kit — https://gobkit.com/freebies | 41 статический природный объект заявлен в бесплатном наборе | CC0 | Камни, деревья, скалы и окружение |
+
+## 10.5. Расширенный банк уникальных способностей
+
+### Воздушные существа
+- **Грифон: Королевский захват** — пикирование, захват цели/рывок и бросок назад.
+- **Гарпия: Крик ветра** — конусный knockback и краткая дезориентация.
+- **Феникс: Солнечная дуга** — полёт по дуге, огненные перья остаются на земле.
+- **Ворон: Чёрная стая** — несколько силуэтов летят к цели и накладывают метку.
+- **Сова: Метка охотника** — тень птицы на полу, затем пикирующий удар.
+
+### Подземные и каменные существа
+- **Титан: Разлом земли** — две последовательные волны каменных шипов.
+- **Голем: Каменная стена** — поднять барьер на несколько секунд.
+- **Тролль: Регенерация плоти** — временная регенерация с визуальным зарастанием ран.
+- **Мимик: Ложный сундук** — приманка, которая захлопывается при приближении врага.
+- **Троглодит: Обвал** — камни падают с потолка/сверху в отмеченной зоне.
+
+### Насекомые и паукообразные
+- **Королева пауков: Кокон** — временно удерживает противника, если тот не успел выйти из зоны.
+- **Скорпион: Жало** — быстрый выпад и яд.
+- **Рой: Поглощение** — насекомые облетают цель, визуально закрывают её и наносят периодический урон.
+- **Богомол: Рассекающий выпад** — быстрый боковой slash.
+- **Сколопендра: Ядовитая трещина** — линия яда по полу.
+
+### Морские/водные
+- **Левиафан: Приливная стена** — широкая волна с отбрасыванием.
+- **Кракен: Щупальца бездны** — несколько щупалец хватают отмеченные участки.
+- **Медуза: Электрический купол** — сфера с цепной молнией.
+- **Морской змей: Водоворот** — зона притяжения и замедления.
+- **Акула: Кровавый рывок** — быстрый проход по линии с усилением против раненых целей.
+
+### Свет, тьма и духи
+- **Архангел: Семь копий** — семь световых копий падают вокруг цели по очереди.
+- **Падший ангел: Чёрные крылья** — рывок с перьями-лезвиями.
+- **Жнец: Последний долг** — метка на низком HP, затем визуальный приговор и усиленный удар.
+- **Баньши: Предсмертный вой** — волна страха/дезориентации.
+- **Дух-лис: Девять огней** — девять огней преследуют цель по кривым траекториям.
+- **Призрак: Проход сквозь** — короткая фаза невосприимчивости и перемещение через линию боя.
+
+### Техно-магия
+- **Эфирный автоматон: Дрон-щит** — вращающийся дрон блокирует часть урона.
+- **Механический паук: Турель** — короткоживущая точка огня с лимитом по времени/целям.
+- **Плазменный клинок: Перегрев** — серия ударов с финальным импульсом.
+- **Нанорой: Разборка** — частицы облетают цель и постепенно снижают броню/скорость.
+- **Грави-ядро: Сингулярность** — притяжение, затем имплозия.
+
+## 10.6. Что реально стоит брать первым
+
+Рейтинг учитывает не только эффектность, но и вероятность довести ассет до рабочего CS2-ресурса.
+
+| Приоритет | Кандидат | Почему |
+|---|---|---|
+| A | Fantasy Creatures (26), особенно Dragon + Hydra | Конкретные полёт/дыхание/атака/смерть анимации, CC0 заявлена |
+| A | Quaternius Ultimate Monsters | Большой проверенный CC0 набор анимированных существ |
+| A | Cethiel Dragon | Небольшой лёгкий дракон для первой технической интеграции |
+| A | Kenney Particle + Smoke | Лицензия простая, хороший набор текстур для собственных VPCF |
+| A | SpritePilot CC0 SFX | Быстрый звуковой слой для первой версии способностей |
+| B | Gobkit 341 model library | Потенциально огромный каталог, сначала проверить manifest и качество |
+| B | Fantasy Forge 144 / 479 | Огромная база, но большие архивы и качество неоднородно |
+| B | Quaternius Fantasy Props | Хорошая база предметов/декора, но не приоритет для первой боевой способности |
+| C | 2D pixel-art VFX и sprite packs | Полезны как reference/HUD/текстуры, но стиль может конфликтовать с 3D CS2 |
+| C | Пакеты с неясной или ограничительной лицензией | Не включать до получения разрешения |
+
+## 10.7. Asset intake checklist (обязателен для каждого скачанного пакета)
+
+- [ ] Оригинальный URL, автор, дата скачивания.
+- [ ] Лицензия в виде сохранённого LICENSE/CC0 deed или страницы.
+- [ ] Разрешено ли изменение и распространение внутри игрового addon.
+- [ ] Фактический формат и список файлов.
+- [ ] Есть ли текстуры, normal maps, материалы и зависимости.
+- [ ] Есть ли риг и клипы анимации, названия клипов.
+- [ ] Проверка масштаба, ориентации, pivot и числа полигонов.
+- [ ] Проверка на дубли, сломанные ссылки и отсутствующие текстуры.
+- [ ] Тестовая компиляция в Source 2 Workshop Tools.
+- [ ] Тест на сервере и у клиента.
+- [ ] Запись в asset manifest с SHA256 и license receipt.
+- [ ] Не включать ассет в публичный релиз до прохождения всех пунктов.
+
+
+
+---
+
+## Fresh intake update — 2026-11-10
+
+### Gobkit: machine-readable CC0 creature source
+
+The official free-assets page currently describes a CC0 1.0 collection of 79 GLB assets, including rigged/animated creatures and static nature props. The open JSON manifest at https://gobkit.com/api/free includes direct file URLs, license text, rig flags, FPS and frame ranges.
+
+Important import detail: a rigged Gobkit GLB contains one master timeline rather than separate idle/attack/death animation clips. Split actions by the manifest's exact frame ranges at 24 FPS. The manifest documents +Z forward, +Y up and metre units. Do not add a guessed 180-degree rotation or assume animation clips are already separated.
+
+The currently documented animal pack contains 10 animated creatures; the minion pack contains 8 rigged enemy models. Both are CC0 1.0. The intake manifest in configs/assets/asset_sources.json and the Windows fetcher in scripts/fetch_cc0_assets.ps1 now include those two packs.
+
+Sources:
+- Official pack page and license: https://gobkit.com/freebies
+- Open manifest and exact file/frame metadata: https://gobkit.com/api/free
+- Public source mirror and technical notes: https://github.com/Ariescar/gobkit-free-assets
+
+### Particle source textures
+
+Two low-risk CC0 texture sets have been added to the intake plan:
+- Kenney Particle Pack: 80 particle/light/shader sprites; the official page declares CC0.
+- Kenney Smoke Particles: 77 separate PNGs in five styles; OpenGameArt declares CC0.
+
+These are textures, not CS2 particle definitions. They must be assembled into VPCF resources in the CS2 Particle Editor and compiled by Workshop Tools.
+
+Sources:
+- https://kenney.nl/assets/particle-pack
+- https://opengameart.org/content/particle-pack-80-sprites
+- https://opengameart.org/content/smoke-particle-assets
+
+### Additional creature discovery
+
+Grab3D currently lists eight free CC0 dragon models, with formats varying by model. The category spans roughly 6k to 800k triangles. Treat it as a discovery index, not an automatic import list: reject high-poly or static models for live server use unless a reduction/rigging plan is validated. The Griffin entry, for example, is described as 800k triangles and static, so it is not a good first player-agent candidate.
+
+- https://grab3d.com/free-3d-models/dragon/
+- https://grab3d.com/models/creatures/griffin/
+
+### Repository-side guardrails added
+
+- configs/assets/asset_sources.json: machine-readable source registry with license evidence, archive URLs, formats and CS2-readiness status.
+- scripts/fetch_cc0_assets.ps1: downloads five CC0 source archives to assets/incoming/cc0, retains ZIPs, writes SHA-256 receipts, prevents overwrite and rejects ZIP path traversal.
+- scripts/audit_asset_references.py: scans only AETHERION-owned particle namespaces and distinguishes missing custom resources from stock CS2 resources.
+- tests/test_audit_asset_references.py: tests the reference scan, compiled-resource lookup and quarantined model warning.
+- docs/ASSET_IMPORT_AUDIT.md: records the repository inventory and the real import gate.
+
+The source-fetch script is prepared but has not been run in this environment. No binaries were imported, no VPCFs were generated, and no Workshop Tools compile or game-server visual test has been claimed.
+
+
+---
+
+## Animation, sound and effect research: second pass (2026-11-10)
+
+### Humanoid animation retargeting
+
+**SupaVoxel animation library** offers 160 CC0 humanoid animation clips. It takes an already-rigged humanoid GLB/FBX and exports an animated GLB with one clip or a set. This is particularly useful for AETHERION's existing humanoid rigs: first retarget locomotion, idle, attack, hit and death to a single test agent, then decide whether the clip quality and skeleton mapping are worth integrating.
+
+- Source: https://supavoxel.com/tools/animate-3d-model
+- Treat exported GLB as source material, not a ready Source 2 model.
+
+**KinemIQ Free Game Animations** offers 460 clips on one humanoid skeleton, with FBX, GLB/glTF and BVH export. The license split matters:
+- 175 clips from Quaternius Universal Animation Library are CC0.
+- 170 clips from the 100STYLE dataset require CC BY 4.0 attribution.
+- 115 clips from Open Motion Project / ACCAD / Ohio State require CC BY 3.0 attribution.
+
+For a low-friction AETHERION import pipeline, use only the 175 CC0 subset unless we intentionally add and preserve the attribution records for the rest. The listed CC0 archives are small: 2.4 MB FBX and 2.1 MB GLB.
+
+- Source: https://kinemiq.itch.io/free-game-animations
+- CC0 download instructions and provenance list: https://kinemiq.app/sources
+
+### Sound library shortlist
+
+**SpritePilot Sound Effects** offers 78 CC0 effects, 48 kHz mono, supplied in WAV, OGG and MP3. The pack covers explosions, impacts, sword swing/clash, footsteps, dash whoosh, UI, creature roars/growls, spell cast, fireball, ice, lightning, heal, teleport, portal and eight ambient loops. Full pack is listed at 24.5 MB; OGG-only at 2.5 MB. Strong first source for the 68 unique missing custom sound paths already configured in AETHERION, but every selected sound still requires a Source 2 VSND_C compile and in-game playback validation.
+
+- Source and CC0 terms: https://spritepilot.com/free-game-assets/sound-effects
+
+**Kaino SFX Library** offers 1,397 CC0 sound effects in 21 categories. Relevant category sizes include 44 creature effects, 57 explosions/weapons, 90 fantasy/RPG, 81 impacts and 123 UI effects. Good reserve library for filling gaps after the smaller SpritePilot set.
+
+- Source and CC0 terms: https://kaino.dev/library/sfx
+
+**SpritePilot Pixel Art Effects** offers 82 CC0 pixel-art sprites/sheets overall, including 7 animated general effects, 9 combat effects, 9 spell/projectile effects, weather and ambient details. Examples include explosion, smoke puff, landing dust, hit spark, sword slash, claw slash, fireball, ice shard, energy orb and lightning strike. These are 2D sprite sheets, not 3D particles; they can serve HUD/menu/2D icon use or as source textures for a deliberately authored billboard VPCF.
+
+- Source and CC0 terms: https://spritepilot.com/free-game-assets
+
+### More character/prop discovery
+
+**AutoSprite Free Assets** advertises 20 3D GLB models, 13 animated 2D character sheets and 50 2D prop/effect sheets under CC0. The 3D entries need per-model inspection for rigging and polygon count; 2D sheets are useful for UI and icons but do not replace 3D CS2 agents.
+
+- Source: https://www.autosprite.io/free
+
+**SpriteCanvas CC0 Monster Sprites** provides small 2D enemies such as slime, mushroom, goblin and stone golem with idle/walk/attack/hurt/death animation sets. Useful for menus, HUD illustrations and icons only, not as Source 2 player models.
+
+- Source: https://spritecanvas.itch.io/free-cc0-monster-sprites
+
+### Audio implementation note for this repository
+
+The CS2 runtime path must be validated against actual compiled resources. CounterStrikeSharp's upstream TestPlugin example invokes play sounds/ui/counter_beep.vsnd; Source 2 stores compiled audio resources as VSND_C and sound events as VSNDEVT_C. The current sounds.json paths use sound/...wav, which are source-like paths, not a verified client runtime resource path. Do not flip the current 68 paths until a small test sound is compiled, precached/delivered and played successfully on the dedicated server/client.
+
+- CounterStrikeSharp sample: https://github.com/roflmuffin/CounterStrikeSharp/blob/main/managed/TestPlugin/TestPlugin.cs
+- Source 2 audio resource reference: https://s2v.app/ValveResourceFormat/guides/exporting-sounds.html
+- Sound-event editor: https://www.source2.wiki/ExternalTools/Hammer5Tools/editors/sound-editor
+
+### Integration priority after research
+
+1. **Humanoid animation proof:** take one current rig, export 3-5 CC0 locomotion/attack/hit/death clips, confirm skeleton mapping and retarget in Blender, then compile and test one agent in CS2.
+2. **Audio proof:** choose one UI click and one ability sound from SpritePilot, convert to VSND_C, use a test SoundEvent or validated play sounds/... path, verify on a real client, then expand the sound map.
+3. **3D creature proof:** prefer the 26-creature fantasy bundle / Gobkit before trying large static dragon catalogues; test a single dragon with one idle and one attack clip first.
+4. **VFX proof:** build one smoke or fire VPCF from the CC0 Kenney source textures; do not treat a sprite sheet as an already-authored Source 2 particle system.
+
+All entries above are candidates, not installed resources.
+
+
+**KinemIQ download-scope clarification:** the source page distinguishes the 460-clip browser library from the small downloadable CC0 bundle currently listed on the page. The downloadable FBX and GLB archives are advertised as **35 CC0 clips** (2.4 MB and 2.1 MB respectively). The broader library's license breakdown lists 175 CC0 clips, 170 CC BY 4.0 clips and 115 CC BY 3.0 clips. These are not interchangeable numbers: start with the 35-clip package, and treat access to the broader 175-clip CC0 subset as a separate export workflow. Do not pull in CC BY clips without preserving the required attribution.
+
+
+---
+
+## Further CC0 animation and humanoid sources — 2026-11-10
+
+### Kenney Animated Characters (three separate 3D packs)
+
+Kenney's creator pages list three separate 3D Animated Characters packs, each with 8 files and an explicit CC0 license:
+- Protagonists: skater/cyborg/criminal themes — https://kenney.nl/assets/animated-characters-protagonists
+- Retro: zombies and survivors — https://kenney.nl/assets/animated-characters-retro
+- Survivors: survival/zombie characters — https://kenney.nl/assets/animated-characters-survivors
+
+A community inventory of the actual ZIPs reports 4 FBX files plus PNG skins for each pack. Treat that as a source-level inventory, not a verified CS2 import: check the exact archive skeleton and animation clips, then retarget to the addon player-agent rig. These packs are promising for undead waves and low-poly NPCs.
+
+### Quaternius character and animation sources
+
+- Ultimate Animated Character Pack: 52 animated, textured low-poly characters, FBX/OBJ/Blend, CC0 — https://quaternius.com/packs/ultimatedanimatedcharacter
+- RPG Character Pack: 6 rigged, animated and textured fantasy characters, FBX/OBJ/Blend/glTF, CC0 — https://quaternius.com/packs/rpgcharacters.html
+- Universal Animation Library: 120+ humanoid animations on a universal retargetable rig, including 8-direction locomotion, jogging, sprinting, combat/gun, push, crawling, swimming, sitting, emotes and death — https://quaternius.com/packs/universalanimationlibrary.html
+- Modular Weapons Pack: 24 medieval weapon models, including swords, daggers, bows, shields and hammers, FBX/OBJ/Blend, CC0 — https://quaternius.com/packs/medievalweapons.html
+
+Important limit for the Universal Animation Library: the creator states that 60–70% of the pack is in the free version; the remaining 30–40% is offered in the full/source editions. The registry only marks the CC0 source and records the partial-free-download status. Do not assume all 120+ clips are in the no-cost download.
+
+### Practical retarget strategy
+
+For AETHERION, start with one source humanoid and the Universal Animation Library. Inspect the rig hierarchy and rest pose, export a minimal test set (idle, walk, run, attack, death), retarget in Blender to the actual CS2 agent skeleton, and test the compiled model/animation graph in Workshop Tools. Only after that works should the same path be applied to the 52-character pack. Animation packs tested in Unity/Unreal/Godot are not automatically compatible with Source 2.
+
+
+
+---
+
+## Dungeon environment, particle textures and SFX expansion — 2026-11-10
+
+### Dungeon and boss-arena kits
+
+- KayKit Dungeon Pack 1.1 free tier: 200 modular 3D assets, low-poly, one 1024×1024 gradient atlas, FBX/GLTF/OBJ; CC0. The 275+ Extra tier and Blender source tier are paid, so the free registry entry does not include those paid additions — https://kaylousberg.itch.io/kaykit-dungeon-pack
+- SigilsVault Modular Dungeon Kit: 90+ modular pieces, GLB/FBX, shared trim sheet, metre grid, 53 MB archive; CC0, creator declares no generative AI — https://sigilsvault.itch.io/modular-dungeon-kit-v10
+- Quaternius Modular Dungeon Pack: 41 models, barrels, torches, potions and modular walls; FBX/OBJ/Blend, CC0 — https://quaternius.com/packs/medievaldungeon.html
+- Quaternius Modular Dungeons Pack: separate 48-model set, FBX/OBJ/Blend, CC0 — https://quaternius.com/packs/modulardungeon.html
+
+Do not import every kit at once. Pick one set, test texture atlas and collision generation in Source 2, then combine only assets that improve visual variety without duplicating the same walls/props.
+
+### Particle sprite source
+
+SpriteCanvas's CC0 effects package is 2.3 MB and contains six transparent sprite sheets: sword slash, hit spark, fireball, lightning, explosion and ice burst. Each has six frames at 12 FPS and a JSON atlas containing frame rectangles, durations and centre pivot. It is a texture source only; the sheets need slicing/texture import and a VPCF authored in the Source 2 Particle Editor.
+
+- https://spritecanvas.com/free-sprite-sheets/effects/
+
+### Sound source update
+
+SpritePilot's current sound page lists 78 CC0 effects across 10 groups, supplied as WAV/OGG/MP3, with eight seamless ambient loops and one dragon roar. The full ZIP is 24.5 MB, OGG-only is 2.5 MB; creator says 48 kHz mono and trimmed/levelled. These are strong options for AETHERION abilities, boss events, UI and ambient systems, but still require Source 2 sound compilation and client playback testing.
+
+- https://spritepilot.com/free-game-assets/sound-effects
+
+
+
+---
+
+## Curated CC0 intake snapshot — 2026-11-10
+
+A second pass cross-checked source archives against the public Ludots-Assets index. Its README reports manifests for 213 Kenney packs, 10 official KayKit GitHub packs and three free humanoid-animation releases. Each pack entry records its original creator page, license URL, byte count and SHA-256. The archive itself uses Git LFS and is an index/curation source, not part of AETHERION.
+
+The selected intake batch is 104.9 MB (99.97 MiB; exact total is in configs/assets/asset_sources.json) and includes:
+- Kenney Modular Dungeon Kit, Particle Pack and Smoke Particles.
+- KayKit Adventures, Skeletons, Dungeon Remastered and Medieval Hexagon public GitHub packs.
+- KayKit Character Animations Free 1.1.
+- Quaternius Universal Animation Library Standard and Standard 2.
+
+The three animation releases are CC0 free tiers. The paid KayKit .blend source tier and Quaternius Pro/Source tiers are excluded. Official KayKit Character Animations page currently lists 133 clips on Rig_Medium and Rig_Large; the third-party archive README reports 161 published humanoid files across the two rig groups. Use the official publisher's 133 total as the canonical pack count and inspect the downloaded files to understand rig variants.
+
+The downloader scripts/fetch_curated_cc0_assets.ps1:
+- Downloads only these selected packs from their official creator/KayKit GitHub/itch upload URLs.
+- Checks exact archive byte count and SHA-256 against the dated 2026-08 curated snapshot; upstream changes fail closed.
+- Checks current KayKit README pages still explicitly declare CC0.
+- Checks ZIP integrity, prevents archive path traversal, rejects overwriting existing extracted destinations and writes per-pack source receipts.
+- Extracts only to assets/incoming/cc0-curated; does not copy anything into CS2 content or game folders.
+
+This session could not download the binary ZIPs because its container has no DNS/network route. The downloader is prepared for the Windows AETHERION checkout, but has not been run here. Recheck the original licence pages and SHA receipts at execution time.

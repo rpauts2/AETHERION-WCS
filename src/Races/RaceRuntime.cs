@@ -29,13 +29,20 @@ public delegate void AbilityEffect(AbilityContext ctx);
 // ── БИБЛИОТЕКА ЭФФЕКТОВ ПО ТЕГАМ ──
 public static class EffectLibrary
 {
+    // Configs normally express slow as percentages (15 = 15%), while some runtime callers already use fractions (0.4 = 40%).
+    public static float NormalizeSlowValue(float value)
+    {
+        float fraction = value > 1f ? value * 0.01f : value;
+        return Math.Clamp(fraction, 0.05f, 0.45f);
+    }
+
     public static readonly Dictionary<string, Func<float, AbilityEffect>> Effects = new()
     {
         ["bonus_hp"] = v => ctx =>
             ctx.Engine.AddHealth(ctx.Slot, (int)(v * ctx.SkillLevel), 100 + (int)(v * ctx.SkillLevel)),
 
         ["speed_buff"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + v * ctx.SkillLevel),
+            ctx.Combat.SetPersistentSpeedModifier(ctx.Slot, "speed_buff", 1f + v * ctx.SkillLevel),
 
         ["low_gravity"] = v => ctx =>
             ctx.Engine.SetGravity(ctx.Slot, Math.Max(0.3f, 1f - v * ctx.SkillLevel)),
@@ -177,7 +184,7 @@ public static class EffectLibrary
         },
 
         ["team_speed"] = v => ctx =>
-            ctx.Engine.ForAlliesInRadius(ctx.Slot, 350f, s => ctx.Engine.SetSpeed(s, 1.0f + 0.05f * ctx.SkillLevel + 0.15f)),
+            ctx.Engine.ForAlliesInRadius(ctx.Slot, 350f, s => ctx.Combat.Apply(EffectTag.SpeedBuff, s, 0.2f + 0.05f * ctx.SkillLevel, 5f)),
 
         ["shield"] = v => ctx =>
         {
@@ -189,7 +196,7 @@ public static class EffectLibrary
         {
             var p = ctx.Engine.GetPosition(ctx.Slot);
             int team = ctx.Player.TeamNum;
-            ctx.Combat.AoeApply(p.x,p.y,p.z, 220f+10f*ctx.SkillLevel, team, EffectTag.Slow, 0.5f, 3f, (int)(v*0.5f), ctx.Slot);
+            ctx.Combat.AoeApply(p.x,p.y,p.z, 220f+10f*ctx.SkillLevel, team, EffectTag.Slow, NormalizeSlowValue(v), 3f, (int)(v*0.5f), ctx.Slot);
             ctx.Engine.SpawnParticle("particles/frost/frost_fall.vpcf", p.x, p.y, p.z + 20);
         },
 
@@ -252,7 +259,7 @@ public static class EffectLibrary
         ["berserk"] = v => ctx =>
         {
             ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, Math.Min(v * 0.01f, 0.5f), 5f);
-            ctx.Engine.SetSpeed(ctx.Slot, 1.1f + Math.Min(v * 0.01f, 0.2f));
+            ctx.Combat.SetPersistentSpeedModifier(ctx.Slot, "berserk", 1.1f + Math.Min(v * 0.01f, 0.2f));
         },
 
         ["death_save"] = v => ctx =>
@@ -337,14 +344,14 @@ public static class EffectLibrary
         },
 
         ["chase_speed"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + v*0.01f * ctx.SkillLevel),
+            ctx.Combat.SetPersistentSpeedModifier(ctx.Slot, "chase_speed", 1f + v*0.01f * ctx.SkillLevel),
 
         ["execute_ult"] = v => ctx =>
         {
             if(ctx.VictimSlot.HasValue)
             {
                 ctx.Engine.SetHealth(ctx.VictimSlot.Value, Math.Max(0, ctx.Engine.GetHealth(ctx.VictimSlot.Value) - (int)v));
-                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, 35, 3f);
+                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, NormalizeSlowValue(35f), 3f);
             }
         },
 
@@ -385,7 +392,7 @@ public static class EffectLibrary
         ["slow_on_hit"] = v => ctx =>
         {
             if(ctx.VictimSlot.HasValue)
-                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, v, 3f);
+                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, NormalizeSlowValue(v), 3f);
         },
 
         ["self_shield"] = v => ctx =>
@@ -551,14 +558,14 @@ public static class EffectLibrary
         ["slow"] = v => ctx =>
         {
             if(ctx.VictimSlot.HasValue)
-                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, v, 3f);
+                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, NormalizeSlowValue(v), 3f);
         },
 
         ["movement_speed"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + v * 0.01f * ctx.SkillLevel),
+            ctx.Combat.Apply(EffectTag.SpeedBuff, ctx.Slot, v * 0.01f * ctx.SkillLevel, 4f),
 
         ["haste"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + v * 0.01f * ctx.SkillLevel),
+            ctx.Combat.Apply(EffectTag.Haste, ctx.Slot, Math.Clamp(v * 0.01f * ctx.SkillLevel, 0.05f, 0.35f), 4f),
 
         ["ice_bolt"] = v => ctx =>
         {
@@ -633,7 +640,7 @@ public static class EffectLibrary
             if(ctx.VictimSlot.HasValue)
             {
                 ctx.Engine.Blind(ctx.VictimSlot.Value, 0.1f, 0.1f);
-                ctx.Engine.SetSpeed(ctx.VictimSlot.Value, 0.75f);
+                ctx.Combat.Apply(EffectTag.Slow, ctx.VictimSlot.Value, 0.25f, 0.1f);
             }
         },
 
@@ -697,7 +704,7 @@ public static class EffectLibrary
         },
 
         ["speed_boost"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + v*0.01f * ctx.SkillLevel),
+            ctx.Combat.SetPersistentSpeedModifier(ctx.Slot, "speed_boost", 1f + v*0.01f * ctx.SkillLevel),
 
         ["dash_damage"] = v => ctx =>
         {
@@ -787,7 +794,7 @@ public static class EffectLibrary
         ["berserk_self"] = v => ctx =>
         {
             ctx.Combat.Apply(EffectTag.CritChance, ctx.Slot, Math.Min(v * 0.01f, 0.5f), 6f);
-            ctx.Engine.SetSpeed(ctx.Slot, 1.15f + Math.Min(v * 0.01f, 0.25f));
+            ctx.Combat.Apply(EffectTag.SpeedBuff, ctx.Slot, 0.15f + Math.Min(v * 0.01f, 0.25f), 6f);
         },
 
         ["hp_cost_aoe"] = v => ctx =>
@@ -860,7 +867,7 @@ public static class EffectLibrary
             foreach(var s in ctx.Combat.EnemiesInRadius(p.x, p.y, p.z, 220f, team))
             {
                 ctx.Engine.Blind(s, 2.0f, 1.5f);
-                ctx.Engine.SetSpeed(s, 0.6f);
+                ctx.Combat.Apply(EffectTag.Slow, s, 0.4f, 2f);
             }
             ctx.Engine.PrintToCenter(ctx.Slot, "🔊 Оглушение!");
         },
@@ -880,7 +887,7 @@ public static class EffectLibrary
 
         ["backstab"] = v => ctx =>
         {
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + (v * 0.01f * ctx.SkillLevel));
+            ctx.Combat.SetPersistentSpeedModifier(ctx.Slot, "backstab", 1f + (v * 0.01f * ctx.SkillLevel));
             if (ctx.VictimSlot.HasValue)
             {
                 int damage = (int)(v * Math.Max(1, ctx.SkillLevel) * 1.5f);
@@ -890,7 +897,54 @@ public static class EffectLibrary
         },
 
         ["blinded_bonus"] = v => ctx =>
-            ctx.Engine.SetSpeed(ctx.Slot, 1f + (v*0.005f * ctx.SkillLevel)),
+            ctx.Combat.SetPersistentSpeedModifier(ctx.Slot, "blinded_bonus", 1f + (v*0.005f * ctx.SkillLevel)),
+
+        ["time_dilation"] = v => ctx =>
+        {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            int team = ctx.Player.TeamNum;
+            float radius = 420f;
+            var enemies = ctx.Combat.EnemiesInRadius(p.x, p.y, p.z, radius, team).ToList();
+            foreach (var enemy in enemies)
+            {
+                ctx.Combat.Apply(EffectTag.Slow, enemy, NormalizeSlowValue(v), 3f, 1f, ctx.Slot);
+                var ep = ctx.Engine.GetPosition(enemy);
+                ctx.Engine.Beam(p.x, p.y, p.z + 35, ep.x, ep.y, ep.z + 35, 105, 95, 255, 0.35f);
+            }
+            ctx.Engine.SpawnParticle("particles/aether_recall.vpcf", p.x, p.y, p.z + 20);
+            ctx.Engine.PrintToCenter(ctx.Slot, enemies.Count == 0 ? "⌛ Хрональное поле: никого не задело" : $"⌛ Искажение такта: {enemies.Count}");
+        },
+
+        ["time_loop"] = v => ctx =>
+        {
+            // A deterministic, honest version of a temporal reset: recover health and
+            // gain a short shield. A true position/death rewind requires server-side history.
+            int heal = Math.Clamp((int)(v * Math.Max(1, ctx.SkillLevel)), 1, 100);
+            ctx.Engine.AddHealth(ctx.Slot, heal, 200);
+            ctx.Combat.Apply(EffectTag.Haste, ctx.Slot, Math.Clamp(0.08f + 0.025f * ctx.SkillLevel, 0.08f, 0.2f), 4f);
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            ctx.Engine.SpawnParticle("particles/aether_recall.vpcf", p.x, p.y, p.z);
+            ctx.Engine.Beam(p.x - 55, p.y, p.z + 20, p.x + 55, p.y, p.z + 20, 125, 110, 255, 0.45f);
+            ctx.Engine.PrintToCenter(ctx.Slot, $"⌛ Петля времени: +{heal} HP, ускорение");
+        },
+
+        ["time_stop_ult"] = v => ctx =>
+        {
+            var p = ctx.Engine.GetPosition(ctx.Slot);
+            int team = ctx.Player.TeamNum;
+            const float radius = 900f;
+            var enemies = ctx.Combat.EnemiesInRadius(p.x, p.y, p.z, radius, team).ToList();
+            foreach (var enemy in enemies)
+            {
+                ctx.Combat.Apply(EffectTag.Stun, enemy, 1f, 2f, 1f, ctx.Slot);
+                int damage = Math.Clamp((int)(v + 5 * ctx.SkillLevel), 1, 90);
+                ctx.Engine.SetHealth(enemy, Math.Max(0, ctx.Engine.GetHealth(enemy) - damage));
+                var ep = ctx.Engine.GetPosition(enemy);
+                ctx.Engine.Beam(p.x, p.y, p.z + 45, ep.x, ep.y, ep.z + 45, 160, 120, 255, 0.55f);
+            }
+            ctx.Engine.SpawnParticle("particles/aether_explosion.vpcf", p.x, p.y, p.z);
+            ctx.Engine.PrintToCenter(ctx.Slot, $"⌛ Разрыв времени: {enemies.Count} целей");
+        },
 
         ["summon_wisp"] = v => ctx =>
         {
@@ -959,7 +1013,7 @@ public static class EffectLibrary
             {
                 int target = ctx.VictimSlot ?? -1;
                 if (target < 0) return;
-                ctx.Combat.Apply(EffectTag.Slow, target, v, 3f);
+                ctx.Combat.Apply(EffectTag.Slow, target, NormalizeSlowValue(v), 3f);
             };
         // Телепорт / blink / dash
         if (e.Contains("blink") || e.Contains("teleport") || e.Contains("dash") || e.Contains("leap") || e.Contains("charge"))
@@ -1010,7 +1064,8 @@ public static class EffectLibrary
             };
         // Ускорение / haste
         if (e.Contains("speed") || e.Contains("haste") || e.Contains("frenzy"))
-            return ctx => { ctx.Engine.SetSpeed(ctx.Slot, 1f + v * 0.01f * ctx.SkillLevel); };
+            return ctx => ctx.Combat.Apply(EffectTag.Haste, ctx.Slot,
+                Math.Clamp(v * 0.01f * ctx.SkillLevel, 0.05f, 0.35f), 4f);
         // Отражение / parry
         if (e.Contains("parry") || e.Contains("reflect") || e.Contains("mirror"))
             return ctx => { ctx.Combat.Apply(EffectTag.Reflect, ctx.Slot, v, 5f); };

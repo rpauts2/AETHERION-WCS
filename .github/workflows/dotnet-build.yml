@@ -1,0 +1,120 @@
+name: AETHERION build and config checks
+
+on:
+  push:
+    branches:
+      - main
+      - "improve/**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate race and visual configuration
+        run: python scripts/validate_visual_assets.py
+
+      - name: Audit AETHERION-owned particle references
+        run: python scripts/audit_asset_references.py --output asset-reference-audit.md
+
+      - name: Audit configured custom audio files
+        run: python scripts/audit_audio_assets.py --output audio-asset-audit.md
+
+      - name: Generate static race balance report
+        run: python scripts/race_balance_report.py --output race-balance-report.md
+
+      - name: Run validator unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore plugin dependencies
+        run: dotnet restore AetherionWcs.csproj
+
+      - name: Run economy and progression unit tests
+        run: dotnet test tests/AetherionWcs.Tests/AetherionWcs.Tests.csproj --configuration Release
+
+      - name: Build Release
+        run: dotnet build AetherionWcs.csproj --configuration Release --no-restore
+
+      - name: Upload plugin build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AetherionWcs-net8
+          path: bin/Release/net8.0/AetherionWcs.dll
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload visual asset reference audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: Aetherion-visual-asset-audit
+          path: asset-reference-audit.md
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload custom audio asset audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: Aetherion-custom-audio-audit
+          path: audio-asset-audit.md
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload static race balance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: AetherionWcs-race-balance-report
+          path: race-balance-report.md
+          if-no-files-found: error
+          retention-days: 14
+
+  validate-powershell:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Parse PowerShell asset scripts
+        shell: pwsh
+        run: |
+          $paths = @(
+            "scripts/fetch_cc0_assets.ps1",
+            "scripts/fetch_curated_cc0_assets.ps1",
+            "scripts/install_cc0_dragon_roar.ps1",
+            "scripts/compile_addon_audio.ps1",
+            "scripts/audit_cs2_stock_resources.ps1"
+          )
+          $failed = $false
+          foreach ($path in $paths) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path).Path, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $failed = $true
+              Write-Host "PowerShell parse errors in $path"
+              $errors | ForEach-Object { Write-Error $_.Message }
+            } else {
+              Write-Host "PowerShell syntax OK: $path"
+            }
+          }
+          if ($failed) { exit 1 }

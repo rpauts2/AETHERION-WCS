@@ -18,6 +18,7 @@ public class AuraManager
         [4] = "models/races/aura_dinf.vmdl",
     };
     private readonly Dictionary<int, CBaseEntity?> _auras = new();
+    private readonly Dictionary<int, CBaseEntity?> _raceAuras = new();
 
     public static void Precache(ResourceManifest m)
     {
@@ -38,6 +39,36 @@ public class AuraManager
         // Прикрепляем к игроку, чтобы парила над головой
         aura.AcceptInput("SetParent", player.PlayerPawn.Value, null, "!activator");
         _auras[player.Slot] = aura;
+    }
+
+    // Optional race-specific aura model from configs/assets/models.json.
+    public void AttachRaceAura(CCSPlayerController player, string? model)
+    {
+        if (player == null) return;
+        RemoveRaceAura(player.Slot);
+        if (player.PlayerPawn?.Value?.AbsOrigin == null || string.IsNullOrWhiteSpace(model)) return;
+        var aura = Utilities.CreateEntityByName<CDynamicProp>("prop_dynamic_override");
+        if (aura == null) return;
+        try
+        {
+            aura.SetModel(model);
+            var o = player.PlayerPawn.Value.AbsOrigin;
+            aura.Teleport(new Vector(o.X, o.Y, o.Z + 75), new QAngle(0,0,0), new Vector(0,0,0));
+            aura.DispatchSpawn();
+            aura.AcceptInput("SetParent", player.PlayerPawn.Value, null, "!activator");
+            _raceAuras[player.Slot] = aura;
+        }
+        catch
+        {
+            try { if (aura.IsValid) aura.Remove(); } catch { }
+        }
+    }
+
+    public void RemoveRaceAura(int slot)
+    {
+        if (_raceAuras.TryGetValue(slot, out var e) && e != null && e.IsValid)
+            try { e.Remove(); } catch { }
+        _raceAuras.Remove(slot);
     }
 
     private readonly Dictionary<int, CBaseEntity?> _acc = new();

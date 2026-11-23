@@ -35,6 +35,8 @@ public class CombatEffects
 {
     private readonly IEngineApi _engine;
     private readonly List<ActiveEffect> _effects = new();
+    // Passive movement bonuses must survive recomputation when temporary effects expire.
+    private readonly Dictionary<int, Dictionary<string, float>> _persistentSpeedModifiers = new();
 
     // Callback for AOE damage — allows systems like BossSystem to react
     public Action<float, float, float, float, int>? OnAoeDamage { get; set; }
@@ -48,7 +50,18 @@ public class CombatEffects
         tickInterval = Math.Max(0.1f, tickInterval);
         var now = DateTime.UtcNow;
         var ex = _effects.FirstOrDefault(e => e.Tag == tag && e.Slot == slot);
-        if (ex != null) { ex.Value = value; ex.ExpiresUtc = now.AddSeconds(durationSec); return; }
+        if (ex != null)
+        {
+            ex.Value = value;
+            ex.ExpiresUtc = now.AddSeconds(durationSec);
+            ex.TickInterval = tickInterval;
+            ex.NextTickUtc = now.AddSeconds(tickInterval);
+            ex.SourceSlot = source;
+            RefreshMovementState(slot);
+            RefreshControlState(slot);
+            RefreshVisibilityState(slot);
+            return;
+        }
         _effects.Add(new ActiveEffect {
             Tag = tag, Slot = slot, Value = value,
             ExpiresUtc = now.AddSeconds(durationSec),
@@ -61,27 +74,30 @@ public class CombatEffects
     {
         switch (tag)
         {
-            case EffectTag.Invisible: _engine.SetInvisible(slot, true); break;
-            case EffectTag.SpeedBuff: _engine.SetSpeed(slot, 1f + value); break;
-            case EffectTag.Slow:      _engine.SetSpeed(slot, Math.Max(0.2f, 1f - value)); break;
+            case EffectTag.Invisible: RefreshVisibilityState(slot); break;
+            case EffectTag.SpeedBuff:
+            case EffectTag.Slow:
+            case EffectTag.Haste:
+                RefreshMovementState(slot);
+                break;
             // — CC —
             case EffectTag.Freeze:
             case EffectTag.Stun:
-                _engine.SetFrozen(slot, true);
+                RefreshControlState(slot);
                 _engine.Blind(slot, dur, dur * 0.6f);
                 break;
             case EffectTag.Root:
-                _engine.SetSpeed(slot, 0.05f);          // прикован, но может целиться
+                RefreshMovementState(slot); // прикован, но может целиться
                 break;
             case EffectTag.Fear:
                 _engine.Blind(slot, dur, dur * 0.5f);   // дезориентация
-                _engine.SetSpeed(slot, 0.6f);
+                RefreshMovementState(slot);
                 break;
             case EffectTag.Shield:
                 _engine.AddArmor(slot, (int)value, 200);
                 break;
             case EffectTag.Berserk:
-                _engine.SetSpeed(slot, 1f + value);
+                RefreshMovementState(slot);
                 break;
             case EffectTag.Reflect:
             case EffectTag.ManaShield:
@@ -95,17 +111,107 @@ public class CombatEffects
 
     private void OnExpire(ActiveEffect e)
     {
-        switch (e.Tag)
+        // Recompute from remaining effects instead of blindly resetting state.
+        // This prevents an expired effect from cancelling a newer effect.
+        RefreshMovementState(e.Slot);
+        RefreshControlState(e.Slot);
+        RefreshVisibilityState(e.Slot);
+    }
+
+    public void SetPersistentSpeedModifier(int slot, string source, float multiplier)
+    {
+        if (slot < 0 || string.IsNullOrWhiteSpace(source)) return;
+        if (!_persistentSpeedModifiers.TryGetValue(slot, out var modifiers))
         {
-            case EffectTag.Invisible: _engine.SetInvisible(e.Slot, false); break;
-            case EffectTag.SpeedBuff:
-            case EffectTag.Slow:
-            case EffectTag.Root:
-            case EffectTag.Fear:
-            case EffectTag.Berserk:  _engine.SetSpeed(e.Slot, 1f); break;
-            case EffectTag.Freeze:
-            case EffectTag.Stun:      _engine.SetFrozen(e.Slot, false); break;
+            modifiers = new Dictionary<string, float>(StringComparer.Ordinal);
+            _persistentSpeedModifiers[slot] = modifiers;
         }
+        modifiers[source] = Math.Clamp(multiplier, 0.2f, 2.5f);
+        RefreshMovementState(slot);
+    }
+
+    public void RemovePersistentSpeedModifier(int slot, string source)
+    {
+        if (slot < 0 || string.IsNullOrWhiteSpace(source)) return;
+        if (!_persistentSpeedModifiers.TryGetValue(slot, out var modifiers)) return;
+        if (!modifiers.Remove(source)) return;
+        if (modifiers.Count == 0) _persistentSpeedModifiers.Remove(slot);
+        RefreshMovementState(slot);
+    }
+
+    private void RefreshMovementState(int slot)
+    {
+        var active = _effects.Where(e => e.Slot == slot && e.ExpiresUtc > DateTime.UtcNow).ToList();
+        if (active.Any(e => e.Tag == EffectTag.Root))
+        {
+            _engine.SetSpeed(slot, 0.05f);
+            return;
+        }
+
+        // Compose independent effects instead of selecting only the strongest one.
+        // Otherwise a haste buff completely cancels a slow field (and vice versa).
+        float multiplier = 1f;
+        if (_persistentSpeedModifiers.TryGetValue(slot, out var persistent))
+        {
+            foreach (var factor in persistent.Values)
+                multiplier = Math.Clamp(multiplier * factor, 0.05f, 3f);
+        }
+        foreach (var effect in active)
+        {
+            float factor = effect.Tag switch
+            {
+                EffectTag.SpeedBuff or EffectTag.Berserk or EffectTag.Haste =>
+                    Math.Clamp(1f + effect.Value, 0.2f, 2.5f),
+                EffectTag.Slow => Math.Clamp(1f - effect.Value, 0.2f, 1f),
+                EffectTag.Fear => 0.6f,
+                _ => 1f
+            };
+
+            multiplier *= factor;
+        }
+
+        // Keep malformed/stacked effects from producing unusable movement values.
+        _engine.SetSpeed(slot, Math.Clamp(multiplier, 0.05f, 3f));
+    }
+
+    private void RefreshControlState(int slot)
+    {
+        bool controlled = _effects.Any(e => e.Slot == slot && e.ExpiresUtc > DateTime.UtcNow &&
+            (e.Tag == EffectTag.Freeze || e.Tag == EffectTag.Stun));
+        _engine.SetFrozen(slot, controlled);
+    }
+
+    private void RefreshVisibilityState(int slot)
+    {
+        bool invisible = _effects.Any(e => e.Slot == slot && e.ExpiresUtc > DateTime.UtcNow &&
+            e.Tag == EffectTag.Invisible);
+        _engine.SetInvisible(slot, invisible);
+    }
+
+    // Remove transient effects when a player disconnects or is otherwise invalidated.
+    public void ClearSlot(int slot)
+    {
+        if (slot < 0) return;
+        var affectedSlots = _effects
+            .Where(e => e.Slot == slot || e.SourceSlot == slot)
+            .Select(e => e.Slot)
+            .Distinct()
+            .ToList();
+
+        _effects.RemoveAll(e => e.Slot == slot || e.SourceSlot == slot);
+        _persistentSpeedModifiers.Remove(slot);
+
+        foreach (var affected in affectedSlots)
+        {
+            if (affected == slot) continue;
+            try { RefreshMovementState(affected); } catch { }
+            try { RefreshControlState(affected); } catch { }
+            try { RefreshVisibilityState(affected); } catch { }
+        }
+
+        try { _engine.SetSpeed(slot, 1f); } catch { }
+        try { _engine.SetFrozen(slot, false); } catch { }
+        try { _engine.SetInvisible(slot, false); } catch { }
     }
 
     public void TickAll()
@@ -259,8 +365,14 @@ public class CombatEffects
 
     public void ClearPlayer(int slot)
     {
-        foreach (var e in _effects.Where(e => e.Slot == slot).ToList()) OnExpire(e);
         _effects.RemoveAll(e => e.Slot == slot);
+        _persistentSpeedModifiers.Remove(slot);
+
+        // Recompute after removal. Calling OnExpire before removing a live effect
+        // sees that effect as active and leaves its movement/CC/visibility behind.
+        RefreshMovementState(slot);
+        RefreshControlState(slot);
+        RefreshVisibilityState(slot);
     }
 
     /// <summary>
@@ -270,7 +382,12 @@ public class CombatEffects
     /// </summary>
     public void RemoveEffect(int slot, EffectTag tag)
     {
-        foreach (var e in _effects.Where(e => e.Slot == slot && e.Tag == tag).ToList()) OnExpire(e);
-        _effects.RemoveAll(e => e.Slot == slot && e.Tag == tag);
+        int removed = _effects.RemoveAll(e => e.Slot == slot && e.Tag == tag);
+        if (removed == 0) return;
+
+        // Recompute only after the requested tag is no longer in the active set.
+        RefreshMovementState(slot);
+        RefreshControlState(slot);
+        RefreshVisibilityState(slot);
     }
 }

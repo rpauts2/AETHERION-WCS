@@ -58,6 +58,9 @@ public class PlayerData
     public long LastDailyRefreshUnix { get; set; } = 0;
     public Dictionary<string, int> QuestCounters { get; set; } = new(); // kills, headshots, boss_kills, ult_casts, etc.
     public Dictionary<string, int> DailyCounterSnapshots { get; set; } = new(); // снимок QuestCounters на начало дня
+    // Daily contracts are persisted with player data so restarts cannot reroll claimed rewards.
+    public int DailyContractDayKey { get; set; } = 0; // UTC date in yyyyMMdd form
+    public List<DailyContractState> DailyContracts { get; set; } = new();
     public double XpBoostMultiplier { get; set; } = 1.0;
     public long XpBoostExpiresUnix { get; set; } = 0;
 
@@ -81,6 +84,20 @@ public class PlayerData
         }
         return rp;
     }
+}
+
+// Persisted snapshot of one daily contract. Kept in Models to avoid storing runtime objects.
+public class DailyContractState
+{
+    public int Type { get; set; }
+    public string Name { get; set; } = "";
+    public string Desc { get; set; } = "";
+    public int Target { get; set; }
+    public int GoldReward { get; set; }
+    public int XpReward { get; set; }
+    public int BonusGoldOnStreak { get; set; }
+    public int Progress { get; set; }
+    public bool Claimed { get; set; }
 }
 
 // Прогресс конкретной расы у игрока
