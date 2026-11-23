@@ -56,7 +56,7 @@ def _particle_resource_candidates(root: Path, reference: str) -> list[Path]:
     intake layouts, but prefer the canonical Workshop Tools source/compiled
     locations used by this repository's audio audit.
     """
-    virtual_path = PurePosixPath(reference.replace("\\\\", "/"))
+    virtual_path = PurePosixPath(reference)
     if virtual_path.is_absolute() or any(part in ("", ".", "..") for part in virtual_path.parts):
         return []
 
@@ -68,6 +68,7 @@ def _particle_resource_candidates(root: Path, reference: str) -> list[Path]:
         root / relative,
         root / compiled,
     ]
+
 
 def scan(root: Path):
     particle_refs = defaultdict(list)
